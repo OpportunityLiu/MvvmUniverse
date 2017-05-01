@@ -22,18 +22,15 @@ namespace Opportunity.MvvmUniverse.Commands
         private readonly WeakAction execute;
         private readonly WeakFunc<bool> canExecute;
 
-        bool ICommand.CanExecute(object parameter)
-        {
-            return IsEnabled;
-        }
+        bool ICommand.CanExecute(object parameter) => CanExecute();
 
         public bool CanExecute()
         {
             if (!IsEnabled)
                 return false;
-            if (canExecute == null)
+            if (this.canExecute == null)
                 return true;
-            return canExecute.Invoke();
+            return this.canExecute.Invoke();
         }
 
         void ICommand.Execute(object parameter) => Execute();
