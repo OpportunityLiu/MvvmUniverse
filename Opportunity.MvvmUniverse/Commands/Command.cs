@@ -8,9 +8,7 @@ namespace Opportunity.MvvmUniverse.Commands
     {
         public Command(Action execute, Func<bool> canExecute)
         {
-            if (execute == null)
-                throw new ArgumentNullException(nameof(execute));
-            this.execute = execute;
+            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
         }
 

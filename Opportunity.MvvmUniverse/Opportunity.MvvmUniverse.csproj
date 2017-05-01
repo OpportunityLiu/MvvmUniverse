@@ -109,10 +109,15 @@
   <ItemGroup>
     <Compile Include="Collections\IncrementalLoadingCollection{T}.cs" />
     <Compile Include="Collections\ObservableCollection{T}.cs" />
+    <Compile Include="Collections\ObservableDictionaty{TKey,TValue}.cs" />
     <Compile Include="Collections\RangedCollectionView{T}.cs" />
     <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\CommandBaseVoid.cs" />
+    <Compile Include="Commands\CommandBase{T}.cs" />
     <Compile Include="Commands\Command{T}.cs" />
     <Compile Include="Commands\CommandBase.cs" />
+    <Compile Include="Commands\WeakCommand.cs" />
+    <Compile Include="Commands\WeakCommand{T}.cs" />
     <Compile Include="Helpers\AsyncCanceledWrapper.cs" />
     <Compile Include="Helpers\AsyncErrorWrapper.cs" />
     <Compile Include="Helpers\AsyncWrapper.cs" />

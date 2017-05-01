@@ -10,12 +10,11 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public abstract class CommandBase<T> : CommandBase, ICommand
     {
-
         protected static T Cast(object obj)
         {
             if (obj is T p)
                 return p;
-            else
+            else 
                 return default(T);
         }
 
@@ -27,6 +26,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 return false;
             return CanExecuteOverride(parameter);
         }
+
         protected virtual bool CanExecuteOverride(T parameter) => true;
 
         void ICommand.Execute(object parameter) => Execute(Cast(parameter));

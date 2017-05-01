@@ -18,6 +18,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 return false;
             return CanExecuteOverride();
         }
+
         protected virtual bool CanExecuteOverride() => true;
 
         void ICommand.Execute(object parameter) => Execute();
