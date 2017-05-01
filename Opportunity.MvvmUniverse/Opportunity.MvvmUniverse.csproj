@@ -113,8 +113,9 @@
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\Command{T}.cs" />
     <Compile Include="Commands\CommandBase.cs" />
-    <Compile Include="DispatcherHelper.cs" />
     <Compile Include="Helpers\AsyncWarpper.cs" />
+    <Compile Include="Helpers\DispatcherHelper.cs" />
+    <Compile Include="Helpers\Predicates.cs" />
     <Compile Include="Helpers\WeakDelegate.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
