@@ -120,6 +120,7 @@
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModelBase.cs" />
+    <Compile Include="Views\FrameWarper.cs" />
     <Compile Include="Views\INavigationHandler.cs" />
     <Compile Include="Views\Navigator.cs" />
     <EmbeddedResource Include="Properties\Opportunity.MvvmUniverse.rd.xml" />
