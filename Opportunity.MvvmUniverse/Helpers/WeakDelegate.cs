@@ -1,94 +1,97 @@
 using System;
 using System.Reflection;
 
-public class WeakDelegate
+namespace Opportunity.MvvmUniverse.Helpers
 {
-    public WeakDelegate(Delegate @delegate)
+    public class WeakDelegate
     {
-        if (@delegate == null)
-            throw new ArgumentNullException(nameof(@delegate));
-        if (@delegate.Target != null)
-            this.target = new WeakReference(@delegate.Target);
-        this.method = @delegate.GetMethodInfo();
+        public WeakDelegate(Delegate @delegate)
+        {
+            if (@delegate == null)
+                throw new ArgumentNullException(nameof(@delegate));
+            if (@delegate.Target != null)
+                this.target = new WeakReference(@delegate.Target);
+            this.method = @delegate.GetMethodInfo();
+        }
+
+        private WeakReference target;
+        private MethodInfo method;
+
+        public bool IsAlive => this.target == null ? true : this.target.IsAlive;
+
+        public object DynamicInvoke(params object[] parameters)
+        {
+            if (!IsAlive)
+                return null;
+            return this.method.Invoke(this.target?.Target, parameters);
+        }
+
+        public TResult DynamicInvoke<TResult>(params object[] parameters)
+        {
+            var r = DynamicInvoke(parameters);
+            if (r is TResult res)
+                return res;
+            return default(TResult);
+        }
     }
 
-    private WeakReference target;
-    protected MethodInfo method;
-
-    public bool IsAlive => this.target == null ? true : this.target.IsAlive;
-
-    public object DynamicInvoke(params object[] parameters)
+    public sealed class WeakAction : WeakDelegate
     {
-        if (!IsAlive)
-            return null;
-        return this.method.Invoke(this.target?.Target, parameters);
+        public WeakAction(Action @delegate) : base(@delegate)
+        {
+        }
+
+        public void Invoke()
+        {
+            this.DynamicInvoke();
+        }
     }
 
-    public TResult DynamicInvoke<TResult>(params object[] parameters)
+    public sealed class WeakAction<T> : WeakDelegate
     {
-        var r = DynamicInvoke(parameters);
-        if (r is TResult res)
-            return res;
-        return default(TResult);
-    }
-}
+        public WeakAction(Action<T> @delegate) : base(@delegate)
+        {
+        }
 
-public sealed class WeakAction : WeakDelegate
-{
-    public WeakAction(Action @delegate) : base(@delegate)
-    {
+        public void Invoke(T obj)
+        {
+            this.DynamicInvoke(obj);
+        }
     }
 
-    public void Invoke()
+    public sealed class WeakFunc<TResult> : WeakDelegate
     {
-        this.DynamicInvoke();
-    }
-}
+        public WeakFunc(Func<TResult> @delegate) : base(@delegate)
+        {
+        }
 
-public sealed class WeakAction<T> : WeakDelegate
-{
-    public WeakAction(Action<T> @delegate) : base(@delegate)
-    {
-    }
-
-    public void Invoke(T obj)
-    {
-        this.DynamicInvoke(obj);
-    }
-}
-
-public sealed class WeakFunc<TResult> : WeakDelegate
-{
-    public WeakFunc(Func<TResult> @delegate) : base(@delegate)
-    {
+        public TResult Invoke()
+        {
+            return this.DynamicInvoke<TResult>();
+        }
     }
 
-    public TResult Invoke()
+    public sealed class WeakFunc<T, TResult> : WeakDelegate
     {
-        return this.DynamicInvoke<TResult>();
-    }
-}
+        public WeakFunc(Func<T, TResult> @delegate) : base(@delegate)
+        {
+        }
 
-public sealed class WeakFunc<T, TResult> : WeakDelegate
-{
-    public WeakFunc(Func<T, TResult> @delegate) : base(@delegate)
-    {
-    }
-
-    public TResult Invoke(T obj)
-    {
-        return this.DynamicInvoke<TResult>(obj);
-    }
-}
-
-public sealed class WeakPredicate<T> : WeakDelegate
-{
-    public WeakPredicate(Predicate<T> @delegate) : base(@delegate)
-    {
+        public TResult Invoke(T obj)
+        {
+            return this.DynamicInvoke<TResult>(obj);
+        }
     }
 
-    public bool Invoke(T obj)
+    public sealed class WeakPredicate<T> : WeakDelegate
     {
-        return this.DynamicInvoke<bool>(obj);
+        public WeakPredicate(Predicate<T> @delegate) : base(@delegate)
+        {
+        }
+
+        public bool Invoke(T obj)
+        {
+            return this.DynamicInvoke<bool>(obj);
+        }
     }
 }

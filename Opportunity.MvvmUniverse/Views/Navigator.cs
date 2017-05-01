@@ -94,7 +94,7 @@ namespace Opportunity.MvvmUniverse.Views
         {
             if (e.OldItems != null)
             {
-                foreach (INavigationHandler item in e.OldItems)
+                foreach (var item in e.OldItems.Cast<INavigationHandler>())
                 {
                     item.Parent = null;
                 }
@@ -110,6 +110,17 @@ namespace Opportunity.MvvmUniverse.Views
         {
             get => manager.AppViewBackButtonVisibility;
             private set => manager.AppViewBackButtonVisibility = value;
+        }
+
+        private AppViewBackButtonVisibility? appViewBackButtonVisibilityOverride = null;
+        public AppViewBackButtonVisibility? AppViewBackButtonVisibilityOverride
+        {
+            get => this.appViewBackButtonVisibilityOverride;
+            set 
+            {
+                if(Set(ref this.appViewBackButtonVisibilityOverride, value))
+                    UpdateAppViewBackButtonVisibility();
+            }
         }
 
         private void manager_BackRequested(object sender, BackRequestedEventArgs e)
