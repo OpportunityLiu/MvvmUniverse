@@ -3,9 +3,9 @@ using Windows.UI.Xaml.Controls;
 
 namespace Opportunity.MvvmUniverse.Views
 {
-    public class FrameWarper : INavigationHandler
+    public class FrameWrapper : INavigationHandler
     {
-        public FrameWarper(Frame frame)
+        public FrameWrapper(Frame frame)
         {
             if (frame == null)
                 throw new ArgumentNullException(nameof(frame));

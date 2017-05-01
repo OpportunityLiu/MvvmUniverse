@@ -15,18 +15,18 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     public abstract class IncrementalLoadingCollection<T> : ObservableCollection<T>, ISupportIncrementalLoading
     {
-        private int recordCount, pageCount;
-
+        private int recordCount;
         public int RecordCount
         {
             get => this.recordCount;
             protected set => Set(nameof(IsEmpty), ref this.recordCount, value);
         }
 
+        private int pageCount;
         public int PageCount
         {
             get => this.pageCount;
-            protected set => Set(nameof(HasMoreItems), nameof(LoadedPageCount), ref this.pageCount, value);
+            protected set => Set(nameof(HasMoreItems), ref this.pageCount, value);
         }
 
         protected abstract IAsyncOperation<IReadOnlyList<T>> LoadPageAsync(int pageIndex);
@@ -34,16 +34,20 @@ namespace Opportunity.MvvmUniverse.Collections
         public bool IsEmpty => this.RecordCount == 0;
 
         private int loadedPageCount;
+        public int LoadedPageCount
+        {
+            get => this.loadedPageCount;
+            protected set => Set(nameof(HasMoreItems), ref this.loadedPageCount, value);
+        }
 
-        public int LoadedPageCount => this.loadedPageCount;
-
-        public bool HasMoreItems => this.loadedPageCount < this.PageCount;
+        public bool HasMoreItems => this.loadedPageCount < this.pageCount;
 
         protected void ResetAll()
         {
             this.loadedPageCount = 0;
-            this.PageCount = 0;
-            this.RecordCount = 0;
+            this.pageCount = 0;
+            this.recordCount = 0;
+            RaisePropertyChanged(nameof(LoadedPageCount), nameof(PageCount), nameof(RecordCount), nameof(IsEmpty), nameof(HasMoreItems));
             Clear();
         }
 
@@ -51,31 +55,13 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
         {
-            if(this.loading?.Status == AsyncStatus.Started)
+            if (this.loading?.Status == AsyncStatus.Started)
             {
-                var temp = this.loading;
-                return Run(async token =>
-                {
-                    token.Register(temp.Cancel);
-                    while(temp.Status == AsyncStatus.Started)
-                    {
-                        await Task.Delay(200);
-                    }
-                    switch(temp.Status)
-                    {
-                    case AsyncStatus.Completed:
-                        return temp.GetResults();
-                    case AsyncStatus.Error:
-                        throw temp.ErrorCode;
-                    default:
-                        token.ThrowIfCancellationRequested();
-                        throw new OperationCanceledException(token);
-                    }
-                });
+                return PollingAsyncWrapper.Wrap(this.loading);
             }
             return this.loading = Run(async token =>
             {
-                if(!this.HasMoreItems)
+                if (!this.HasMoreItems)
                     return new LoadMoreItemsResult();
                 var lp = LoadPageAsync(this.loadedPageCount);
                 IReadOnlyList<T> re = null;
@@ -84,12 +70,11 @@ namespace Opportunity.MvvmUniverse.Collections
                 {
                     re = await lp;
                     this.AddRange(re);
-                    this.loadedPageCount++;
-                    RaisePropertyChanged(nameof(HasMoreItems));
+                    this.LoadedPageCount++;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    if(!await tryHandle(ex))
+                    if (!await tryHandle(ex))
                         throw;
                 }
                 return new LoadMoreItemsResult() { Count = re == null ? 0u : (uint)re.Count };
@@ -101,7 +86,7 @@ namespace Opportunity.MvvmUniverse.Collections
         private async Task<bool> tryHandle(Exception ex)
         {
             var temp = LoadMoreItemsException;
-            if(temp == null)
+            if (temp == null)
                 return false;
             var h = false;
             await DispatcherHelper.RunAsync(() =>

@@ -3,9 +3,9 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Helpers
 {
-    public sealed class AsyncWarpper<T> : IAsyncOperation<T>
+    public sealed class AsyncWrapper<T> : IAsyncOperation<T>
     {
-        public AsyncWarpper(T result)
+        public AsyncWrapper(T result)
         {
             this.result = result;
         }
@@ -31,35 +31,31 @@ namespace Opportunity.MvvmUniverse.Helpers
 
         public AsyncStatus Status => AsyncStatus.Completed;
 
-        public void Cancel()
-        {
-        }
+        public void Cancel() { }
 
-        public void Close()
-        {
-        }
+        public void Close() { }
 
         public T GetResults() => this.result;
     }
 
-    public sealed class AsyncWarpper: IAsyncAction
+    public sealed class AsyncWrapper : IAsyncAction
     {
-        public static AsyncWarpper Create()
+        public static AsyncWrapper Create()
         {
-            return new AsyncWarpper();
+            return new AsyncWrapper();
         }
 
-        public static AsyncWarpper<TResult> Create<TResult>()
+        public static AsyncWrapper<TResult> Create<TResult>()
         {
-            return new AsyncWarpper<TResult>(default(TResult));
+            return new AsyncWrapper<TResult>(default(TResult));
         }
 
-        public static AsyncWarpper<TResult> Create<TResult>(TResult result)
+        public static AsyncWrapper<TResult> Create<TResult>(TResult result)
         {
-            return new AsyncWarpper<TResult>(result);
+            return new AsyncWrapper<TResult>(result);
         }
 
-        private AsyncWarpper() { }
+        public AsyncWrapper() { }
 
         public AsyncActionCompletedHandler Completed
         {
@@ -79,16 +75,10 @@ namespace Opportunity.MvvmUniverse.Helpers
 
         public AsyncStatus Status => AsyncStatus.Completed;
 
-        public void Cancel()
-        {
-        }
+        public void Cancel() { }
 
-        public void Close()
-        {
-        }
+        public void Close() { }
 
-        public void GetResults()
-        {
-        }
+        public void GetResults() { }
     }
 }

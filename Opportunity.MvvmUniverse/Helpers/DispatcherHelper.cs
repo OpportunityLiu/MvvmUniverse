@@ -57,7 +57,7 @@ namespace Opportunity.MvvmUniverse.Helpers
             if (UseForNotification)
                 return RunAsyncOnUIThread(action);
             action();
-            return Helpers.AsyncWarpper.Create();
+            return Helpers.AsyncWrapper.Create();
         }
 
         public static IAsyncAction RunAsyncOnUIThread(DispatchedHandler action)
@@ -65,7 +65,7 @@ namespace Opportunity.MvvmUniverse.Helpers
             if (dispatcher == null || dispatcher.HasThreadAccess)
             {
                 action();
-                return Helpers.AsyncWarpper.Create();
+                return Helpers.AsyncWrapper.Create();
             }
             return dispatcher.RunAsync(CoreDispatcherPriority.Normal, action);
         }
