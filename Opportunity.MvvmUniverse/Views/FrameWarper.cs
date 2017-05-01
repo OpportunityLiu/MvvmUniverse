@@ -10,6 +10,18 @@ namespace Opportunity.MvvmUniverse.Views
             if (frame == null)
                 throw new ArgumentNullException(nameof(frame));
             this.frame = new WeakReference<Frame>(frame);
+            frame.Navigated += this.Frame_Navigated;
+        }
+
+        private void Frame_Navigated(object sender, Windows.UI.Xaml.Navigation.NavigationEventArgs e)
+        {
+            if (this.Frame == null)
+            {
+                var f = (Frame)sender;
+                f.Navigated -= this.Frame_Navigated;
+                return;
+            }
+            this.RaiseCanGoBackChanged();
         }
 
         private readonly WeakReference<Frame> frame;

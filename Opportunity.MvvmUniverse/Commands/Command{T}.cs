@@ -21,7 +21,8 @@ namespace Opportunity.MvvmUniverse.Commands
 
         private readonly WeakAction<T> execute;
         private readonly WeakPredicate<T> canExecute;
-        bool ICommand.CanExecute(object parameter) => CanExecute((T)parameter);
+        
+        bool ICommand.CanExecute(object parameter) => CanExecute(Cast(parameter));
 
         public bool CanExecute(T parameter)
         {
@@ -32,13 +33,7 @@ namespace Opportunity.MvvmUniverse.Commands
             return this.canExecute.Invoke(parameter);
         }
 
-        void ICommand.Execute(object parameter)
-        {
-            if (parameter is T p)
-                Execute(p);
-            else
-                Execute(default(T));
-        }
+        void ICommand.Execute(object parameter) => Execute(Cast(parameter));
 
         public bool Execute(T parameter)
         {
@@ -48,6 +43,14 @@ namespace Opportunity.MvvmUniverse.Commands
                 return true;
             }
             return false;
+        }
+
+        private T Cast(object obj)
+        {
+            if (obj is T p)
+                return p;
+            else
+                return default(T);
         }
     }
 }

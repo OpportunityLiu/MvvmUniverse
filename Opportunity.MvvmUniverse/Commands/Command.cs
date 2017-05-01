@@ -26,7 +26,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
         public bool CanExecute()
         {
-            if (!IsEnabled)
+            if (!this.IsEnabled)
                 return false;
             if (this.canExecute == null)
                 return true;
