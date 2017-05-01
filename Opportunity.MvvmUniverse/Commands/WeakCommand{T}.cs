@@ -4,22 +4,23 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class Command<T> : CommandBase<T>
+    public class WeakCommand<T> : CommandBase<T>
     {
-        public Command(Action<T> execute, Predicate<T> canExecute)
+        public WeakCommand(Action<T> execute, Predicate<T> canExecute)
         {
             if (execute == null)
                 throw new ArgumentNullException(nameof(execute));
-            this.execute = execute;
-            this.canExecute = canExecute;
+            this.execute = new WeakAction<T>(execute);
+            if (canExecute != null)
+                this.canExecute = new WeakPredicate<T>(canExecute);
         }
 
-        public Command(Action<T> execute) : this(execute, null)
+        public WeakCommand(Action<T> execute) : this(execute, null)
         {
         }
 
-        private readonly Action<T> execute;
-        private readonly Predicate<T> canExecute;
+        private readonly WeakAction<T> execute;
+        private readonly WeakPredicate<T> canExecute;
 
         protected override bool CanExecuteOverride(T parameter)
         {

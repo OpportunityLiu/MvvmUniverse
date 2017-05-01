@@ -16,7 +16,7 @@ namespace Opportunity.MvvmUniverse.Views
     {
         private static readonly Dictionary<int, Navigator> dic = new Dictionary<int, Navigator>();
 
-        public static Navigator CreateOrGetForCurrentView()
+        public static Navigator GetOrCreateForCurrentView()
         {
             var id = DispatcherHelper.GetCurrentViewId();
             if (dic.TryGetValue(id, out var r))
@@ -65,16 +65,14 @@ namespace Opportunity.MvvmUniverse.Views
 
         public bool CanGoBack()
         {
-            var canGoBack = false;
             for (var i = Handlers.Count - 1; i >= 0; i--)
             {
                 if (Handlers[i].CanGoBack())
                 {
-                    canGoBack = true;
-                    break;
+                    return true;
                 }
             }
-            return canGoBack;
+            return false;
         }
 
         public bool GoBack()
