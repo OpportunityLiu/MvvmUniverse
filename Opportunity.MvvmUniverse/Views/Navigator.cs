@@ -42,20 +42,30 @@ namespace Opportunity.MvvmUniverse.Views
             return true;
         }
 
-        public ObservableCollection<INavigationHandler> Handlers { get; private set; } = new ObservableCollection<INavigationHandler>();
+        public ObservableVector<INavigationHandler> Handlers { get; private set; } 
+            = new ObservableVector<INavigationHandler>();
 
         private SystemNavigationManager manager = SystemNavigationManager.GetForCurrentView();
 
         private Navigator()
         {
             this.manager.BackRequested += this.manager_BackRequested;
-            this.Handlers.CollectionChanged += this.handlers_CollectionChanged;
+            this.Handlers.VectorChanged += this.handlers_VectorChanged;
+        }
+
+        private void handlers_VectorChanged(Windows.Foundation.Collections.IObservableVector<INavigationHandler> sender, Windows.Foundation.Collections.IVectorChangedEventArgs args)
+        {
+            foreach (var item in Handlers)
+            {
+                item.Parent = this;
+            }
+            UpdateAppViewBackButtonVisibility();
         }
 
         public void UpdateAppViewBackButtonVisibility()
         {
             var ov = AppViewBackButtonVisibility;
-            var nv = appViewBackButtonVisibilityOverride ?? (CanGoBack() ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed);
+            var nv = this.appViewBackButtonVisibilityOverride ?? (CanGoBack() ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed);
             if (ov != nv)
             {
                 AppViewBackButtonVisibility = nv;
@@ -89,22 +99,6 @@ namespace Opportunity.MvvmUniverse.Views
             return false;
         }
 
-        private void handlers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.OldItems != null)
-            {
-                foreach (var item in e.OldItems.Cast<INavigationHandler>())
-                {
-                    item.Parent = null;
-                }
-            }
-            foreach (var item in Handlers)
-            {
-                item.Parent = this;
-            }
-            UpdateAppViewBackButtonVisibility();
-        }
-
         public AppViewBackButtonVisibility AppViewBackButtonVisibility
         {
             get => manager.AppViewBackButtonVisibility;
@@ -134,7 +128,7 @@ namespace Opportunity.MvvmUniverse.Views
         {
             this.manager.BackRequested -= manager_BackRequested;
             this.manager = null;
-            this.Handlers.CollectionChanged -= handlers_CollectionChanged;
+            this.Handlers.VectorChanged -= handlers_VectorChanged;
             foreach (var item in Handlers)
             {
                 item.Parent = null;

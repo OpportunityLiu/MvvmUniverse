@@ -15,7 +15,18 @@ namespace Opportunity.MvvmUniverse.Collections
         , IDictionary<TKey, TValue>, IDictionary
         , ICollection<KeyValuePair<TKey, TValue>>
     {
-        protected class MapChangedEventArgs : IMapChangedEventArgs<TKey>
+        protected Dictionary<TKey, TValue> Items { get; }
+
+        public ObservableDictionaty() : this(EqualityComparer<TKey>.Default) { }
+
+        public ObservableDictionaty(IEqualityComparer<TKey> comparer)
+        {
+            this.Items = new Dictionary<TKey, TValue>(comparer);
+        }
+
+        public event MapChangedEventHandler<TKey, TValue> MapChanged;
+
+        protected sealed class MapChangedEventArgs : IMapChangedEventArgs<TKey>
         {
             public MapChangedEventArgs(CollectionChange collectionChange, TKey key)
             {
@@ -28,23 +39,12 @@ namespace Opportunity.MvvmUniverse.Collections
             public TKey Key { get; private set; }
         }
 
-        protected Dictionary<TKey, TValue> Items { get; }
-
-        public ObservableDictionaty() : this(EqualityComparer<TKey>.Default) { }
-
-        public ObservableDictionaty(IEqualityComparer<TKey> comparer)
-        {
-            this.Items = new Dictionary<TKey, TValue>(comparer);
-        }
-
-        public event MapChangedEventHandler<TKey, TValue> MapChanged;
-
         protected void RaiseMapChanged(MapChangedEventArgs args)
         {
             var temp = MapChanged;
             if (temp == null)
                 return;
-            DispatcherHelper.BeginInvokeOnUIThread(() =>
+            DispatcherHelper.BeginInvoke(() =>
             {
                 temp.Invoke(this, args);
             });

@@ -13,7 +13,7 @@ using static System.Runtime.InteropServices.WindowsRuntime.AsyncInfo;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public abstract class IncrementalLoadingCollection<T> : ObservableCollection<T>, ISupportIncrementalLoading
+    public abstract class IncrementalLoadingVector<T> : ObservableVector<T>, ISupportIncrementalLoading
     {
         private int recordCount;
         public int RecordCount
@@ -81,7 +81,7 @@ namespace Opportunity.MvvmUniverse.Collections
             });
         }
 
-        public event TypedEventHandler<IncrementalLoadingCollection<T>, LoadMoreItemsExceptionEventArgs> LoadMoreItemsException;
+        public event TypedEventHandler<IncrementalLoadingVector<T>, LoadMoreItemsExceptionEventArgs> LoadMoreItemsException;
 
         private async Task<bool> tryHandle(Exception ex)
         {
@@ -96,27 +96,6 @@ namespace Opportunity.MvvmUniverse.Collections
                 h = args.Handled;
             });
             return h;
-        }
-    }
-
-    public class LoadMoreItemsExceptionEventArgs : EventArgs
-    {
-        internal LoadMoreItemsExceptionEventArgs(Exception ex)
-        {
-            this.Exception = ex;
-        }
-
-        public Exception Exception
-        {
-            get;
-        }
-
-        public string Message => this.Exception?.Message;
-
-        public bool Handled
-        {
-            get;
-            set;
         }
     }
 }
