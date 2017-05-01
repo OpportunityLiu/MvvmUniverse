@@ -54,7 +54,7 @@ namespace Opportunity.MvvmUniverse.Views
         public void UpdateAppViewBackButtonVisibility()
         {
             var ov = AppViewBackButtonVisibility;
-            var nv = CanGoBack() ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;
+            var nv = appViewBackButtonVisibilityOverride ?? (CanGoBack() ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed);
             if (ov != nv)
             {
                 AppViewBackButtonVisibility = nv;
@@ -116,9 +116,9 @@ namespace Opportunity.MvvmUniverse.Views
         public AppViewBackButtonVisibility? AppViewBackButtonVisibilityOverride
         {
             get => this.appViewBackButtonVisibilityOverride;
-            set 
+            set
             {
-                if(Set(ref this.appViewBackButtonVisibilityOverride, value))
+                if (Set(ref this.appViewBackButtonVisibilityOverride, value))
                     UpdateAppViewBackButtonVisibility();
             }
         }
