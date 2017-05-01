@@ -34,10 +34,14 @@ namespace Opportunity.MvvmUniverse.Commands
 
         void ICommand.Execute(object parameter) => Execute((T)parameter);
 
-        public void Execute(T parameter)
+        public bool Execute(T parameter)
         {
             if (CanExecute(parameter))
+            {
                 this.execute.Invoke(parameter);
+                return true;
+            }
+            return false;
         }
     }
 }

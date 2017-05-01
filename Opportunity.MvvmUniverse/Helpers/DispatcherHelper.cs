@@ -8,7 +8,7 @@ using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 
-namespace Opportunity.MvvmUniverse
+namespace Opportunity.MvvmUniverse.Helpers
 {
     public static class DispatcherHelper
     {
@@ -60,7 +60,7 @@ namespace Opportunity.MvvmUniverse
             return Helpers.AsyncWarpper.Create();
         }
 
-        private static IAsyncAction RunAsyncOnUIThread(DispatchedHandler action)
+        public static IAsyncAction RunAsyncOnUIThread(DispatchedHandler action)
         {
             if (dispatcher == null || dispatcher.HasThreadAccess)
             {
