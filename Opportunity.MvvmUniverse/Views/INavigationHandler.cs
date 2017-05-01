@@ -6,6 +6,16 @@ namespace Opportunity.MvvmUniverse.Views
     {
         bool CanGoBack();
         void GoBack();
-        event EventHandler CanGoBackChanged;
+        Navigator Parent { get; set; }
+    }
+
+    public static class INavigationHandlerExtension
+    {
+        public static void RaiseCanGoBackChanged(this INavigationHandler handler)
+        {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+            handler.Parent?.UpdateAppViewBackButtonVisibility();
+        }
     }
 }
