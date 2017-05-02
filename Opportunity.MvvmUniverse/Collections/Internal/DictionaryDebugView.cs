@@ -5,9 +5,9 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     internal sealed class DictionaryDebugView<K, V>
     {
-        private IDictionary<K, V> dict;
+        private ICollection<KeyValuePair<K, V>> dict;
 
-        public DictionaryDebugView(IDictionary<K, V> dictionary)
+        public DictionaryDebugView(ICollection<KeyValuePair<K, V>> dictionary)
         {
             this.dict = dictionary;
         }

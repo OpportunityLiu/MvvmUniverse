@@ -36,5 +36,15 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             return new KeyValuePair<TKey, TValue>(key, value);
         }
+
+        public static void ThrowForReadOnlyCollection(string parent)
+        {
+            throw new InvalidOperationException($"This collection is a read only view of {parent}.");
+        }
+
+        public static T ThrowForReadOnlyCollection<T>(string parent)
+        {
+            throw new InvalidOperationException($"This collection is a read only view of {parent}.");
+        }
     }
 }

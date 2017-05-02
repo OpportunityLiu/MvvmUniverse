@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Collections
@@ -112,9 +113,16 @@ namespace Opportunity.MvvmUniverse.Collections
             return true;
         }
 
-        public IEnumerator<T> GetEnumerator() => Items.GetEnumerator();
+        private ObservableCollectionView<T> readOnlyView;
+
+        public ObservableCollectionView<T> AsReadOnly()
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, () => new ObservableCollectionView<T>(this));
+
+        public List<T>.Enumerator GetEnumerator() => Items.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => Items.GetEnumerator();
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => Items.GetEnumerator();
 
         int IList.Add(object value)
         {

@@ -42,8 +42,6 @@ namespace Opportunity.MvvmUniverse.Collections
                 => RaiseCollectionReplace(newItem, oldItem, index);
 
             public int Count => Parent.Count;
-
-            protected static Exception Modifing() => new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
         }
     }
 }

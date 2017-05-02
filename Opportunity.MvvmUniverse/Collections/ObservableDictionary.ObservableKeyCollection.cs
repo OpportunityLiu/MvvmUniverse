@@ -19,7 +19,7 @@ namespace Opportunity.MvvmUniverse.Collections
             object IList.this[int index]
             {
                 get => this.Parent.Items[index].Key;
-                set => throw Modifing();
+                set => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey, TValue>));
             }
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -45,13 +45,13 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
             }
 
-            int IList.Add(object value) => throw Modifing();
+            int IList.Add(object value) => Helpers.ThrowForReadOnlyCollection<int>(nameof(ObservableDictionary<TKey, TValue>));
 
-            void ICollection<TKey>.Add(TKey item) => throw Modifing();
+            void ICollection<TKey>.Add(TKey item) => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey, TValue>));
 
-            void IList.Clear() => throw Modifing();
+            void IList.Clear() => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey, TValue>));
 
-            void ICollection<TKey>.Clear() => throw Modifing();
+            void ICollection<TKey>.Clear() => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey, TValue>));
 
             bool IList.Contains(object value) => this.Parent.ContainsKey(Helpers.CastKey<TKey>(value));
 
@@ -94,12 +94,12 @@ namespace Opportunity.MvvmUniverse.Collections
                 return index;
             }
 
-            void IList.Insert(int index, object value) => throw Modifing();
+            void IList.Insert(int index, object value) => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey, TValue>));
 
-            void IList.Remove(object value) => throw Modifing();
-            bool ICollection<TKey>.Remove(TKey item) => throw Modifing();
+            void IList.Remove(object value) => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey, TValue>));
+            bool ICollection<TKey>.Remove(TKey item) => Helpers.ThrowForReadOnlyCollection<bool>(nameof(ObservableDictionary<TKey, TValue>));
 
-            void IList.RemoveAt(int index) => throw Modifing();
+            void IList.RemoveAt(int index) => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey, TValue>));
         }
     }
 }

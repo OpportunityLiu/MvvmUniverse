@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Collections
@@ -188,9 +189,9 @@ namespace Opportunity.MvvmUniverse.Collections
         private ObservableValueCollection values;
 
         public ObservableKeyCollection Keys
-            => System.Threading.LazyInitializer.EnsureInitialized(ref this.keys, () => new ObservableKeyCollection(this));
+            => LazyInitializer.EnsureInitialized(ref this.keys, () => new ObservableKeyCollection(this));
         public ObservableValueCollection Values
-            => System.Threading.LazyInitializer.EnsureInitialized(ref this.values, () => new ObservableValueCollection(this));
+            => LazyInitializer.EnsureInitialized(ref this.values, () => new ObservableValueCollection(this));
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ICollection<TKey> IDictionary<TKey, TValue>.Keys => Keys;
@@ -247,6 +248,12 @@ namespace Opportunity.MvvmUniverse.Collections
             RemoveItem(key);
             return true;
         }
+
+        private ObservableDictionaryView<TKey, TValue> readOnlyView;
+
+        public ObservableDictionaryView<TKey, TValue> AsReadOnly()
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, () 
+                => new ObservableDictionaryView<TKey, TValue>(this));
 
         public bool TryGetValue(TKey key, out TValue value)
         {
