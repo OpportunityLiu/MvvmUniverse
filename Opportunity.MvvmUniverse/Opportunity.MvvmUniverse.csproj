@@ -109,7 +109,7 @@
   <ItemGroup>
     <Compile Include="Collections\IncrementalLoadingVector{T}.cs" />
     <Compile Include="Collections\LoadMoreItemsExceptionEventArgs.cs" />
-    <Compile Include="Collections\ObservableDictionaty{TKey,TValue}.cs" />
+    <Compile Include="Collections\ObservableMap{TKey,TValue}.cs" />
     <Compile Include="Collections\ObservableVector{T}.cs" />
     <Compile Include="Collections\RangedCollectionView{T}.cs" />
     <Compile Include="Commands\Command.cs" />

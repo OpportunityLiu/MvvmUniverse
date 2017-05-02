@@ -9,7 +9,7 @@ using Windows.Foundation.Collections;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public class ObservableDictionaty<TKey, TValue>
+    public class ObservableMap<TKey, TValue>
         : ObservableObject
         , IObservableMap<TKey, TValue>
         , IDictionary<TKey, TValue>, IDictionary
@@ -17,9 +17,9 @@ namespace Opportunity.MvvmUniverse.Collections
     {
         protected Dictionary<TKey, TValue> Items { get; }
 
-        public ObservableDictionaty() : this(EqualityComparer<TKey>.Default) { }
+        public ObservableMap() : this(EqualityComparer<TKey>.Default) { }
 
-        public ObservableDictionaty(IEqualityComparer<TKey> comparer)
+        public ObservableMap(IEqualityComparer<TKey> comparer)
         {
             this.Items = new Dictionary<TKey, TValue>(comparer);
         }
@@ -50,17 +50,14 @@ namespace Opportunity.MvvmUniverse.Collections
             });
         }
 
-        public void Add(TKey key, TValue value)
+        protected virtual void InsertItem(TKey key,TValue value)
         {
             Items.Add(key, value);
             RaiseMapChanged(new MapChangedEventArgs(CollectionChange.ItemInserted, key));
             RaisePropertyChanged(nameof(Count));
         }
 
-        public bool ContainsKey(TKey key)
-            => Items.ContainsKey(key);
-
-        public bool Remove(TKey key)
+        protected virtual bool RemoveItem(TKey key)
         {
             var r = Items.Remove(key);
             if (r == false)
@@ -68,6 +65,32 @@ namespace Opportunity.MvvmUniverse.Collections
             RaiseMapChanged(new MapChangedEventArgs(CollectionChange.ItemRemoved, key));
             RaisePropertyChanged(nameof(Count));
             return true;
+        }
+
+        protected virtual void SetItem(TKey key,TValue value)
+        {
+            Items[key] = value;
+            RaiseMapChanged(new MapChangedEventArgs(CollectionChange.ItemChanged, key));
+        }
+
+        protected virtual void ClearItems()
+        {
+            Items.Clear();
+            RaiseMapChanged(new MapChangedEventArgs(CollectionChange.Reset, default(TKey)));
+            RaisePropertyChanged(nameof(Count));
+        }
+
+        public void Add(TKey key, TValue value)
+        {
+            InsertItem(key,value);
+        }
+
+        public bool ContainsKey(TKey key)
+            => Items.ContainsKey(key);
+
+        public bool Remove(TKey key)
+        {
+            return RemoveItem(key);
         }
 
         public bool TryGetValue(TKey key, out TValue value)
@@ -80,12 +103,11 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 if (Items.ContainsKey(key))
                 {
-                    Items[key] = value;
-                    RaiseMapChanged(new MapChangedEventArgs(CollectionChange.ItemChanged, key));
+                    SetItem(key,value);
                 }
                 else
                 {
-                    Add(key, value);
+                    InsertItem(key,value);
                 }
             }
         }
@@ -103,9 +125,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public void Clear()
         {
-            Items.Clear();
-            RaiseMapChanged(new MapChangedEventArgs(CollectionChange.Reset, default(TKey)));
-            RaisePropertyChanged(nameof(Count));
+            ClearItems();
         }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)

@@ -69,7 +69,10 @@ namespace Opportunity.MvvmUniverse.Collections
                 try
                 {
                     re = await lp;
-                    this.AddRange(re);
+                    foreach (var item in re)
+                    {
+                        this.Add(item);
+                    }
                     this.LoadedPageCount++;
                 }
                 catch (Exception ex)

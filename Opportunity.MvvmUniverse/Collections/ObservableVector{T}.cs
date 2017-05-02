@@ -42,44 +42,6 @@ namespace Opportunity.MvvmUniverse.Collections
             public uint Index { get; internal set; }
         }
 
-        protected sealed class VectorChangedEventArgsCollection : IEnumerable<VectorChangedEventArgs>
-        {
-            public VectorChangedEventArgsCollection(CollectionChange collectionChange, int index, int count)
-            {
-                if (index < 0)
-                    throw new ArgumentOutOfRangeException(nameof(index));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                this.Index = (uint)index;
-                this.Count = (uint)count;
-                this.current = new VectorChangedEventArgs(collectionChange, this.Index);
-            }
-
-            public VectorChangedEventArgsCollection(CollectionChange collectionChange, uint index, uint count)
-            {
-                this.Index = index;
-                this.Count = count;
-                this.current = new VectorChangedEventArgs(collectionChange, index);
-            }
-
-            public uint Index { get; private set; }
-            public uint Count { get; private set; }
-
-            private VectorChangedEventArgs current;
-
-            public IEnumerator<VectorChangedEventArgs> GetEnumerator()
-            {
-                for (uint i = 0; i < Count; i++)
-                {
-                    this.current.Index = i + Count;
-                    yield return this.current;
-                }
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-                => GetEnumerator();
-        }
-
         protected void RaiseVectorChanged(VectorChangedEventArgs args)
         {
             var temp = VectorChanged;
@@ -91,30 +53,37 @@ namespace Opportunity.MvvmUniverse.Collections
             });
         }
 
-        protected void RaiseVectorChanged(IEnumerable<VectorChangedEventArgs> args)
+        protected virtual void InsertItem(int index, T item)
         {
-            var temp = VectorChanged;
-            if (temp == null)
-                return;
-            DispatcherHelper.BeginInvoke(() =>
-            {
-                foreach (var item in args)
-                {
-                    temp.Invoke(this, item);
-                }
-            });
+            Items.Insert(index, item);
+            RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.ItemInserted, index));
+            RaisePropertyChanged(nameof(Count));
+        }
+
+        protected virtual void RemoveItem(int index)
+        {
+            Items.RemoveAt(index);
+            RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.ItemRemoved, index));
+            RaisePropertyChanged(nameof(Count));
+        }
+
+        protected virtual void SetItem(int index, T item)
+        {
+            Items[index] = item;
+            RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.ItemChanged, index));
+        }
+
+        protected virtual void ClearItems()
+        {
+            Items.Clear();
+            RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.Reset, 0));
+            RaisePropertyChanged(nameof(Count));
         }
 
         public T this[int index]
         {
             get => Items[index];
-            set
-            {
-                if (index < 0 || index >= Items.Count)
-                    throw new IndexOutOfRangeException();
-                Items[index] = value;
-                RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.ItemChanged, index));
-            }
+            set => SetItem(index, value);
         }
 
         object IList.this[int index]
@@ -124,7 +93,7 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 if (!(value is T v))
                     throw new ArgumentException("Wrong type of value.", nameof(value));
-                this[index] = v;
+                SetItem(index, v);
             }
         }
 
@@ -147,24 +116,12 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public void Add(T item)
         {
-            Items.Add(item);
-            RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.ItemInserted, Items.Count - 1));
-            RaisePropertyChanged(nameof(Count));
-        }
-
-        public void AddRange(IEnumerable<T> items)
-        {
-            var oldCount = Items.Count;
-            Items.AddRange(items);
-            RaiseVectorChanged(new VectorChangedEventArgsCollection(CollectionChange.ItemInserted, oldCount, Items.Count - oldCount));
-            RaisePropertyChanged(nameof(Count));
+            InsertItem(Items.Count,item);
         }
 
         public void Clear()
         {
-            Items.Clear();
-            RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.Reset, 0));
-            RaisePropertyChanged(nameof(Count));
+            ClearItems();
         }
 
         public bool Contains(T item)
@@ -178,17 +135,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public void Insert(int index, T item)
         {
-            Items.Insert(index, item);
-            RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.ItemInserted, index));
-            RaisePropertyChanged(nameof(Count));
-        }
-
-        public void InsertRange(int index, IEnumerable<T> items)
-        {
-            var oldCount = Items.Count;
-            Items.InsertRange(index, items);
-            RaiseVectorChanged(new VectorChangedEventArgsCollection(CollectionChange.ItemInserted, index, Items.Count - oldCount));
-            RaisePropertyChanged(nameof(Count));
+            InsertItem(index,item);
         }
 
         public bool Remove(T item)
@@ -202,16 +149,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public void RemoveAt(int index)
         {
-            Items.RemoveAt(index);
-            RaiseVectorChanged(new VectorChangedEventArgs(CollectionChange.ItemRemoved, index));
-            RaisePropertyChanged(nameof(Count));
-        }
-
-        public void RemoveRange(int index, int count)
-        {
-            Items.RemoveRange(index, count);
-            RaiseVectorChanged(new VectorChangedEventArgsCollection(CollectionChange.ItemRemoved, index, count));
-            RaisePropertyChanged(nameof(Count));
+            RemoveItem(index);
         }
 
         int IList.Add(object value)
