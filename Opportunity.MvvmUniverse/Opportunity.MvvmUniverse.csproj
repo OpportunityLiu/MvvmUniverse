@@ -107,10 +107,13 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Collections\IncrementalLoadingVector{T}.cs" />
+    <Compile Include="Collections\IncrementalLoadingCollection{T}.cs" />
     <Compile Include="Collections\LoadMoreItemsExceptionEventArgs.cs" />
-    <Compile Include="Collections\ObservableMap{TKey,TValue}.cs" />
-    <Compile Include="Collections\ObservableVector{T}.cs" />
+    <Compile Include="Collections\ObservableCollection{T}.cs" />
+    <Compile Include="Collections\ObservableDictionary.ObservableKeyCollection.cs" />
+    <Compile Include="Collections\ObservableDictionary.ObservableValueCollection.cs" />
+    <Compile Include="Collections\ObservableDictionary{TKey,TValue}.cs" />
+    <Compile Include="Collections\ObservableCollectionBase.cs" />
     <Compile Include="Collections\RangedCollectionView{T}.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CommandBaseVoid.cs" />

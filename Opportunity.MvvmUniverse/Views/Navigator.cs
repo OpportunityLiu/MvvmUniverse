@@ -42,19 +42,26 @@ namespace Opportunity.MvvmUniverse.Views
             return true;
         }
 
-        public ObservableVector<INavigationHandler> Handlers { get; private set; } 
-            = new ObservableVector<INavigationHandler>();
+        public ObservableCollection<INavigationHandler> Handlers { get; private set; } 
+            = new ObservableCollection<INavigationHandler>();
 
         private SystemNavigationManager manager = SystemNavigationManager.GetForCurrentView();
 
         private Navigator()
         {
             this.manager.BackRequested += this.manager_BackRequested;
-            this.Handlers.VectorChanged += this.handlers_VectorChanged;
+            this.Handlers.CollectionChanged += this.handlers_CollectionChanged;
         }
 
-        private void handlers_VectorChanged(Windows.Foundation.Collections.IObservableVector<INavigationHandler> sender, Windows.Foundation.Collections.IVectorChangedEventArgs args)
+        private void handlers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if(e.OldItems!=null)
+            {
+                foreach (var item in e.OldItems.OfType<INavigationHandler>())
+                {
+                    item.Parent = null;
+                }
+            }
             foreach (var item in Handlers)
             {
                 item.Parent = this;
@@ -126,9 +133,9 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void destory()
         {
-            this.manager.BackRequested -= manager_BackRequested;
+            this.manager.BackRequested -= this.manager_BackRequested;
             this.manager = null;
-            this.Handlers.VectorChanged -= handlers_VectorChanged;
+            this.Handlers.CollectionChanged -= this.handlers_CollectionChanged;
             foreach (var item in Handlers)
             {
                 item.Parent = null;
