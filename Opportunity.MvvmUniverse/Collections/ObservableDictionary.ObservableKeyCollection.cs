@@ -6,76 +6,21 @@ using System.Diagnostics;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    internal sealed class Mscorlib_DictionaryKeyCollectionDebugView<TKey, TValue>
+    public partial class ObservableDictionary<TKey, TValue>
     {
-        private ICollection<TKey> collection;
-
-        public Mscorlib_DictionaryKeyCollectionDebugView(ICollection<TKey> collection)
-        {
-            this.collection = collection;
-        }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public TKey[] Items
-        {
-            get
-            {
-                TKey[] items = new TKey[collection.Count];
-                collection.CopyTo(items, 0);
-                return items;
-            }
-        }
-    }
-
-    public partial class ObservableDictionary<TKey, TValue> : ObservableCollectionBase, IDictionary<TKey, TValue>, IDictionary, IList<KeyValuePair<TKey, TValue>>, IReadOnlyList<KeyValuePair<TKey, TValue>>, IList
-    {
-        [DebuggerTypeProxy(typeof(Mscorlib_DictionaryKeyCollectionDebugView<,>))]
+        [DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
-        public sealed class ObservableKeyCollection : ObservableCollectionBase, ICollection<TKey>, IReadOnlyList<TKey>, IList
+        public sealed class ObservableKeyCollection : ObservableKeyValueCollectionBase, ICollection<TKey>, IReadOnlyList<TKey>, IList
         {
-            private readonly ObservableDictionary<TKey, TValue> parent;
+            internal ObservableKeyCollection(ObservableDictionary<TKey, TValue> parent) : base(parent) { }
 
-            public ObservableKeyCollection(ObservableDictionary<TKey, TValue> parent)
-            {
-                if (parent == null)
-                    throw new ArgumentNullException(nameof(parent));
-                this.parent = parent;
-                this.parent.CollectionChanged += this.Parent_CollectionChanged;
-            }
-
-            private void Parent_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-            {
-                var newItem = e.NewItems == null ? default(KeyValuePair<TKey, TValue>) : e.NewItems.Cast<KeyValuePair<TKey, TValue>>().FirstOrDefault();
-                var oldItem = e.OldItems == null ? default(KeyValuePair<TKey, TValue>) : e.OldItems.Cast<KeyValuePair<TKey, TValue>>().FirstOrDefault();
-                switch (e.Action)
-                {
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
-                    RaiseCollectionAdd(newItem.Key, e.NewStartingIndex);
-                    break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
-                    RaiseCollectionMove(newItem.Key, e.NewStartingIndex, e.OldStartingIndex);
-                    break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
-                    RaiseCollectionRemove(oldItem.Key, e.OldStartingIndex);
-                    break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
-                    RaiseCollectionReplace(newItem.Key, oldItem.Key, e.NewStartingIndex);
-                    break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
-                    RaiseCollectionReset();
-                    break;
-                }
-            }
-
-            public TKey this[int index] => this.parent.SortedKeys[index];
+            public TKey this[int index] => this.Parent.Items[index].Key;
 
             object IList.this[int index]
             {
-                get => this.parent.SortedKeys[index];
-                set => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
+                get => this.Parent.Items[index].Key;
+                set => throw Modifing();
             }
-
-            public int Count => this.parent.Count;
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool IList.IsFixedSize => false;
@@ -90,37 +35,71 @@ namespace Opportunity.MvvmUniverse.Collections
             bool ICollection.IsSynchronized => false;
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            object ICollection.SyncRoot => ((ICollection)this.parent.Items).SyncRoot;
+            object ICollection.SyncRoot => ((ICollection)this.Parent.Items).SyncRoot;
 
-            public IEnumerator<TKey> GetEnumerator() => this.parent.SortedKeys.GetEnumerator();
+            public IEnumerator<TKey> GetEnumerator()
+            {
+                foreach (var item in this.Parent.Items)
+                {
+                    yield return item.Key;
+                }
+            }
 
-            int IList.Add(object value) => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
+            int IList.Add(object value) => throw Modifing();
 
-            void ICollection<TKey>.Add(TKey item) => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
+            void ICollection<TKey>.Add(TKey item) => throw Modifing();
 
-            void IList.Clear() => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
+            void IList.Clear() => throw Modifing();
 
-            void ICollection<TKey>.Clear() => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
+            void ICollection<TKey>.Clear() => throw Modifing();
 
-            bool IList.Contains(object value) => this.parent.ContainsKey(ObservableDictionary<TKey, TValue>.castKey(value));
+            bool IList.Contains(object value) => this.Parent.ContainsKey(Helpers.CastKey<TKey>(value));
 
-            public bool Contains(TKey item) => this.parent.ContainsKey(item);
+            public bool Contains(TKey item) => this.Parent.ContainsKey(item);
 
-            void ICollection.CopyTo(Array array, int index) => ((ICollection)this.parent.SortedKeys).CopyTo(array, index);
+            void ICollection.CopyTo(Array array, int index)
+            {
+                if (array == null)
+                    throw new ArgumentNullException(nameof(array));
+                if (array.Rank != 1 || array.GetLowerBound(0) != 0)
+                    throw new ArgumentException("Unsupported array", nameof(array));
+                var a = array as TKey[];
+                if (a == null)
+                    throw new ArgumentException("Wrong array type", nameof(array));
+                ((ICollection<TKey>)this).CopyTo(a, index);
+            }
 
-            void ICollection<TKey>.CopyTo(TKey[] array, int arrayIndex) => ((ICollection<TKey>)this.parent.SortedKeys).CopyTo(array, arrayIndex);
+            void ICollection<TKey>.CopyTo(TKey[] array, int arrayIndex)
+            {
+                if (array == null)
+                    throw new ArgumentNullException(nameof(array));
+                if (array.Length - arrayIndex < Count)
+                    throw new ArgumentException("Array size not enough", nameof(array));
+                foreach (var item in this)
+                {
+                    array[arrayIndex] = item;
+                    arrayIndex++;
+                }
+            }
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            int IList.IndexOf(object value) => this.parent.indexOf(ObservableDictionary<TKey, TValue>.castKey(value));
+            int IList.IndexOf(object value)
+            {
+                if (value == null)
+                    return -1;
+                var k = Helpers.CastKey<TKey>(value);
+                if (!this.Parent.KeySet.TryGetValue(k, out var index))
+                    return -1;
+                return index;
+            }
 
-            void IList.Insert(int index, object value) => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
+            void IList.Insert(int index, object value) => throw Modifing();
 
-            void IList.Remove(object value) => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
+            void IList.Remove(object value) => throw Modifing();
+            bool ICollection<TKey>.Remove(TKey item) => throw Modifing();
 
-            bool ICollection<TKey>.Remove(TKey item) => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
-
-            void IList.RemoveAt(int index) => throw new InvalidOperationException("This collection is a read only view of ObservableDictionary.");
+            void IList.RemoveAt(int index) => throw Modifing();
         }
     }
 }

@@ -4,17 +4,17 @@ using System.Collections.Generic;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public struct RangedCollectionView<T> : IReadOnlyList<T>
+    public struct RangedCollectionView<T> : IReadOnlyList<T>, IList
     {
         public static RangedCollectionView<T> Empty => new RangedCollectionView<T>();
 
         public RangedCollectionView(IReadOnlyList<T> items, int startIndex, int count)
         {
-            if(items == null)
+            if (items == null)
                 throw new ArgumentNullException(nameof(items));
-            if(unchecked((uint)startIndex > (uint)items.Count))
+            if (unchecked((uint)startIndex > (uint)items.Count))
                 throw new ArgumentOutOfRangeException(nameof(startIndex));
-            if(count < 0 || startIndex + count > items.Count)
+            if (count < 0 || startIndex + count > items.Count)
                 throw new ArgumentOutOfRangeException(nameof(count));
             this.items = items;
             this.StartIndex = startIndex;
@@ -27,7 +27,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             get
             {
-                if(unchecked((uint)index >= (uint)this.Count))
+                if (unchecked((uint)index >= (uint)this.Count))
                     throw new IndexOutOfRangeException();
                 return this.items[this.StartIndex + index];
             }
@@ -35,6 +35,20 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public int Count { get; }
         public int StartIndex { get; }
+
+        bool IList.IsFixedSize => true;
+
+        bool IList.IsReadOnly => true;
+
+        bool ICollection.IsSynchronized => false;
+
+        object ICollection.SyncRoot => throw new NotImplementedException();
+
+        object IList.this[int index]
+        {
+            get => this[index];
+            set => throw new InvalidOperationException("This view is read-only.");
+        }
 
         public RangedCollectionViewEnumerator GetEnumerator()
         {
@@ -44,6 +58,52 @@ namespace Opportunity.MvvmUniverse.Collections
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        int IList.Add(object value) => throw new InvalidOperationException("This view is read-only.");
+
+        void IList.Clear() => throw new InvalidOperationException("This view is read-only.");
+
+        bool IList.Contains(object value)
+        {
+            var i = ((IList)this).IndexOf(value);
+            return i != -1;
+        }
+
+        int IList.IndexOf(object value)
+        {
+            var v = Helpers.CastValue<T>(value);
+            var c = EqualityComparer<T>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (c.Equals(v, this[i]))
+                    return i;
+            }
+            return -1;
+        }
+
+        void IList.Insert(int index, object value) => throw new InvalidOperationException("This view is read-only.");
+
+        void IList.Remove(object value) => throw new InvalidOperationException("This view is read-only.");
+
+        void IList.RemoveAt(int index) => throw new InvalidOperationException("This view is read-only.");
+
+        void ICollection.CopyTo(Array array, int index)
+        {
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+            if (array.Rank != 1 || array.GetLowerBound(0) != 0)
+                throw new ArgumentException("Unsupported array", nameof(array));
+            var a = array as T[];
+            if (a == null)
+                throw new ArgumentException("Wrong array type", nameof(array));
+            if (a.Length - index < Count)
+                throw new ArgumentException("Array size not enough", nameof(array));
+            foreach (var item in this)
+            {
+                a[index] = item;
+                index++;
+            }
+        }
 
         public struct RangedCollectionViewEnumerator : IEnumerator<T>
         {

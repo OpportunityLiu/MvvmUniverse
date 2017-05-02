@@ -107,6 +107,10 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\CollectionDebugView.cs" />
+    <Compile Include="Collections\DictionaryDebugView.cs" />
+    <Compile Include="Collections\DictionaryKeyCollectionDebugView.cs" />
+    <Compile Include="Collections\DictionaryValueCollectionDebugView.cs" />
     <Compile Include="Collections\IncrementalLoadingCollection{T}.cs" />
     <Compile Include="Collections\LoadMoreItemsExceptionEventArgs.cs" />
     <Compile Include="Collections\ObservableCollection{T}.cs" />

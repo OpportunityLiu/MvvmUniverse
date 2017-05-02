@@ -10,28 +10,7 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    internal sealed class Mscorlib_CollectionDebugView<T>
-    {
-        private ICollection<T> collection;
-
-        public Mscorlib_CollectionDebugView(ICollection<T> collection)
-        {
-            this.collection = collection;
-        }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public T[] Items
-        {
-            get
-            {
-                T[] items = new T[collection.Count];
-                collection.CopyTo(items, 0);
-                return items;
-            }
-        }
-    }
-
-    [DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
+    [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     public class ObservableCollection<T> : ObservableCollectionBase, IList<T>, IReadOnlyList<T>, IList
     {
@@ -105,10 +84,7 @@ namespace Opportunity.MvvmUniverse.Collections
         object IList.this[int index]
         {
             get => Items[index];
-            set
-            {
-                SetItem(index, castValue(value));
-            }
+            set => SetItem(index, Helpers.CastValue<T>(value));
         }
 
         public int IndexOf(T item) => Items.IndexOf(item);
@@ -140,40 +116,19 @@ namespace Opportunity.MvvmUniverse.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => Items.GetEnumerator();
 
-        private static T castValue(object value)
-        {
-            if (value == null && default(T) == null)
-                return default(T);
-            if (value is T v)
-                return v;
-            throw new ArgumentException("Wrong type of value", nameof(value));
-        }
-
         int IList.Add(object value)
         {
-            Add(castValue(value));
+            Add(Helpers.CastValue<T>(value));
             return Items.Count - 1;
         }
 
-        bool IList.Contains(object value)
-        {
-            return Contains(castValue(value));
-        }
+        bool IList.Contains(object value) => Contains(Helpers.CastValue<T>(value));
 
-        int IList.IndexOf(object value)
-        {
-            return IndexOf(castValue(value));
-        }
+        int IList.IndexOf(object value) => IndexOf(Helpers.CastValue<T>(value));
 
-        void IList.Insert(int index, object value)
-        {
-            Insert(index, castValue(value));
-        }
+        void IList.Insert(int index, object value) => Insert(index, Helpers.CastValue<T>(value));
 
-        void IList.Remove(object value)
-        {
-            Remove(castValue(value));
-        }
+        void IList.Remove(object value) => Remove(Helpers.CastValue<T>(value));
 
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
     }

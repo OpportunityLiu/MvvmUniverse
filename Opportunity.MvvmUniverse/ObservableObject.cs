@@ -15,7 +15,7 @@ namespace Opportunity.MvvmUniverse
 
         protected bool Set<TProp>(ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
-            if (Equals(field, value))
+            if (EqualityComparer<TProp>.Default.Equals(field, value))
                 return false;
             ForceSet(ref field, value, propertyName);
             return true;
@@ -23,7 +23,7 @@ namespace Opportunity.MvvmUniverse
 
         protected bool Set<TProp>(string addtionalPropertyName, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
-            if (Equals(field, value))
+            if (EqualityComparer<TProp>.Default.Equals(field, value))
                 return false;
             ForceSet(addtionalPropertyName, ref field, value, propertyName);
             return true;
@@ -31,7 +31,7 @@ namespace Opportunity.MvvmUniverse
 
         protected bool Set<TProp>(string addtionalPropertyName0, string addtionalPropertyName1, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
-            if (Equals(field, value))
+            if (EqualityComparer<TProp>.Default.Equals(field, value))
                 return false;
             ForceSet(addtionalPropertyName0, addtionalPropertyName1, ref field, value, propertyName);
             return true;
@@ -39,7 +39,7 @@ namespace Opportunity.MvvmUniverse
 
         protected bool Set<TProp>(IEnumerable<string> addtionalPropertyNames, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
-            if (Equals(field, value))
+            if (EqualityComparer<TProp>.Default.Equals(field, value))
                 return false;
             ForceSet(addtionalPropertyNames, ref field, value, propertyName);
             return true;
@@ -66,50 +66,47 @@ namespace Opportunity.MvvmUniverse
         protected void ForceSet<TProp>(IEnumerable<string> addtionalPropertyNames, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;
-            var temp = PropertyChanged;
-            if (temp == null)
-                return;
-            DispatcherHelper.BeginInvoke(() =>
+            IEnumerable<string> g()
             {
-                temp(this, new PropertyChangedEventArgs(propertyName));
+                yield return propertyName;
+                if (addtionalPropertyNames == null)
+                    yield break;
                 foreach (var item in addtionalPropertyNames)
                 {
-                    temp(this, new PropertyChangedEventArgs(item));
+                    yield return item;
                 }
-            });
+            }
+            RaisePropertyChanged(g());
         }
 
         protected void RaisePropertyChanged([CallerMemberName]string propertyName = null)
         {
-            var temp = PropertyChanged;
-            if (temp == null)
-                return;
-            DispatcherHelper.BeginInvoke(() => temp(this, new PropertyChangedEventArgs(propertyName)));
+            IEnumerable<string> g()
+            {
+                yield return propertyName;
+            }
+            RaisePropertyChanged(g());
         }
 
         protected void RaisePropertyChanged(string propertyName0, string propertyName1)
         {
-            var temp = PropertyChanged;
-            if (temp == null)
-                return;
-            DispatcherHelper.BeginInvoke(() =>
+            IEnumerable<string> g()
             {
-                temp(this, new PropertyChangedEventArgs(propertyName0));
-                temp(this, new PropertyChangedEventArgs(propertyName1));
-            });
+                yield return propertyName0;
+                yield return propertyName1;
+            }
+            RaisePropertyChanged(g());
         }
 
         protected void RaisePropertyChanged(string propertyName0, string propertyName1, string propertyName2)
         {
-            var temp = PropertyChanged;
-            if (temp == null)
-                return;
-            DispatcherHelper.BeginInvoke(() =>
+            IEnumerable<string> g()
             {
-                temp(this, new PropertyChangedEventArgs(propertyName0));
-                temp(this, new PropertyChangedEventArgs(propertyName1));
-                temp(this, new PropertyChangedEventArgs(propertyName2));
-            });
+                yield return propertyName0;
+                yield return propertyName1;
+                yield return propertyName2;
+            }
+            RaisePropertyChanged(g());
         }
 
         protected void RaisePropertyChanged(params string[] propertyNames)
@@ -117,8 +114,10 @@ namespace Opportunity.MvvmUniverse
             this.RaisePropertyChanged((IEnumerable<string>)propertyNames);
         }
 
-        protected void RaisePropertyChanged(IEnumerable<string> propertyNames)
+        protected virtual void RaisePropertyChanged(IEnumerable<string> propertyNames)
         {
+            if (propertyNames == null)
+                return;
             var temp = PropertyChanged;
             if (temp == null)
                 return;

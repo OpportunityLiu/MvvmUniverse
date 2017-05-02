@@ -10,35 +10,16 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    internal sealed class Mscorlib_DictionaryDebugView<K, V>
-    {
-        private IDictionary<K, V> dict;
-
-        public Mscorlib_DictionaryDebugView(IDictionary<K, V> dictionary)
-        {
-            this.dict = dictionary;
-        }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public KeyValuePair<K, V>[] Items
-        {
-            get
-            {
-                KeyValuePair<K, V>[] items = new KeyValuePair<K, V>[dict.Count];
-                dict.CopyTo(items, 0);
-                return items;
-            }
-        }
-    }
-
-    [DebuggerTypeProxy(typeof(Mscorlib_DictionaryDebugView<,>))]
+    [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
-    public partial class ObservableDictionary<TKey, TValue> : ObservableCollectionBase, IDictionary<TKey, TValue>, IDictionary, IList<KeyValuePair<TKey, TValue>>, IReadOnlyList<KeyValuePair<TKey, TValue>>, IList
+    public partial class ObservableDictionary<TKey, TValue> : ObservableCollectionBase
+        , IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary
+        , IList<KeyValuePair<TKey, TValue>>, IReadOnlyList<KeyValuePair<TKey, TValue>>, IList
     {
-        protected Dictionary<TKey, TValue> Items { get; }
-        protected List<TKey> SortedKeys { get; } = new List<TKey>();
+        protected List<KeyValuePair<TKey, TValue>> Items { get; } = new List<KeyValuePair<TKey, TValue>>();
+        protected Dictionary<TKey, int> KeySet { get; }
 
-        public IEqualityComparer<TKey> Comparer => Items.Comparer;
+        public IEqualityComparer<TKey> Comparer => KeySet.Comparer;
 
         public ObservableDictionary() : this(EqualityComparer<TKey>.Default) { }
 
@@ -46,117 +27,159 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
-            this.Items = new Dictionary<TKey, TValue>(comparer);
+            this.KeySet = new Dictionary<TKey, int>(comparer);
         }
 
-        protected virtual void InsertItem(TKey key, TValue value)
+        private void updateIndex(int startIndex, int length)
         {
-            Items.Add(key, value);
-            SortedKeys.Add(key);
-            RaiseCollectionAdd(new KeyValuePair<TKey, TValue>(key, value), SortedKeys.Count - 1);
+            for (var i = 0; i < length; i++)
+            {
+                var item = Items[startIndex];
+                KeySet[item.Key] = startIndex;
+                startIndex++;
+            }
+        }
+
+        protected virtual void InsertItem(TKey key, TValue value, int index)
+        {
+            if (index < 0 || index > KeySet.Count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            KeySet.Add(key, index);
+            var toInsert = Helpers.CreateKVP(key, value);
+            Items.Add(toInsert);
+            updateIndex(index + 1, Items.Count - index - 1);
+            if (this.keys != null)
+            {
+                this.keys.RaiseCountChangedInternal();
+                this.keys.RaiseCollectionAddInternal(toInsert.Key, Items.Count - 1);
+            }
+            if (this.values != null)
+            {
+                this.values.RaiseCountChangedInternal();
+                this.values.RaiseCollectionAddInternal(toInsert.Value, Items.Count - 1);
+            }
             RaisePropertyChanged(nameof(Count));
+            RaiseCollectionAdd(toInsert, Items.Count - 1);
         }
 
         protected virtual void RemoveItem(TKey key)
         {
-            var removedValue = Items[key];
-            Items.Remove(key);
-            var index = indexOf(key);
-            SortedKeys.Remove(key);
-            RaiseCollectionRemove(new KeyValuePair<TKey, TValue>(key, removedValue), index);
+            var removedIndex = KeySet[key];
+            var removedValue = Items[removedIndex];
+            Items.RemoveAt(removedIndex);
+            updateIndex(removedIndex, Items.Count - removedIndex);
+            if (this.keys != null)
+            {
+                this.keys.RaiseCountChangedInternal();
+                this.keys.RaiseCollectionRemoveInternal(removedValue.Key, removedIndex);
+            }
+            if (this.values != null)
+            {
+                this.values.RaiseCountChangedInternal();
+                this.values.RaiseCollectionRemoveInternal(removedValue.Value, removedIndex);
+            }
             RaisePropertyChanged(nameof(Count));
+            RaiseCollectionRemove(removedValue, removedIndex);
         }
 
         protected virtual void SetItem(TKey key, TValue value)
         {
-            var oldV = Items[key];
-            Items[key] = value;
-            var index = indexOf(key);
-            RaiseCollectionReplace(new KeyValuePair<TKey, TValue>(key, value), new KeyValuePair<TKey, TValue>(key, oldV), index);
+            var index = KeySet[key];
+            var oldValue = Items[index];
+            var newValue = Helpers.CreateKVP(key, value);
+            Items[index] = newValue;
+            if (this.keys != null)
+            {
+                this.keys.RaiseCollectionReplaceInternal(newValue.Key, oldValue.Key, index);
+            }
+            if (this.values != null)
+            {
+                this.values.RaiseCollectionReplaceInternal(newValue.Value, oldValue.Value, index);
+            }
+            RaiseCollectionReplace(newValue, oldValue, index);
+        }
+
+        protected virtual void MoveItem(TKey key, int newIndex)
+        {
+            if (newIndex < 0 || newIndex >= this.Count)
+                throw new ArgumentOutOfRangeException(nameof(newIndex));
+            var oldIndex = KeySet[key];
+            if (oldIndex == newIndex)
+                return;
+            var value = Items[oldIndex];
+            Items.RemoveAt(oldIndex);
+            Items.Insert(newIndex, value);
+            var start = Math.Min(oldIndex, newIndex);
+            var end = Math.Max(oldIndex, newIndex);
+            updateIndex(start, end - start + 1);
+            if (this.keys != null)
+            {
+                this.keys.RaiseCollectionMoveInternal(value.Key, newIndex, oldIndex);
+            }
+            if (this.values != null)
+            {
+                this.values.RaiseCollectionMoveInternal(value.Value, newIndex, oldIndex);
+            }
+            RaiseCollectionMove(value, newIndex, oldIndex);
         }
 
         protected virtual void ClearItems()
         {
             Items.Clear();
-            SortedKeys.Clear();
-            RaiseCollectionReset();
+            KeySet.Clear();
+            if (this.keys != null)
+            {
+                this.keys.RaiseCountChangedInternal();
+                this.keys.RaiseCollectionResetInternal();
+            }
+            if (this.values != null)
+            {
+                this.values.RaiseCountChangedInternal();
+                this.values.RaiseCollectionResetInternal();
+            }
             RaisePropertyChanged(nameof(Count));
-        }
-
-        private int indexOf(TKey key)
-        {
-            return SortedKeys.FindLastIndex(SortedKeys.Count - 1, SortedKeys.Count, v => Comparer.Equals(v, key));
+            RaiseCollectionReset();
         }
 
         private void insert(TKey key, TValue value)
         {
-            if (Items.ContainsKey(key))
+            if (KeySet.ContainsKey(key))
                 SetItem(key, value);
             else
-                InsertItem(key, value);
+                InsertItem(key, value, Items.Count);
         }
 
-        private static TValue castValue(object value)
+        public void Move(TKey key, int newIndex)
         {
-            if (value == null && default(TValue) == null)
-                return default(TValue);
-            if (value is TValue v)
-                return v;
-            throw new ArgumentException("Wrong type of value", nameof(value));
-        }
-
-        private static TKey castKey(object key)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            if (key is TKey v)
-                return v;
-            throw new ArgumentException("Wrong type of key", nameof(key));
-        }
-
-        private static KeyValuePair<TKey, TValue> castKV(object value)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (value is KeyValuePair<TKey, TValue> v)
-                return v;
-            throw new ArgumentException("Wrong type of value", nameof(value));
+            MoveItem(key, newIndex);
         }
 
         public TValue this[TKey key]
         {
-            get => Items[key];
+            get => Items[KeySet[key]].Value;
             set => insert(key, value);
         }
         object IDictionary.this[object key]
         {
-            get => Items[castKey(key)];
-            set => insert(castKey(key), castValue(value));
+            get => Items[KeySet[Helpers.CastKey<TKey>(key)]].Value;
+            set => insert(Helpers.CastKey<TKey>(key), Helpers.CastValue<TValue>(value));
         }
+
         KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[int index]
         {
-            get
-            {
-                var key = SortedKeys[index];
-                return new KeyValuePair<TKey, TValue>(key, Items[key]);
-            }
+            get => Items[index];
             set
             {
-                var oldKey = SortedKeys[index];
-                if (Comparer.Equals(oldKey, value.Key))
-                    this[oldKey] = value.Value;
-                else
-                {
-                    RemoveItem(oldKey);
-                    insert(value.Key, value.Value);
-                }
+                var oldValue = Items[index];
+                RemoveItem(oldValue.Key);
+                InsertItem(value.Key, value.Value, index);
             }
         }
         KeyValuePair<TKey, TValue> IReadOnlyList<KeyValuePair<TKey, TValue>>.this[int index] => ((IList<KeyValuePair<TKey, TValue>>)this)[index];
         object IList.this[int index]
         {
             get => ((IList<KeyValuePair<TKey, TValue>>)this)[index];
-            set => ((IList<KeyValuePair<TKey, TValue>>)this)[index] = castKV(value);
+            set => ((IList<KeyValuePair<TKey, TValue>>)this)[index] = Helpers.CastKVP<TKey, TValue>(value);
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -177,8 +200,12 @@ namespace Opportunity.MvvmUniverse.Collections
         ICollection IDictionary.Keys => Keys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ICollection IDictionary.Values => Values;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
 
-        public int Count => SortedKeys.Count;
+        public int Count => Items.Count;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => false;
@@ -198,19 +225,39 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => ((ICollection)Items).SyncRoot;
 
-        public void Add(TKey key, TValue value) => InsertItem(key, value);
+        public void Add(TKey key, TValue value) => InsertItem(key, value, Items.Count);
 
-        public bool ContainsKey(TKey key) => Items.ContainsKey(key);
+        public bool ContainsKey(TKey key) => KeySet.ContainsKey(key);
+
+        public bool ContainsValue(TValue value)
+        {
+            var c = EqualityComparer<TValue>.Default;
+            foreach (var item in Items)
+            {
+                if (c.Equals(item.Value, value))
+                    return true;
+            }
+            return false;
+        }
 
         public bool Remove(TKey key)
         {
-            if (!Items.ContainsKey(key))
+            if (!KeySet.ContainsKey(key))
                 return false;
             RemoveItem(key);
             return true;
         }
 
-        public bool TryGetValue(TKey key, out TValue value) => Items.TryGetValue(key, out value);
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            if (!KeySet.TryGetValue(key, out var index))
+            {
+                value = default(TValue);
+                return false;
+            }
+            value = Items[index].Value;
+            return true;
+        }
 
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => insert(item.Key, item.Value);
 
@@ -222,92 +269,94 @@ namespace Opportunity.MvvmUniverse.Collections
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
         {
-            if (!Items.TryGetValue(item.Key, out var val))
+            if (!KeySet.TryGetValue(item.Key, out var index))
                 return false;
-            if (!EqualityComparer<TValue>.Default.Equals(val, item.Value))
+            var oldItem = Items[index];
+            if (!EqualityComparer<TValue>.Default.Equals(oldItem.Value, item.Value))
                 return false;
             return Remove(item.Key);
         }
 
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            foreach (var item in SortedKeys)
-            {
-                yield return new KeyValuePair<TKey, TValue>(item, Items[item]);
-            }
-        }
+        public List<KeyValuePair<TKey, TValue>>.Enumerator GetEnumerator() => Items.GetEnumerator();
 
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        void IDictionary.Add(object key, object value) => Add(castKey(key), castValue(value));
+        void IDictionary.Add(object key, object value) => Add(Helpers.CastKey<TKey>(key), Helpers.CastValue<TValue>(value));
 
-        bool IDictionary.Contains(object key) => ContainsKey(castKey(key));
+        bool IDictionary.Contains(object key) => ContainsKey(Helpers.CastKey<TKey>(key));
 
         private class DictionaryEnumerator : IDictionaryEnumerator
         {
             private readonly ObservableDictionary<TKey, TValue> parents;
 
-            private readonly List<TKey>.Enumerator keyEmulator;
+            private readonly List<KeyValuePair<TKey, TValue>>.Enumerator enumlator;
 
             internal DictionaryEnumerator(ObservableDictionary<TKey, TValue> parents)
             {
                 this.parents = parents;
-                this.keyEmulator = parents.SortedKeys.GetEnumerator();
+                this.enumlator = parents.Items.GetEnumerator();
             }
 
             public DictionaryEntry Entry => new DictionaryEntry(Key, Value);
 
-            public object Key => this.keyEmulator.Current;
+            public object Key => this.enumlator.Current.Key;
 
-            public object Value => this.parents[this.keyEmulator.Current];
+            public object Value => this.enumlator.Current.Value;
 
-            public object Current => new KeyValuePair<TKey, TValue>(this.keyEmulator.Current, this.parents[this.keyEmulator.Current]);
+            public object Current => this.enumlator.Current;
 
-            public bool MoveNext() => this.keyEmulator.MoveNext();
+            public bool MoveNext() => this.enumlator.MoveNext();
 
-            public void Reset() => ((IEnumerator)this.keyEmulator).Reset();
+            public void Reset() => ((IEnumerator)this.enumlator).Reset();
         }
 
         IDictionaryEnumerator IDictionary.GetEnumerator() => new DictionaryEnumerator(this);
 
-        void IDictionary.Remove(object key) => Remove(castKey(key));
+        void IDictionary.Remove(object key) => Remove(Helpers.CastKey<TKey>(key));
 
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
 
         int IList<KeyValuePair<TKey, TValue>>.IndexOf(KeyValuePair<TKey, TValue> item)
         {
-            var index = indexOf(item.Key);
-            if (index == -1)
+            if (!KeySet.TryGetValue(item.Key, out var index))
                 return -1;
-            var k = SortedKeys[index];
-            var v = Items[k];
-            if (EqualityComparer<TValue>.Default.Equals(v, item.Value))
+            var kv = Items[index];
+            if (EqualityComparer<TValue>.Default.Equals(kv.Value, item.Value))
                 return index;
             return -1;
         }
 
         void IList<KeyValuePair<TKey, TValue>>.Insert(int index, KeyValuePair<TKey, TValue> item)
-            => insert(item.Key, item.Value);
+        {
+            if (!KeySet.TryGetValue(item.Key, out var currentIndex))
+            {
+                InsertItem(item.Key, item.Value, index);
+                return;
+            }
+            SetItem(item.Key, item.Value);
+            MoveItem(item.Key, index);
+        }
 
         void IList<KeyValuePair<TKey, TValue>>.RemoveAt(int index)
         {
-            var k = SortedKeys[index];
-            RemoveItem(k);
+            var kv = Items[index];
+            RemoveItem(kv.Key);
         }
 
         int IList.Add(object value)
         {
-            ((IList<KeyValuePair<TKey, TValue>>)this).Add(castKV(value));
+            ((IList<KeyValuePair<TKey, TValue>>)this).Add(Helpers.CastKVP<TKey, TValue>(value));
             return this.Count - 1;
         }
 
-        bool IList.Contains(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Contains(castKV(value));
+        bool IList.Contains(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Contains(Helpers.CastKVP<TKey, TValue>(value));
 
-        int IList.IndexOf(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).IndexOf(castKV(value));
+        int IList.IndexOf(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).IndexOf(Helpers.CastKVP<TKey, TValue>(value));
 
-        void IList.Insert(int index, object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Insert(index, castKV(value));
+        void IList.Insert(int index, object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Insert(index, Helpers.CastKVP<TKey, TValue>(value));
 
-        void IList.Remove(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Remove(castKV(value));
+        void IList.Remove(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Remove(Helpers.CastKVP<TKey, TValue>(value));
 
         void IList.RemoveAt(int index) => ((IList<KeyValuePair<TKey, TValue>>)this).RemoveAt(index);
 
