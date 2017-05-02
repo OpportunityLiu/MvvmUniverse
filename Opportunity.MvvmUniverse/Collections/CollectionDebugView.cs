@@ -17,8 +17,8 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             get
             {
-                T[] items = new T[collection.Count];
-                collection.CopyTo(items, 0);
+                var items = new T[this.collection.Count];
+                this.collection.CopyTo(items, 0);
                 return items;
             }
         }

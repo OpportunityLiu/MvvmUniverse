@@ -17,8 +17,8 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             get
             {
-                KeyValuePair<K, V>[] items = new KeyValuePair<K, V>[dict.Count];
-                dict.CopyTo(items, 0);
+                var items = new KeyValuePair<K, V>[this.dict.Count];
+                this.dict.CopyTo(items, 0);
                 return items;
             }
         }

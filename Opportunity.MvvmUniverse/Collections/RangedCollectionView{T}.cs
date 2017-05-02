@@ -73,7 +73,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             var v = Helpers.CastValue<T>(value);
             var c = EqualityComparer<T>.Default;
-            for (int i = 0; i < Count; i++)
+            for (var i = 0; i < Count; i++)
             {
                 if (c.Equals(v, this[i]))
                     return i;

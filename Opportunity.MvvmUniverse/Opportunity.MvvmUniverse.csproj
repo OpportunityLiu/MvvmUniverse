@@ -111,10 +111,12 @@
     <Compile Include="Collections\DictionaryDebugView.cs" />
     <Compile Include="Collections\DictionaryKeyCollectionDebugView.cs" />
     <Compile Include="Collections\DictionaryValueCollectionDebugView.cs" />
+    <Compile Include="Collections\Helpers.cs" />
     <Compile Include="Collections\IncrementalLoadingCollection{T}.cs" />
     <Compile Include="Collections\LoadMoreItemsExceptionEventArgs.cs" />
     <Compile Include="Collections\ObservableCollection{T}.cs" />
     <Compile Include="Collections\ObservableDictionary.ObservableKeyCollection.cs" />
+    <Compile Include="Collections\ObservableDictionary.ObservableKeyValueCollectionBase.cs" />
     <Compile Include="Collections\ObservableDictionary.ObservableValueCollection.cs" />
     <Compile Include="Collections\ObservableDictionary{TKey,TValue}.cs" />
     <Compile Include="Collections\ObservableCollectionBase.cs" />

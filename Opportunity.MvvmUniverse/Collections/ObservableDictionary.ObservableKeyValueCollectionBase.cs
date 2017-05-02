@@ -17,9 +17,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             internal ObservableKeyValueCollectionBase(ObservableDictionary<TKey, TValue> parent)
             {
-                if (parent == null)
-                    throw new ArgumentNullException(nameof(parent));
-                this.Parent = parent;
+                this.Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             }
 
             internal void RaiseCountChangedInternal()
