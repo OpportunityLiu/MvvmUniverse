@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Opportunity.MvvmUniverse.Collections
+namespace Opportunity.MvvmUniverse.Collections.Internal
 {
     internal sealed class DictionaryDebugView<K, V>
     {

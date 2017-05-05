@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Opportunity.MvvmUniverse.Collections
+namespace Opportunity.MvvmUniverse.Collections.Internal
 {
     internal static class Helpers
     {

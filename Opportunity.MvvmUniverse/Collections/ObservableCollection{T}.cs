@@ -1,4 +1,6 @@
-﻿using Opportunity.MvvmUniverse.Helpers;
+﻿using Opportunity.MvvmUniverse.Collections.Internal;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
+using Opportunity.MvvmUniverse.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -85,7 +87,7 @@ namespace Opportunity.MvvmUniverse.Collections
         object IList.this[int index]
         {
             get => Items[index];
-            set => SetItem(index, Helpers.CastValue<T>(value));
+            set => SetItem(index, CastValue<T>(value));
         }
 
         public int IndexOf(T item) => Items.IndexOf(item);
@@ -126,17 +128,17 @@ namespace Opportunity.MvvmUniverse.Collections
 
         int IList.Add(object value)
         {
-            Add(Helpers.CastValue<T>(value));
+            Add(CastValue<T>(value));
             return Items.Count - 1;
         }
 
-        bool IList.Contains(object value) => Contains(Helpers.CastValue<T>(value));
+        bool IList.Contains(object value) => Contains(CastValue<T>(value));
 
-        int IList.IndexOf(object value) => IndexOf(Helpers.CastValue<T>(value));
+        int IList.IndexOf(object value) => IndexOf(CastValue<T>(value));
 
-        void IList.Insert(int index, object value) => Insert(index, Helpers.CastValue<T>(value));
+        void IList.Insert(int index, object value) => Insert(index, CastValue<T>(value));
 
-        void IList.Remove(object value) => Remove(Helpers.CastValue<T>(value));
+        void IList.Remove(object value) => Remove(CastValue<T>(value));
 
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
     }

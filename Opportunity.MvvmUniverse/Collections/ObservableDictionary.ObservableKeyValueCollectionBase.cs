@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Collections.Internal;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;

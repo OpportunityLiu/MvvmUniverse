@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Collections.Internal;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -37,12 +39,12 @@ namespace Opportunity.MvvmUniverse.Collections
         object IDictionary.this[object key]
         {
             get => ((IDictionary)Dictionary)[key];
-            set => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+            set => ThrowForReadOnlyCollection(Dictionary.ToString());
         }
         object IList.this[int index]
         {
             get => ((IList)Dictionary)[index];
-            set => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+            set => ThrowForReadOnlyCollection(Dictionary.ToString());
         }
 
         public ObservableDictionary<TKey, TValue>.ObservableKeyCollection Keys => Dictionary.Keys;
@@ -92,13 +94,13 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public bool TryGetValue(TKey key, out TValue value) => Dictionary.TryGetValue(key, out value);
 
-        void IDictionary.Add(object key, object value) => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void IDictionary.Add(object key, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
 
-        int IList.Add(object value) => Helpers.ThrowForReadOnlyCollection<int>(Dictionary.ToString());
+        int IList.Add(object value) => ThrowForReadOnlyCollection<int>(Dictionary.ToString());
 
-        void IDictionary.Clear() => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void IDictionary.Clear() => ThrowForReadOnlyCollection(Dictionary.ToString());
 
-        void IList.Clear() => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void IList.Clear() => ThrowForReadOnlyCollection(Dictionary.ToString());
 
         bool IDictionary.Contains(object key) => ((IDictionary)Dictionary).Contains(key);
 
@@ -108,17 +110,17 @@ namespace Opportunity.MvvmUniverse.Collections
 
         int IList.IndexOf(object value) => ((IList)Dictionary).IndexOf(value);
 
-        void IList.Insert(int index, object value) => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
 
-        void IDictionary.Remove(object key) => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void IDictionary.Remove(object key) => ThrowForReadOnlyCollection(Dictionary.ToString());
 
-        void IList.Remove(object value) => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void IList.Remove(object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
 
-        void IList.RemoveAt(int index) => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary.ToString());
 
-        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection(Dictionary.ToString());
 
-        void ICollection<KeyValuePair<TKey, TValue>>.Clear() => Helpers.ThrowForReadOnlyCollection(Dictionary.ToString());
+        void ICollection<KeyValuePair<TKey, TValue>>.Clear() => ThrowForReadOnlyCollection(Dictionary.ToString());
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
             => ((ICollection<KeyValuePair<TKey, TValue>>)Dictionary).Contains(item);
@@ -127,7 +129,7 @@ namespace Opportunity.MvvmUniverse.Collections
             => ((ICollection<KeyValuePair<TKey, TValue>>)Dictionary).CopyTo(array, arrayIndex);
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
-            => Helpers.ThrowForReadOnlyCollection<bool>(Dictionary.ToString());
+            => ThrowForReadOnlyCollection<bool>(Dictionary.ToString());
 
         public List<KeyValuePair<TKey, TValue>>.Enumerator GetEnumerator() => Dictionary.GetEnumerator();
 

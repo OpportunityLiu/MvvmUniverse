@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.AsyncWrappers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 
-namespace Opportunity.MvvmUniverse.Helpers
+namespace Opportunity.MvvmUniverse
 {
     public static class DispatcherHelper
     {
@@ -57,7 +58,7 @@ namespace Opportunity.MvvmUniverse.Helpers
             if (UseForNotification)
                 return RunAsyncOnUIThread(action);
             action();
-            return Helpers.AsyncWrapper.Create();
+            return AsyncWrapper.CreateCompleted();
         }
 
         public static IAsyncAction RunAsyncOnUIThread(DispatchedHandler action)
@@ -65,7 +66,7 @@ namespace Opportunity.MvvmUniverse.Helpers
             if (dispatcher == null || dispatcher.HasThreadAccess)
             {
                 action();
-                return Helpers.AsyncWrapper.Create();
+                return AsyncWrapper.CreateCompleted();
             }
             return dispatcher.RunAsync(CoreDispatcherPriority.Normal, action);
         }

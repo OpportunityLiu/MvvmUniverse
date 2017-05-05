@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Collections.Internal;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,7 +21,7 @@ namespace Opportunity.MvvmUniverse.Collections
             object IList.this[int index]
             {
                 get => this.Parent.Items[index].Value;
-                set => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
+                set => ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
             }
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -45,15 +47,15 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
             }
 
-            int IList.Add(object value) => Helpers.ThrowForReadOnlyCollection<int>(nameof(ObservableDictionary<TKey,TValue>));
+            int IList.Add(object value) => ThrowForReadOnlyCollection<int>(nameof(ObservableDictionary<TKey,TValue>));
 
-            void ICollection<TValue>.Add(TValue item) => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
+            void ICollection<TValue>.Add(TValue item) => ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
 
-            void IList.Clear() => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
+            void IList.Clear() => ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
 
-            void ICollection<TValue>.Clear() => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
+            void ICollection<TValue>.Clear() => ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
 
-            bool IList.Contains(object value) => Contains(Helpers.CastValue<TValue>(value));
+            bool IList.Contains(object value) => Contains(CastValue<TValue>(value));
 
             public bool Contains(TValue item) => this.Parent.ContainsValue(item);
 
@@ -86,7 +88,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             int IList.IndexOf(object value)
             {
-                var v = Helpers.CastValue<TValue>(value);
+                var v = CastValue<TValue>(value);
                 var cmp = EqualityComparer<TValue>.Default;
                 for (var i = 0; i < this.Parent.Count; i++)
                 {
@@ -96,13 +98,13 @@ namespace Opportunity.MvvmUniverse.Collections
                 return -1;
             }
 
-            void IList.Insert(int index, object value) => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
+            void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
 
-            void IList.Remove(object value) => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
+            void IList.Remove(object value) => ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
 
-            bool ICollection<TValue>.Remove(TValue item) => Helpers.ThrowForReadOnlyCollection<bool>(nameof(ObservableDictionary<TKey,TValue>));
+            bool ICollection<TValue>.Remove(TValue item) => ThrowForReadOnlyCollection<bool>(nameof(ObservableDictionary<TKey,TValue>));
 
-            void IList.RemoveAt(int index) => Helpers.ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
+            void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(nameof(ObservableDictionary<TKey,TValue>));
         }
     }
 }

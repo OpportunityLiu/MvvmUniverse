@@ -1,4 +1,5 @@
-﻿using Opportunity.MvvmUniverse.Helpers;
+﻿using Opportunity.MvvmUniverse.Delegates;
+using Opportunity.MvvmUniverse.Helpers;
 using System;
 using System.Windows.Input;
 

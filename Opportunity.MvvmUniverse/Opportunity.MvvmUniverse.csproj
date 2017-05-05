@@ -107,6 +107,8 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncWrappers\AsyncWrapper-Create.cs" />
+    <Compile Include="AsyncWrappers\AsyncWrapper{T}.cs" />
     <Compile Include="Collections\Internal\CollectionDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryKeyCollectionDebugView.cs" />
@@ -130,13 +132,16 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\WeakCommand.cs" />
     <Compile Include="Commands\WeakCommand{T}.cs" />
-    <Compile Include="Helpers\AsyncCanceledWrapper.cs" />
-    <Compile Include="Helpers\AsyncErrorWrapper.cs" />
-    <Compile Include="Helpers\AsyncWrapper.cs" />
-    <Compile Include="Helpers\DispatcherHelper.cs" />
-    <Compile Include="Helpers\PollingAsyncWrapper.cs" />
+    <Compile Include="AsyncWrappers\AsyncWrapper.cs" />
+    <Compile Include="DispatcherHelper.cs" />
+    <Compile Include="Helpers\EnumExtension.cs" />
+    <Compile Include="Helpers\Handle{T}.cs" />
+    <Compile Include="AsyncWrappers\PollingAsyncWrapper.cs" />
     <Compile Include="Helpers\Predicates.cs" />
-    <Compile Include="Helpers\WeakDelegate.cs" />
+    <Compile Include="Helpers\StorageHelper.cs" />
+    <Compile Include="Helpers\ThemeExtension.cs" />
+    <Compile Include="Helpers\VisualTreeHelperExtension.cs" />
+    <Compile Include="Delegates\WeakDelegate.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModelBase.cs" />

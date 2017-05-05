@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Collections.Internal;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -32,7 +34,7 @@ namespace Opportunity.MvvmUniverse.Collections
         object IList.this[int index]
         {
             get => ((IList)Collection)[index];
-            set => Helpers.ThrowForReadOnlyCollection(Collection.ToString());
+            set => ThrowForReadOnlyCollection(Collection.ToString());
         }
 
         public int Count => Collection.Count;
@@ -58,9 +60,9 @@ namespace Opportunity.MvvmUniverse.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Collection).GetEnumerator();
 
-        int IList.Add(object value) => Helpers.ThrowForReadOnlyCollection<int>(Collection.ToString());
+        int IList.Add(object value) => ThrowForReadOnlyCollection<int>(Collection.ToString());
 
-        void IList.Clear() => Helpers.ThrowForReadOnlyCollection(Collection.ToString());
+        void IList.Clear() => ThrowForReadOnlyCollection(Collection.ToString());
 
         bool IList.Contains(object value) => ((IList)Collection).Contains(value);
 
@@ -68,20 +70,20 @@ namespace Opportunity.MvvmUniverse.Collections
 
         int IList.IndexOf(object value) => ((IList)Collection).IndexOf(value);
 
-        void IList.Insert(int index, object value) => Helpers.ThrowForReadOnlyCollection(Collection.ToString());
+        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Collection.ToString());
 
-        void IList.Remove(object value) => Helpers.ThrowForReadOnlyCollection(Collection.ToString());
+        void IList.Remove(object value) => ThrowForReadOnlyCollection(Collection.ToString());
 
-        void IList.RemoveAt(int index) => Helpers.ThrowForReadOnlyCollection(Collection.ToString());
+        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Collection.ToString());
 
-        void ICollection<T>.Add(T item) => Helpers.ThrowForReadOnlyCollection(Collection.ToString());
+        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(Collection.ToString());
 
-        void ICollection<T>.Clear() => Helpers.ThrowForReadOnlyCollection(Collection.ToString());
+        void ICollection<T>.Clear() => ThrowForReadOnlyCollection(Collection.ToString());
 
         public bool Contains(T item) => ((ICollection<T>)Collection).Contains(item);
 
         public void CopyTo(T[] array, int arrayIndex) => ((ICollection<T>)Collection).CopyTo(array, arrayIndex);
 
-        bool ICollection<T>.Remove(T item) => Helpers.ThrowForReadOnlyCollection<bool>(Collection.ToString());
+        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(Collection.ToString());
     }
 }

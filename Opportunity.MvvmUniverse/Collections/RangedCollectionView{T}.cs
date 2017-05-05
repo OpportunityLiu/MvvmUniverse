@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Collections.Internal;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -58,7 +60,7 @@ namespace Opportunity.MvvmUniverse.Collections
         object IList.this[int index]
         {
             get => this[index];
-            set => Helpers.ThrowForReadOnlyCollection(this.items.ToString());
+            set => ThrowForReadOnlyCollection(this.items.ToString());
         }
 
         public RangedCollectionViewEnumerator GetEnumerator()
@@ -70,9 +72,9 @@ namespace Opportunity.MvvmUniverse.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        int IList.Add(object value) => Helpers.ThrowForReadOnlyCollection<int>(this.items.ToString());
+        int IList.Add(object value) => ThrowForReadOnlyCollection<int>(this.items.ToString());
 
-        void IList.Clear() => Helpers.ThrowForReadOnlyCollection(this.items.ToString());
+        void IList.Clear() => ThrowForReadOnlyCollection(this.items.ToString());
 
         bool IList.Contains(object value)
         {
@@ -82,7 +84,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         int IList.IndexOf(object value)
         {
-            var v = Helpers.CastValue<T>(value);
+            var v = CastValue<T>(value);
             var c = EqualityComparer<T>.Default;
             for (var i = 0; i < Count; i++)
             {
@@ -92,11 +94,11 @@ namespace Opportunity.MvvmUniverse.Collections
             return -1;
         }
 
-        void IList.Insert(int index, object value) => Helpers.ThrowForReadOnlyCollection(this.items.ToString());
+        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(this.items.ToString());
 
-        void IList.Remove(object value) => Helpers.ThrowForReadOnlyCollection(this.items.ToString());
+        void IList.Remove(object value) => ThrowForReadOnlyCollection(this.items.ToString());
 
-        void IList.RemoveAt(int index) => Helpers.ThrowForReadOnlyCollection(this.items.ToString());
+        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(this.items.ToString());
 
         void ICollection.CopyTo(Array array, int index)
         {
@@ -110,9 +112,9 @@ namespace Opportunity.MvvmUniverse.Collections
             ((ICollection<T>)this).CopyTo(a, index);
         }
 
-        void ICollection<T>.Add(T item) => Helpers.ThrowForReadOnlyCollection(this.items.ToString());
+        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(this.items.ToString());
 
-        void ICollection<T>.Clear() => Helpers.ThrowForReadOnlyCollection(this.items.ToString());
+        void ICollection<T>.Clear() => ThrowForReadOnlyCollection(this.items.ToString());
 
         bool ICollection<T>.Contains(T item)
         {
@@ -138,7 +140,7 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
-        bool ICollection<T>.Remove(T item) => Helpers.ThrowForReadOnlyCollection<bool>(this.items.ToString());
+        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(this.items.ToString());
 
         public struct RangedCollectionViewEnumerator : IEnumerator<T>
         {

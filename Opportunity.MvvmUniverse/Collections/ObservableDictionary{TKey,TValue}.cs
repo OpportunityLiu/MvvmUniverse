@@ -1,4 +1,6 @@
-﻿using Opportunity.MvvmUniverse.Helpers;
+﻿using Opportunity.MvvmUniverse.Collections.Internal;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
+using Opportunity.MvvmUniverse.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -46,7 +48,7 @@ namespace Opportunity.MvvmUniverse.Collections
             if (index < 0 || index > KeySet.Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
             KeySet.Add(key, index);
-            var toInsert = Helpers.CreateKVP(key, value);
+            var toInsert = CreateKVP(key, value);
             Items.Add(toInsert);
             updateIndex(index + 1, Items.Count - index - 1);
             if (this.keys != null)
@@ -87,7 +89,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             var index = KeySet[key];
             var oldValue = Items[index];
-            var newValue = Helpers.CreateKVP(key, value);
+            var newValue = CreateKVP(key, value);
             Items[index] = newValue;
             if (this.keys != null)
             {
@@ -162,8 +164,8 @@ namespace Opportunity.MvvmUniverse.Collections
         }
         object IDictionary.this[object key]
         {
-            get => Items[KeySet[Helpers.CastKey<TKey>(key)]].Value;
-            set => insert(Helpers.CastKey<TKey>(key), Helpers.CastValue<TValue>(value));
+            get => Items[KeySet[CastKey<TKey>(key)]].Value;
+            set => insert(CastKey<TKey>(key), CastValue<TValue>(value));
         }
 
         KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[int index]
@@ -180,7 +182,7 @@ namespace Opportunity.MvvmUniverse.Collections
         object IList.this[int index]
         {
             get => ((IList<KeyValuePair<TKey, TValue>>)this)[index];
-            set => ((IList<KeyValuePair<TKey, TValue>>)this)[index] = Helpers.CastKVP<TKey, TValue>(value);
+            set => ((IList<KeyValuePair<TKey, TValue>>)this)[index] = CastKVP<TKey, TValue>(value);
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -289,9 +291,9 @@ namespace Opportunity.MvvmUniverse.Collections
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        void IDictionary.Add(object key, object value) => Add(Helpers.CastKey<TKey>(key), Helpers.CastValue<TValue>(value));
+        void IDictionary.Add(object key, object value) => Add(CastKey<TKey>(key), CastValue<TValue>(value));
 
-        bool IDictionary.Contains(object key) => ContainsKey(Helpers.CastKey<TKey>(key));
+        bool IDictionary.Contains(object key) => ContainsKey(CastKey<TKey>(key));
 
         private class DictionaryEnumerator : IDictionaryEnumerator
         {
@@ -320,7 +322,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         IDictionaryEnumerator IDictionary.GetEnumerator() => new DictionaryEnumerator(this);
 
-        void IDictionary.Remove(object key) => Remove(Helpers.CastKey<TKey>(key));
+        void IDictionary.Remove(object key) => Remove(CastKey<TKey>(key));
 
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
 
@@ -353,17 +355,17 @@ namespace Opportunity.MvvmUniverse.Collections
 
         int IList.Add(object value)
         {
-            ((IList<KeyValuePair<TKey, TValue>>)this).Add(Helpers.CastKVP<TKey, TValue>(value));
+            ((IList<KeyValuePair<TKey, TValue>>)this).Add(CastKVP<TKey, TValue>(value));
             return this.Count - 1;
         }
 
-        bool IList.Contains(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Contains(Helpers.CastKVP<TKey, TValue>(value));
+        bool IList.Contains(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Contains(CastKVP<TKey, TValue>(value));
 
-        int IList.IndexOf(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).IndexOf(Helpers.CastKVP<TKey, TValue>(value));
+        int IList.IndexOf(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).IndexOf(CastKVP<TKey, TValue>(value));
 
-        void IList.Insert(int index, object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Insert(index, Helpers.CastKVP<TKey, TValue>(value));
+        void IList.Insert(int index, object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Insert(index, CastKVP<TKey, TValue>(value));
 
-        void IList.Remove(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Remove(Helpers.CastKVP<TKey, TValue>(value));
+        void IList.Remove(object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Remove(CastKVP<TKey, TValue>(value));
 
         void IList.RemoveAt(int index) => ((IList<KeyValuePair<TKey, TValue>>)this).RemoveAt(index);
 

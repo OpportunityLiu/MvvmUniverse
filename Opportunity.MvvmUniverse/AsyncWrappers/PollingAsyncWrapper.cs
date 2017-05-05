@@ -3,7 +3,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 
-namespace Opportunity.MvvmUniverse.Helpers
+namespace Opportunity.MvvmUniverse.AsyncWrappers
 {
     public static class PollingAsyncWrapper
     {
@@ -51,11 +51,11 @@ namespace Opportunity.MvvmUniverse.Helpers
             switch (action.Status)
             {
             case AsyncStatus.Canceled:
-                return AsyncCanceledWrapper.Create();
+                return AsyncWrapper.CreateCanceled();
             case AsyncStatus.Completed:
-                return AsyncWrapper.Create();
+                return AsyncWrapper.CreateCompleted();
             case AsyncStatus.Error:
-                return AsyncErrorWrapper.Create(action.ErrorCode);
+                return AsyncWrapper.CreateError(action.ErrorCode);
             }
             return AsyncInfo.Run(async token =>
             {
@@ -121,11 +121,11 @@ namespace Opportunity.MvvmUniverse.Helpers
             switch (operation.Status)
             {
             case AsyncStatus.Canceled:
-                return AsyncCanceledWrapper.Create<T>();
+                return AsyncWrapper.CreateCanceled<T>();
             case AsyncStatus.Completed:
-                return AsyncWrapper.Create(operation.GetResults());
+                return AsyncWrapper.CreateCompleted(operation.GetResults());
             case AsyncStatus.Error:
-                return AsyncErrorWrapper.Create<T>(operation.ErrorCode);
+                return AsyncWrapper.CreateError<T>(operation.ErrorCode);
             }
             return AsyncInfo.Run(async token =>
             {

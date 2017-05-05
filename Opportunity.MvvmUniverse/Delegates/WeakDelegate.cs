@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace Opportunity.MvvmUniverse.Helpers
+namespace Opportunity.MvvmUniverse.Delegates
 {
     public class WeakDelegate
     {
