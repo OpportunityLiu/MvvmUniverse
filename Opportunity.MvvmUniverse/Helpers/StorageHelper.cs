@@ -14,13 +14,7 @@ namespace Windows.Storage
     /// </summary>
     public static class StorageHelper
     {
-        private readonly static StorageFolder localCache = ApplicationData.Current.LocalCacheFolder;
-        private readonly static StorageFolder localState = ApplicationData.Current.LocalFolder;
         private readonly static StorageFolder temp = ApplicationData.Current.TemporaryFolder;
-
-        public static StorageFolder LocalCache => localCache;
-        public static StorageFolder LocalState => localState;
-        public static StorageFolder Temporary => temp;
 
         public static IAsyncOperation<StorageItemThumbnail> GetIconOfExtension(string extension)
         {
@@ -50,11 +44,14 @@ namespace Windows.Storage
             return Run(async token => await folder.TryGetItemAsync(name) as StorageFolder);
         }
 
-        public static IAsyncOperation<StorageFile> SaveFileAsync(this StorageFolder folder, string fileName, IBuffer buffer)
+        public static IAsyncOperation<StorageFile> SaveFileAsync(this StorageFolder folder, string fileName, CreationCollisionOption options, IBuffer buffer)
         {
+            if (folder == null)
+                throw new ArgumentNullException(nameof(folder));
             return Run(async token =>
             {
-                var file = await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
+                fileName = ToValidFileName(fileName);
+                var file = await folder.CreateFileAsync(fileName, options);
                 await FileIO.WriteBufferAsync(file, buffer);
                 return file;
             });
@@ -62,7 +59,7 @@ namespace Windows.Storage
 
         public static IAsyncOperation<StorageFolder> CreateTempFolderAsync()
         {
-            return Temporary.CreateFolderAsync(DateTimeOffset.Now.Ticks.ToString());
+            return temp.CreateFolderAsync(ToValidFileName(null));
         }
 
         private static Dictionary<char, char> alternateFolderChars = new Dictionary<char, char>()
@@ -80,8 +77,10 @@ namespace Windows.Storage
 
         private static char[] invalidChars = Path.GetInvalidFileNameChars();
 
-        public static string ToValidFolderName(string raw)
+        public static string ToValidFileName(string raw)
         {
+            if (raw == null)
+                return DateTimeOffset.Now.Ticks.ToString();
             if (raw.IndexOfAny(invalidChars) == -1)
             {
                 if (string.IsNullOrWhiteSpace(raw))

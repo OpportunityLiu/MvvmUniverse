@@ -1,6 +1,6 @@
 ﻿namespace Windows.UI.Xaml
 {
-    internal static class ThemeExtension
+    public static class ThemeExtension
     {
         public static ElementTheme ToElementTheme(this ApplicationTheme value)
         {
