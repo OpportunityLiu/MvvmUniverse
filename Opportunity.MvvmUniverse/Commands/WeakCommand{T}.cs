@@ -23,6 +23,8 @@ namespace Opportunity.MvvmUniverse.Commands
         private readonly WeakAction<T> execute;
         private readonly WeakPredicate<T> canExecute;
 
+        public bool IsAlive => this.execute.IsAlive && (this.canExecute?.IsAlive == true);
+
         protected override bool CanExecuteOverride(T parameter)
         {
             if (this.canExecute == null)

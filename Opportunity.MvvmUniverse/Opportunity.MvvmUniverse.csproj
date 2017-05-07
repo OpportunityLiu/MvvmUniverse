@@ -133,6 +133,9 @@
     <Compile Include="Commands\WeakCommand.cs" />
     <Compile Include="Commands\WeakCommand{T}.cs" />
     <Compile Include="AsyncWrappers\AsyncWrapper.cs" />
+    <Compile Include="Delegates\WeakAction.cs" />
+    <Compile Include="Delegates\WeakFunc.cs" />
+    <Compile Include="Delegates\WeakPredicate.cs" />
     <Compile Include="DispatcherHelper.cs" />
     <Compile Include="Helpers\EnumExtension.cs" />
     <Compile Include="Helpers\Handle{T}.cs" />

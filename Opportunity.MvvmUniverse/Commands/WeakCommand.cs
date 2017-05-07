@@ -23,6 +23,8 @@ namespace Opportunity.MvvmUniverse.Commands
         private readonly WeakAction execute;
         private readonly WeakFunc<bool> canExecute;
 
+        public bool IsAlive => this.execute.IsAlive && (this.canExecute?.IsAlive == true);
+
         protected override bool CanExecuteOverride()
         {
             if (this.canExecute == null)
@@ -32,7 +34,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected override void ExecuteImpl()
         {
-                this.execute.Invoke();
+            this.execute.Invoke();
         }
     }
 }

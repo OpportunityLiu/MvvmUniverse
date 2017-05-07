@@ -20,9 +20,24 @@ namespace System
                 TUnderlyingType = Enum.GetUnderlyingType(TType);
                 var info = TType.GetTypeInfo();
                 IsFlag = info.GetCustomAttribute<FlagsAttribute>() != null;
-                Names = Enum.GetNames(TType);
-                Values = (T[])Enum.GetValues(TType);
-                UInt64Values = Values.Select(ToUInt64).ToArray();
+                var names = Enum.GetNames(TType);
+                var values = (T[])Enum.GetValues(TType);
+                var count = names.Length;
+                var query = from index in Enumerable.Range(0, count)
+                            let r = new { Name = names[index], Value = values[index], UInt64Value = ToUInt64(values[index]) }
+                            orderby r.UInt64Value
+                            select r;
+                Names = new string[count];
+                Values = new T[count];
+                UInt64Values = new ulong[count];
+                var i = 0;
+                foreach (var item in query)
+                {
+                    Names[i] = item.Name;
+                    Values[i] = item.Value;
+                    UInt64Values[i] = item.UInt64Value;
+                    i++;
+                }
             }
 
             public static readonly Type TType;
