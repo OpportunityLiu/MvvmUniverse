@@ -24,13 +24,22 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public IEqualityComparer<TKey> Comparer => KeySet.Comparer;
 
-        public ObservableDictionary() : this(EqualityComparer<TKey>.Default) { }
+        public ObservableDictionary() : this(null, EqualityComparer<TKey>.Default) { }
+        public ObservableDictionary(IEqualityComparer<TKey> comparer) : this(null, comparer) { }
+        public ObservableDictionary(IDictionary<TKey, TValue> dictionary) : this(dictionary, EqualityComparer<TKey>.Default) { }
 
-        public ObservableDictionary(IEqualityComparer<TKey> comparer)
+        public ObservableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
         {
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
             this.KeySet = new Dictionary<TKey, int>(comparer);
+            if (dictionary != null)
+            {
+                foreach (var item in dictionary)
+                {
+                    this.Add(item.Key, item.Value);
+                }
+            }
         }
 
         private void updateIndex(int startIndex, int length)
@@ -254,7 +263,7 @@ namespace Opportunity.MvvmUniverse.Collections
         private ObservableDictionaryView<TKey, TValue> readOnlyView;
 
         public ObservableDictionaryView<TKey, TValue> AsReadOnly()
-            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, () 
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ()
                 => new ObservableDictionaryView<TKey, TValue>(this));
 
         public bool TryGetValue(TKey key, out TValue value)

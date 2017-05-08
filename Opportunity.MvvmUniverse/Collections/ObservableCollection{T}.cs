@@ -18,9 +18,17 @@ namespace Opportunity.MvvmUniverse.Collections
     public class ObservableCollection<T> : ObservableCollectionBase, IList<T>, IReadOnlyList<T>, IList
     {
 
-        protected List<T> Items { get; } = new List<T>();
+        protected List<T> Items { get; }
 
-        public ObservableCollection() { }
+        public ObservableCollection() : this(null) { }
+
+        public ObservableCollection(IEnumerable<T> items)
+        {
+            if (items == null)
+                this.Items = new List<T>();
+            else
+                this.Items = new List<T>(items);
+        }
 
         protected virtual void InsertItem(int index, T item)
         {

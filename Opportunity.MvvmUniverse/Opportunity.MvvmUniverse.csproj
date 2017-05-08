@@ -147,6 +147,7 @@
     <Compile Include="Delegates\WeakDelegate.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\SettingCollection.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Compile Include="Views\FrameWrapper.cs" />
     <Compile Include="Views\INavigationHandler.cs" />
