@@ -92,40 +92,52 @@ namespace Opportunity.MvvmUniverse.Settings
 
         protected ApplicationDataContainer Container { get; }
 
-        protected T GetFromContainer<T>(T @default, [CallerMemberName]string key = null)
+        protected T GetFromContainer<T>(SettingProperty<T> property)
         {
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentNullException(nameof(key));
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
             try
             {
-                if (TryGetValue(key, out var v))
+                if (TryGetValue(property.Name, out var v))
                 {
-                    if (@default is Enum)
+                    if (property.DefaultValue is Enum)
                         return (T)Enum.Parse(typeof(T), v.ToString());
                     return (T)v;
                 }
             }
             catch { }
-            return @default;
+            return property.DefaultValue;
         }
 
-        protected bool SetToContainer<T>(T value, [CallerMemberName]string key = null)
+        protected bool SetToContainer<T>(SettingProperty<T> property, T value)
         {
-            if (ContainsKey(key) && EqualityComparer<T>.Default.Equals(GetFromContainer(value, key), value))
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+            var old = GetFromContainer(property);
+            if (ContainsKey(property.Name) && EqualityComparer<T>.Default.Equals(old, value))
+            {
                 return false;
-            ForceSetToContainer(value, key);
+            }
+            setToContainerCore(property, old, value);
             return true;
         }
 
-        protected void ForceSetToContainer<T>(T value, [CallerMemberName]string key = null)
+        protected void ForceSetToContainer<T>(SettingProperty<T> property, T value)
         {
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentNullException(nameof(key));
-            if (value is Enum)
-                this[key] = value.ToString();
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+            var old = GetFromContainer(property);
+            setToContainerCore(property, old, value);
+        }
+
+        private void setToContainerCore<T>(SettingProperty<T> property, T old, T value)
+        {
+            if (old is Enum)
+                this[property.Name] = value.ToString();
             else
-                this[key] = value;
-            RaisePropertyChanged(key);
+                this[property.Name] = value;
+            RaisePropertyChanged(property.Name);
+            property.RaisePropertyChanged(this, old, value);
         }
 
         protected override void InsertItem(string key, object value, int index)
