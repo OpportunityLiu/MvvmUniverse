@@ -6,7 +6,7 @@ using Windows.Storage;
 
 namespace Opportunity.MvvmUniverse.Settings
 {
-    public class SettingCollection : ObservableDictionary<string, object>
+    public class SettingCollection : ObservableObject
     {
         static SettingCollection()
         {
@@ -20,46 +20,20 @@ namespace Opportunity.MvvmUniverse.Settings
             {
                 if (item.TryGetTarget(out var target))
                 {
-                    target.Sync(true);
+                    target.RoamingDataChanged();
                 }
             }
+        }
+
+        protected virtual void RoamingDataChanged()
+        {
+            RaisePropertyChanged((string)null);
         }
 
         private static readonly List<WeakReference<SettingCollection>> roamingCollcetions
             = new List<WeakReference<SettingCollection>>();
 
-        protected void Sync(bool containerToCollection)
-        {
-            if (containerToCollection)
-            {
-                sync(this.Container.Values, this);
-            }
-            else
-            {
-                sync(this, this.Container.Values);
-            }
-        }
-
-        private static void sync(IDictionary<string, object> from, IDictionary<string, object> to)
-        {
-            var removeKeys = new List<string>();
-            foreach (var item in to.Keys)
-            {
-                if (!from.ContainsKey(item))
-                    removeKeys.Add(item);
-            }
-            foreach (var item in removeKeys)
-            {
-                to.Remove(item);
-            }
-            foreach (var item in from)
-            {
-                to[item.Key] = item.Value;
-            }
-        }
-
         public SettingCollection(ApplicationDataContainer container)
-            : base((container ?? throw new ArgumentNullException(nameof(container))).Values)
         {
             this.Container = container;
             if (container.Locality == ApplicationDataLocality.Roaming)
@@ -98,11 +72,9 @@ namespace Opportunity.MvvmUniverse.Settings
                 throw new ArgumentNullException(nameof(property));
             try
             {
-                if (TryGetValue(property.Name, out var v))
+                if (this.Container.Values.TryGetValue(property.Name, out var v))
                 {
-                    if (property.DefaultValue is Enum)
-                        return (T)Enum.Parse(typeof(T), v.ToString());
-                    return (T)v;
+                    return deserializeValue<T>(v);
                 }
             }
             catch { }
@@ -114,7 +86,7 @@ namespace Opportunity.MvvmUniverse.Settings
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
             var old = GetFromContainer(property);
-            if (ContainsKey(property.Name) && EqualityComparer<T>.Default.Equals(old, value))
+            if (this.Container.Values.ContainsKey(property.Name) && EqualityComparer<T>.Default.Equals(old, value))
             {
                 return false;
             }
@@ -132,36 +104,24 @@ namespace Opportunity.MvvmUniverse.Settings
 
         private void setToContainerCore<T>(SettingProperty<T> property, T old, T value)
         {
-            if (old is Enum)
-                this[property.Name] = value.ToString();
-            else
-                this[property.Name] = value;
+            this.Container.Values[property.Name] = serializeValue(value);
             RaisePropertyChanged(property.Name);
             property.RaisePropertyChanged(this, old, value);
         }
 
-        protected override void InsertItem(string key, object value, int index)
+        private static object serializeValue(object value)
         {
-            base.InsertItem(key, value, index);
-            Container.Values[key] = value;
+            if (value is Enum)
+                return value.ToString();
+            else
+                return value;
         }
 
-        protected override void SetItem(string key, object value)
+        private static T deserializeValue<T>(object value)
         {
-            base.SetItem(key, value);
-            Container.Values[key] = value;
-        }
-
-        protected override void RemoveItem(string key)
-        {
-            base.RemoveItem(key);
-            Container.Values.Remove(key);
-        }
-
-        protected override void ClearItems()
-        {
-            base.ClearItems();
-            Container.Values.Clear();
+            if (default(T) is Enum)
+                return (T)Enum.Parse(typeof(T), value.ToString());
+            return (T)value;
         }
     }
 }

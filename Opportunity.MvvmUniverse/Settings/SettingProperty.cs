@@ -9,6 +9,21 @@ namespace Opportunity.MvvmUniverse.Settings
 {
     public sealed class SettingProperty<T>
     {
+        public SettingProperty(string name, Type owner)
+            : this(name, owner, default(T), null)
+        {
+        }
+
+        public SettingProperty(string name, Type owner, T def)
+            : this(name, owner, def, null)
+        {
+        }
+
+        public SettingProperty(string name, Type owner, SettingPropertyChangedCallback<T> callback)
+            : this(name, owner, default(T), callback)
+        {
+        }
+
         public SettingProperty(string name, Type owner, T def, SettingPropertyChangedCallback<T> callback)
         {
             this.Name = name;
