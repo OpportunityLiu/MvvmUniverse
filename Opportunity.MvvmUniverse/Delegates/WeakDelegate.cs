@@ -9,6 +9,8 @@ namespace Opportunity.MvvmUniverse.Delegates
         {
             if (@delegate == null)
                 throw new ArgumentNullException(nameof(@delegate));
+            if (@delegate.GetInvocationList().Length > 1)
+                throw new NotSupportedException("Multicast delegate not supported.");
             if (@delegate.Target != null)
                 this.target = new WeakReference(@delegate.Target);
             this.method = @delegate.GetMethodInfo();
@@ -21,14 +23,23 @@ namespace Opportunity.MvvmUniverse.Delegates
 
         public object DynamicInvoke(params object[] parameters)
         {
-            if (!IsAlive)
-                return null;
-            return this.method.Invoke(this.target?.Target, parameters);
+            if (this.target == null)
+                return this.method.Invoke(null, parameters);
+            else
+            {
+                var tgtObj = this.target.Target;
+                if (tgtObj == null)
+                    throw new InvalidOperationException("Delegate is not alive.");
+                return this.method.Invoke(tgtObj, parameters);
+            }
         }
+    }
 
-        public TResult DynamicInvoke<TResult>(params object[] parameters)
+    internal static class WeakDelegateExtension
+    {
+        public static TResult DynamicInvoke<TResult>(this WeakDelegate that, params object[] parameters)
         {
-            var r = DynamicInvoke(parameters);
+            var r = that.DynamicInvoke(parameters);
             if (r is TResult res)
                 return res;
             return default(TResult);

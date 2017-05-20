@@ -3,9 +3,9 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.AsyncWrappers
 {
-    public sealed class AsyncWrapper<T> : IAsyncOperation<T>
+    internal sealed class AsyncOperationWrapper<T> : IAsyncOperation<T>
     {
-        internal AsyncWrapper(AsyncStatus status, T result, Exception error)
+        internal AsyncOperationWrapper(AsyncStatus status, T result, Exception error)
         {
             this.Status = status;
             this.result = result;
@@ -26,7 +26,7 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
 
         private AsyncOperationCompletedHandler<T> completed;
 
-        public Exception ErrorCode { get; }
+        public Exception ErrorCode { get; private set; }
 
         public uint Id => unchecked((uint)GetHashCode());
 
@@ -37,6 +37,8 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
         public void Close()
         {
             this.completed = null;
+            this.ErrorCode = null;
+            this.result = default(T);
         }
 
         public T GetResults()

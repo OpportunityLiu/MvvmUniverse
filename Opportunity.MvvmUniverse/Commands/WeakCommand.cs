@@ -27,6 +27,8 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected override bool CanExecuteOverride()
         {
+            if (!IsAlive)
+                return false;
             if (this.canExecute == null)
                 return true;
             return this.canExecute.Invoke();

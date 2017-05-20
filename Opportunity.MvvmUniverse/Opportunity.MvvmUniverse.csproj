@@ -107,8 +107,11 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncWrappers\AsyncWrapper-Create.cs" />
-    <Compile Include="AsyncWrappers\AsyncWrapper{T}.cs" />
+    <Compile Include="AsyncWrappers\AsyncActionWrapper{TProgress}.cs" />
+    <Compile Include="AsyncWrappers\AsyncActionWrapper.cs" />
+    <Compile Include="AsyncWrappers\AsyncWrapper.cs" />
+    <Compile Include="AsyncWrappers\AsyncOperationWrapper{T,TProgress}.cs" />
+    <Compile Include="AsyncWrappers\AsyncOperationWrapper{T}.cs" />
     <Compile Include="Collections\Internal\CollectionDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryKeyCollectionDebugView.cs" />
@@ -125,6 +128,10 @@
     <Compile Include="Collections\ObservableDictionary{TKey,TValue}.cs" />
     <Compile Include="Collections\ObservableCollectionBase.cs" />
     <Compile Include="Collections\RangedCollectionView{T}.cs" />
+    <Compile Include="Commands\WeakAsyncCommand.cs" />
+    <Compile Include="Commands\WeakAsyncCommand{T}.cs" />
+    <Compile Include="Commands\AsyncCommand{T}.cs" />
+    <Compile Include="Commands\AsyncCommand.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CommandBaseVoid.cs" />
     <Compile Include="Commands\CommandBase{T}.cs" />
@@ -132,13 +139,14 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\WeakCommand.cs" />
     <Compile Include="Commands\WeakCommand{T}.cs" />
-    <Compile Include="AsyncWrappers\AsyncWrapper.cs" />
+    <Compile Include="Delegates\AsyncAction.cs" />
+    <Compile Include="Delegates\WeakAsyncAction.cs" />
     <Compile Include="Delegates\WeakAction.cs" />
     <Compile Include="Delegates\WeakFunc.cs" />
     <Compile Include="Delegates\WeakPredicate.cs" />
+    <Compile Include="Delegates\WeakReferenceOfAttribute.cs" />
     <Compile Include="DispatcherHelper.cs" />
     <Compile Include="Helpers\EnumExtension.cs" />
-    <Compile Include="Helpers\Handle{T}.cs" />
     <Compile Include="AsyncWrappers\PollingAsyncWrapper.cs" />
     <Compile Include="Helpers\Predicates.cs" />
     <Compile Include="Helpers\StorageHelper.cs" />

@@ -16,8 +16,15 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
                 throw new ArgumentNullException(nameof(action));
             if (millisecondsCycle < 0)
                 throw new ArgumentOutOfRangeException(nameof(millisecondsCycle));
-            if (action.Status != AsyncStatus.Started)
-                return action;
+            switch(action.Status)
+            {
+            case AsyncStatus.Canceled:
+                return AsyncWrapper.CreateCanceled();
+            case AsyncStatus.Completed:
+                return AsyncWrapper.CreateCompleted();
+            case AsyncStatus.Error:
+                return AsyncWrapper.CreateError(action.ErrorCode);
+            }
             return AsyncInfo.Run(async token =>
             {
                 token.Register(action.Cancel);
@@ -87,8 +94,15 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
                 throw new ArgumentNullException(nameof(operation));
             if (millisecondsCycle < 0)
                 throw new ArgumentOutOfRangeException(nameof(millisecondsCycle));
-            if (operation.Status != AsyncStatus.Started)
-                return operation;
+            switch(operation.Status)
+            {
+            case AsyncStatus.Canceled:
+                return AsyncWrapper.CreateCanceled<T>();
+            case AsyncStatus.Completed:
+                return AsyncWrapper.CreateCompleted(operation.GetResults());
+            case AsyncStatus.Error:
+                return AsyncWrapper.CreateError<T>(operation.ErrorCode);
+            }
             return AsyncInfo.Run(async token =>
             {
                 token.Register(operation.Cancel);

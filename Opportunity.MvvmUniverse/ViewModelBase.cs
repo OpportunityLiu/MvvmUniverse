@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using Windows.ApplicationModel;
 
 namespace Opportunity.MvvmUniverse

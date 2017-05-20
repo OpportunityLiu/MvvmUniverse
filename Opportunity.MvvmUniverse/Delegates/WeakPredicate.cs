@@ -2,6 +2,7 @@
 
 namespace Opportunity.MvvmUniverse.Delegates
 {
+    [WeakReferenceOf(typeof(Predicate<>))]
     public sealed class WeakPredicate<T> : WeakDelegate
     {
         public WeakPredicate(Predicate<T> @delegate) : base(@delegate)

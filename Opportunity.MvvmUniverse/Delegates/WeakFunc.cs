@@ -2,6 +2,7 @@
 
 namespace Opportunity.MvvmUniverse.Delegates
 {
+    [WeakReferenceOf(typeof(Func<>))]
     public sealed class WeakFunc<TResult> : WeakDelegate
     {
         public WeakFunc(Func<TResult> @delegate) : base(@delegate)
@@ -14,6 +15,7 @@ namespace Opportunity.MvvmUniverse.Delegates
         }
     }
 
+    [WeakReferenceOf(typeof(Func<,>))]
     public sealed class WeakFunc<T, TResult> : WeakDelegate
     {
         public WeakFunc(Func<T, TResult> @delegate) : base(@delegate)

@@ -2,6 +2,7 @@
 
 namespace Opportunity.MvvmUniverse.Delegates
 {
+    [WeakReferenceOf(typeof(Action))]
     public sealed class WeakAction : WeakDelegate
     {
         public WeakAction(Action @delegate) : base(@delegate)
@@ -14,6 +15,7 @@ namespace Opportunity.MvvmUniverse.Delegates
         }
     }
 
+    [WeakReferenceOf(typeof(Action<>))]
     public sealed class WeakAction<T> : WeakDelegate
     {
         public WeakAction(Action<T> @delegate) : base(@delegate)
