@@ -11,13 +11,12 @@ namespace System
     public static class EnumExtension
     {
         private static class EnumExtentionCache<T>
-            where T : struct
+            where T : struct, IComparable, IFormattable, IConvertible
         {
             static EnumExtentionCache()
             {
                 TType = typeof(T);
-                TTypeCode = Convert.GetTypeCode(default(T));
-                TUnderlyingType = Enum.GetUnderlyingType(TType);
+                TTypeCode = default(T).GetTypeCode();
                 var info = TType.GetTypeInfo();
                 IsFlag = info.GetCustomAttribute<FlagsAttribute>() != null;
                 var names = Enum.GetNames(TType);
@@ -42,7 +41,6 @@ namespace System
 
             public static readonly Type TType;
             public static readonly TypeCode TTypeCode;
-            public static readonly Type TUnderlyingType;
             public static readonly bool IsFlag;
 
             public static readonly string[] Names;
@@ -56,21 +54,46 @@ namespace System
                 ulong result = 0;
                 switch (TTypeCode)
                 {
-                    case TypeCode.SByte:
-                    case TypeCode.Int16:
-                    case TypeCode.Int32:
-                    case TypeCode.Int64:
-                        result = (ulong)Convert.ToInt64(value, Globalization.CultureInfo.InvariantCulture);
-                        break;
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                    result = unchecked((ulong)Convert.ToInt64(value, Globalization.CultureInfo.InvariantCulture));
+                    break;
 
-                    case TypeCode.Byte:
-                    case TypeCode.UInt16:
-                    case TypeCode.UInt32:
-                    case TypeCode.UInt64:
-                    case TypeCode.Boolean:
-                    case TypeCode.Char:
-                        result = Convert.ToUInt64(value, Globalization.CultureInfo.InvariantCulture);
-                        break;
+                case TypeCode.Byte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Boolean:
+                case TypeCode.Char:
+                    result = Convert.ToUInt64(value, Globalization.CultureInfo.InvariantCulture);
+                    break;
+                }
+                return result;
+            }
+
+            public static T FromUInt64(ulong value)
+            {
+                var result = default(T);
+                switch (TTypeCode)
+                {
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                    var v = unchecked((long)value);
+                    result = (T)Convert.ChangeType(v, TTypeCode, Globalization.CultureInfo.InvariantCulture);
+                    break;
+
+                case TypeCode.Byte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Boolean:
+                case TypeCode.Char:
+                    result = (T)Convert.ChangeType(value, TType, Globalization.CultureInfo.InvariantCulture);
+                    break;
                 }
                 return result;
             }
@@ -148,26 +171,38 @@ namespace System
             }
         }
 
+        public static ulong ToUInt64<T>(this T that)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return EnumExtentionCache<T>.ToUInt64(that);
+        }
+
+        public static T ToEnum<T>(this ulong that)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return EnumExtentionCache<T>.FromUInt64(that);
+        }
+
         public static string ToFriendlyNameString<T>(this T that, Func<T, string> nameProvider)
-            where T : struct
+            where T : struct, IComparable, IFormattable, IConvertible
         {
             return EnumExtentionCache<T>.ToFriendlyNameString(that, nameProvider);
         }
 
         public static string ToFriendlyNameString<T>(this T that, Func<string, string> nameProvider)
-            where T : struct
+            where T : struct, IComparable, IFormattable, IConvertible
         {
             return EnumExtentionCache<T>.ToFriendlyNameString(that, nameProvider);
         }
 
         public static bool IsDefined<T>(this T that)
-            where T : struct
+            where T : struct, IComparable, IFormattable, IConvertible
         {
             return EnumExtentionCache<T>.GetIndex(that) >= 0;
         }
 
-        public static IEnumerable<KeyValuePair<string,T>> GetDefinedValues<T>()
-            where T : struct
+        public static IEnumerable<KeyValuePair<string, T>> GetDefinedValues<T>()
+            where T : struct, IComparable, IFormattable, IConvertible
         {
             var names = EnumExtentionCache<T>.Names;
             var values = EnumExtentionCache<T>.Values;
