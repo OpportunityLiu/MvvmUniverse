@@ -121,13 +121,34 @@ namespace Opportunity.MvvmUniverse
             var temp = PropertyChanged;
             if (temp == null)
                 return;
+            var args = new MultiPropertyChangedEventArgs(propertyNames);
             DispatcherHelper.BeginInvoke(() =>
             {
-                foreach (var item in propertyNames)
+                while (args.MoveNext())
                 {
-                    temp(this, new PropertyChangedEventArgs(item));
+                    temp(this, args);
                 }
             });
+        }
+
+        private class MultiPropertyChangedEventArgs : PropertyChangedEventArgs
+        {
+            public MultiPropertyChangedEventArgs(IEnumerable<string> propertyNames) : base(null)
+            {
+                this.enumrator = propertyNames.GetEnumerator();
+            }
+
+            private IEnumerator<string> enumrator;
+
+            public override string PropertyName => this.enumrator.Current;
+
+            public bool MoveNext()
+            {
+                if (this.enumrator.MoveNext())
+                    return true;
+                this.enumrator.Dispose();
+                return false;
+            }
         }
     }
 }
