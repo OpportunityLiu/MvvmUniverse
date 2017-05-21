@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Windows.Foundation;
 
-namespace Opportunity.MvvmUniverse.AsyncWrappers
+namespace Opportunity.MvvmUniverse.AsyncHelpers
 {
-    internal sealed class AsyncOperationWrapper<T> : IAsyncOperation<T>
+    internal sealed class CompletedAsyncOperation<T, TProgress> : IAsyncOperationWithProgress<T, TProgress>
     {
-        internal AsyncOperationWrapper(AsyncStatus status, T result, Exception error)
+        internal CompletedAsyncOperation(AsyncStatus status, T result, Exception error)
         {
             this.Status = status;
             this.result = result;
@@ -14,7 +18,7 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
 
         private T result;
 
-        public AsyncOperationCompletedHandler<T> Completed
+        public AsyncOperationWithProgressCompletedHandler<T, TProgress> Completed
         {
             get => this.completed;
             set
@@ -24,7 +28,7 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
             }
         }
 
-        private AsyncOperationCompletedHandler<T> completed;
+        private AsyncOperationWithProgressCompletedHandler<T, TProgress> completed;
 
         public Exception ErrorCode { get; private set; }
 
@@ -37,15 +41,18 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
         public void Close()
         {
             this.completed = null;
+            this.Progress = null;
             this.ErrorCode = null;
             this.result = default(T);
         }
 
         public T GetResults()
         {
-            if (this.ErrorCode != null)
+            if(this.ErrorCode != null)
                 throw new AggregateException(this.ErrorCode);
             return this.result;
         }
+
+        public AsyncOperationProgressHandler<T, TProgress> Progress { get; set; }
     }
 }

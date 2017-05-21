@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Windows.UI.Xaml.Data;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -13,6 +14,11 @@ namespace Opportunity.MvvmUniverse.Collections
     {
         public static RangedCollectionView<T> Empty { get; }
             = new RangedCollectionView<T>(Array.Empty<T>(), 0, 0);
+
+        public RangedCollectionView(IReadOnlyList<T> items, ItemIndexRange range)
+            : this(items, range.FirstIndex, (int)range.Length)
+        {
+        }
 
         public RangedCollectionView(IReadOnlyList<T> items, int startIndex, int count)
         {
@@ -41,6 +47,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public int Count { get; }
         public int StartIndex { get; }
+
+        public ItemIndexRange Range => new ItemIndexRange(StartIndex, (uint)Count);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IList.IsFixedSize => true;

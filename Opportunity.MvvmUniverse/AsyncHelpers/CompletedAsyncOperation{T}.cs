@@ -1,19 +1,22 @@
 ﻿using System;
 using Windows.Foundation;
 
-namespace Opportunity.MvvmUniverse.AsyncWrappers
+namespace Opportunity.MvvmUniverse.AsyncHelpers
 {
-    internal sealed class AsyncActionWrapper<TProgress> : IAsyncActionWithProgress<TProgress>
+    internal sealed class CompletedAsyncOperation<T> : IAsyncOperation<T>
     {
-        internal AsyncActionWrapper(AsyncStatus status, Exception error)
+        internal CompletedAsyncOperation(AsyncStatus status, T result, Exception error)
         {
             this.Status = status;
+            this.result = result;
             this.ErrorCode = error;
         }
 
-        public AsyncActionWithProgressCompletedHandler<TProgress> Completed
+        private T result;
+
+        public AsyncOperationCompletedHandler<T> Completed
         {
-            get => completed;
+            get => this.completed;
             set
             {
                 this.completed = value;
@@ -21,7 +24,7 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
             }
         }
 
-        private AsyncActionWithProgressCompletedHandler<TProgress> completed;
+        private AsyncOperationCompletedHandler<T> completed;
 
         public Exception ErrorCode { get; private set; }
 
@@ -35,15 +38,14 @@ namespace Opportunity.MvvmUniverse.AsyncWrappers
         {
             this.completed = null;
             this.ErrorCode = null;
-            this.Progress = null;
+            this.result = default(T);
         }
 
-        public void GetResults()
+        public T GetResults()
         {
             if (this.ErrorCode != null)
                 throw new AggregateException(this.ErrorCode);
+            return this.result;
         }
-
-        public AsyncActionProgressHandler<TProgress> Progress { get ; set; }
     }
 }

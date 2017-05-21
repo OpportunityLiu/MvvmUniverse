@@ -107,11 +107,16 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncWrappers\AsyncActionWrapper{TProgress}.cs" />
-    <Compile Include="AsyncWrappers\AsyncActionWrapper.cs" />
-    <Compile Include="AsyncWrappers\AsyncWrapper.cs" />
-    <Compile Include="AsyncWrappers\AsyncOperationWrapper{T,TProgress}.cs" />
-    <Compile Include="AsyncWrappers\AsyncOperationWrapper{T}.cs" />
+    <Compile Include="AsyncHelpers\AsyncWrapper.cs" />
+    <Compile Include="AsyncHelpers\CompletedAsyncAction.cs" />
+    <Compile Include="AsyncHelpers\CompletedAsyncAction{TProgress}.cs" />
+    <Compile Include="AsyncHelpers\CompletedAsyncOperation{T,TProgress}.cs" />
+    <Compile Include="AsyncHelpers\CompletedAsyncOperation{T}.cs" />
+    <Compile Include="AsyncHelpers\MulticastAsyncAction.cs" />
+    <Compile Include="AsyncHelpers\MulticastAsyncAction{TProgress}.cs" />
+    <Compile Include="AsyncHelpers\MulticastAsyncOperation{T,TProgress}.cs" />
+    <Compile Include="AsyncHelpers\MulticastAsyncOperation{T}.cs" />
+    <Compile Include="AsyncHelpers\MulticastExtension.cs" />
     <Compile Include="Collections\Internal\CollectionDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryKeyCollectionDebugView.cs" />
@@ -147,7 +152,7 @@
     <Compile Include="Delegates\WeakReferenceOfAttribute.cs" />
     <Compile Include="DispatcherHelper.cs" />
     <Compile Include="Helpers\EnumExtension.cs" />
-    <Compile Include="AsyncWrappers\PollingAsyncWrapper.cs" />
+    <Compile Include="AsyncHelpers\PollingAsyncWrapper.cs" />
     <Compile Include="Helpers\Predicates.cs" />
     <Compile Include="Helpers\StorageHelper.cs" />
     <Compile Include="Helpers\ThemeExtension.cs" />

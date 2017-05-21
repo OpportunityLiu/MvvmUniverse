@@ -3,7 +3,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 
-namespace Opportunity.MvvmUniverse.AsyncWrappers
+namespace Opportunity.MvvmUniverse.AsyncHelpers
 {
     public static class PollingAsyncWrapper
     {
