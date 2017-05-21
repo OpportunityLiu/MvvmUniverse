@@ -17,8 +17,8 @@ namespace Opportunity.MvvmUniverse.Commands
             get => this.isEnabled;
             set
             {
-                Set(ref this.isEnabled, value);
-                RaiseCanExecuteChanged();
+                if (Set(ref this.isEnabled, value))
+                    RaiseCanExecuteChanged();
             }
         }
 
@@ -26,7 +26,7 @@ namespace Opportunity.MvvmUniverse.Commands
         public object Tag
         {
             get => this.tag;
-            set => Set(ref this.tag, value);
+            set => ForceSet(ref this.tag, value);
         }
 
         public void RaiseCanExecuteChanged()

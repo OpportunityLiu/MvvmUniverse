@@ -28,7 +28,11 @@ namespace Opportunity.MvvmUniverse.Commands
         public bool Executing
         {
             get => this.executing;
-            protected set => Set(ref this.executing, value);
+            protected set
+            {
+                if (Set(ref this.executing, value))
+                    RaiseCanExecuteChanged();
+            }
         }
 
         protected override bool CanExecuteOverride(T parameter)

@@ -10,7 +10,7 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public abstract class CommandBase<T> : CommandBase, ICommand
     {
-        protected static T Cast(object obj)
+        private static T Cast(object obj)
         {
             if (obj is T p)
                 return p;
