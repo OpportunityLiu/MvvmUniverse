@@ -29,7 +29,7 @@ namespace Opportunity.MvvmUniverse.Collections
             protected set => Set(nameof(HasMoreItems), ref this.pageCount, value);
         }
 
-        protected abstract IAsyncOperation<IReadOnlyList<T>> LoadPageAsync(int pageIndex);
+        protected abstract IAsyncOperation<IList<T>> LoadPageAsync(int pageIndex);
 
         public bool IsEmpty => this.RecordCount == 0;
 
@@ -47,8 +47,8 @@ namespace Opportunity.MvvmUniverse.Collections
             this.loadedPageCount = 0;
             this.pageCount = 0;
             this.recordCount = 0;
-            RaisePropertyChanged(nameof(LoadedPageCount), nameof(PageCount), nameof(RecordCount), nameof(IsEmpty), nameof(HasMoreItems));
             Clear();
+            RaisePropertyChanged(nameof(LoadedPageCount), nameof(PageCount), nameof(RecordCount), nameof(IsEmpty), nameof(HasMoreItems));
         }
 
         private IAsyncOperation<LoadMoreItemsResult> loading;
@@ -64,15 +64,12 @@ namespace Opportunity.MvvmUniverse.Collections
                 if (!this.HasMoreItems)
                     return new LoadMoreItemsResult();
                 var lp = LoadPageAsync(this.loadedPageCount);
-                IReadOnlyList<T> re = null;
+                IList<T> re = null;
                 token.Register(lp.Cancel);
                 try
                 {
                     re = await lp;
-                    foreach (var item in re)
-                    {
-                        this.Add(item);
-                    }
+                    this.AddRange(re);
                     this.LoadedPageCount++;
                 }
                 catch (Exception ex)
