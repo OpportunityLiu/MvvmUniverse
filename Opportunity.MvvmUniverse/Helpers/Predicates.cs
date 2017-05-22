@@ -7,11 +7,13 @@ namespace Opportunity.MvvmUniverse.Helpers
     public static class Predicates
     {
         public static Predicate<TSource> NotNull<TSource>()
+            where TSource : class
         {
             return obj => obj != null;
         }
 
         public static Predicate<TSource> SelectNotNull<TSource, TResult>(Func<TSource, TResult> selector)
+            where TResult : class
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));

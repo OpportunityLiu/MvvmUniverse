@@ -10,12 +10,31 @@ namespace Opportunity.MvvmUniverse.AsyncHelpers
     public static class MulticastExtension
     {
         public static MulticastAsyncAction AsMulticast(this IAsyncAction action)
-            => new MulticastAsyncAction(action);
+        {
+            if (action is MulticastAsyncAction mu)
+                return mu;
+            return new MulticastAsyncAction(action);
+        }
+
         public static MulticastAsyncAction<TProgress> AsMulticast<TProgress>(this IAsyncActionWithProgress<TProgress> action)
-            => new MulticastAsyncAction<TProgress>(action);
+        {
+            if (action is MulticastAsyncAction<TProgress> mu)
+                return mu;
+            return new MulticastAsyncAction<TProgress>(action);
+        }
+
         public static MulticastAsyncOperation<T> AsMulticast<T>(this IAsyncOperation<T> operation)
-            => new MulticastAsyncOperation<T>(operation);
+        {
+            if (operation is MulticastAsyncOperation<T> mu)
+                return mu;
+            return new MulticastAsyncOperation<T>(operation);
+        }
+
         public static MulticastAsyncOperation<T, TProgress> AsMulticast<T, TProgress>(this IAsyncOperationWithProgress<T, TProgress> operation)
-            => new MulticastAsyncOperation<T, TProgress>(operation);
+        {
+            if (operation is MulticastAsyncOperation<T, TProgress> mu)
+                return mu;
+            return new MulticastAsyncOperation<T, TProgress>(operation);
+        }
     }
 }

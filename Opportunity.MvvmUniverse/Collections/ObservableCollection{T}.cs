@@ -24,6 +24,13 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.Items = new List<T>(items);
         }
 
+        protected virtual void InsertItem(int index, T item)
+        {
+            Items.Insert(index, item);
+            RaisePropertyChanged(nameof(Count));
+            RaiseCollectionAdd(item, index);
+        }
+
         protected virtual void InsertItems(int index, IList<T> items)
         {
             if (items == null || items.Count <= 0)
@@ -31,6 +38,14 @@ namespace Opportunity.MvvmUniverse.Collections
             Items.InsertRange(index, items);
             RaisePropertyChanged(nameof(Count));
             RaiseCollectionAdd(CastView(items), index);
+        }
+
+        protected virtual void RemoveItem(int index)
+        {
+            var removed = Items[index];
+            Items.RemoveAt(index);
+            RaisePropertyChanged(nameof(Count));
+            RaiseCollectionRemove(removed, index);
         }
 
         protected virtual void RemoveItems(int index, int count)
@@ -42,6 +57,13 @@ namespace Opportunity.MvvmUniverse.Collections
             Items.RemoveRange(index, count);
             RaisePropertyChanged(nameof(Count));
             RaiseCollectionRemove(removedItems, index);
+        }
+
+        protected virtual void SetItem(int index, T item)
+        {
+            var old = Items[index];
+            Items[index] = item;
+            RaiseCollectionReplace(item, old, index);
         }
 
         protected virtual void SetItems(int index, IList<T> items)
@@ -62,6 +84,16 @@ namespace Opportunity.MvvmUniverse.Collections
             RaiseCollectionReplace(CastView(items), oldItems, index);
         }
 
+        protected virtual void MoveItem(int oldIndex, int newIndex)
+        {
+            if (oldIndex == newIndex)
+                return;
+            var itemToMove = this[oldIndex];
+            Items.RemoveAt(oldIndex);
+            Items.Insert(newIndex, itemToMove);
+            RaiseCollectionMove(itemToMove, newIndex, oldIndex);
+        }
+
         protected virtual void MoveItems(int oldIndex, int newIndex, int count)
         {
             if (oldIndex == newIndex || count <= 0)
@@ -71,6 +103,13 @@ namespace Opportunity.MvvmUniverse.Collections
             Items.RemoveRange(oldIndex, count);
             Items.InsertRange(newIndex, itemsToMove);
             RaiseCollectionMove(itemsToMove, newIndex, oldIndex);
+        }
+
+        protected virtual void ClearItems()
+        {
+            Items.Clear();
+            RaisePropertyChanged(nameof(Count));
+            RaiseCollectionReset();
         }
 
         public int Count => Items.Count;
@@ -93,7 +132,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public T this[int index]
         {
             get => Items[index];
-            set => SetItems(index, new[] { value });
+            set => SetItem(index, value);
         }
 
         object IList.this[int index]
@@ -106,23 +145,23 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public int IndexOf(T item) => Items.IndexOf(item);
 
-        public void Insert(int index, T item) => InsertItems(index, new[] { item });
+        public void Insert(int index, T item) => InsertItem(index, item);
 
         public void InsertRange(int index, IList<T> items) => InsertItems(index, items);
 
-        public void RemoveAt(int index) => RemoveItems(index, 1);
+        public void RemoveAt(int index) => RemoveItem(index);
 
         public void RemoveRange(int index, int count) => RemoveItems(index, count);
 
-        public void Add(T item) => InsertItems(Items.Count, new[] { item });
+        public void Add(T item) => InsertItem(Items.Count, item);
 
         public void AddRange(IList<T> items) => InsertItems(Items.Count, items);
 
-        public void Move(int oldIndex, int newIndex) => MoveItems(oldIndex, newIndex, 1);
+        public void Move(int oldIndex, int newIndex) => MoveItem(oldIndex, newIndex);
 
         public void MoveRange(int oldIndex, int newIndex, int count) => MoveItems(oldIndex, newIndex, count);
 
-        public void Clear() => RemoveItems(0, Items.Count);
+        public void Clear() => ClearItems();
 
         public bool Contains(T item) => Items.Contains(item);
 
