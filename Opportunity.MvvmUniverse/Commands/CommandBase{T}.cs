@@ -37,7 +37,14 @@ namespace Opportunity.MvvmUniverse.Commands
             DispatcherHelper.BeginInvoke(() => temp(this, EventArgs.Empty));
         }
 
-        bool ICommand.CanExecute(object parameter) => CanExecute((T)parameter);
+        bool ICommand.CanExecute(object parameter) => CanExecute(cast(parameter));
+
+        private static T cast(object parameter)
+        {
+            if (default(T) != null && parameter == null)
+                return default(T);
+            return (T)parameter;
+        }
 
         public bool CanExecute(T parameter)
         {
@@ -48,7 +55,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected virtual bool CanExecuteOverride(T parameter) => true;
 
-        void ICommand.Execute(object parameter) => Execute((T)parameter);
+        void ICommand.Execute(object parameter) => Execute(cast(parameter));
 
         public bool Execute(T parameter)
         {
