@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class WeakAsyncCommand : CommandBaseVoid
+    public class WeakAsyncCommand : CommandBase
     {
         public WeakAsyncCommand(WeakAsyncAction execute, WeakFunc<bool> canExecute)
         {

@@ -108,6 +108,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncHelpers\AsyncWrapper.cs" />
+    <Compile Include="AsyncHelpers\CastAcyncOperation.cs" />
+    <Compile Include="AsyncHelpers\CastAcyncOperation1.cs" />
+    <Compile Include="AsyncHelpers\CastExtension.cs" />
     <Compile Include="AsyncHelpers\CompletedAsyncAction.cs" />
     <Compile Include="AsyncHelpers\CompletedAsyncAction{TProgress}.cs" />
     <Compile Include="AsyncHelpers\CompletedAsyncOperation{T,TProgress}.cs" />
@@ -133,15 +136,14 @@
     <Compile Include="Collections\ObservableDictionary{TKey,TValue}.cs" />
     <Compile Include="Collections\ObservableCollectionBase.cs" />
     <Compile Include="Collections\RangedCollectionView{T}.cs" />
+    <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\WeakAsyncCommand.cs" />
     <Compile Include="Commands\WeakAsyncCommand{T}.cs" />
     <Compile Include="Commands\AsyncCommand{T}.cs" />
     <Compile Include="Commands\AsyncCommand.cs" />
     <Compile Include="Commands\Command.cs" />
-    <Compile Include="Commands\CommandBaseVoid.cs" />
     <Compile Include="Commands\CommandBase{T}.cs" />
     <Compile Include="Commands\Command{T}.cs" />
-    <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\WeakCommand.cs" />
     <Compile Include="Commands\WeakCommand{T}.cs" />
     <Compile Include="Delegates\AsyncAction.cs" />
@@ -153,7 +155,6 @@
     <Compile Include="DispatcherHelper.cs" />
     <Compile Include="Helpers\EnumExtension.cs" />
     <Compile Include="AsyncHelpers\PollingAsyncWrapper.cs" />
-    <Compile Include="Helpers\Predicates.cs" />
     <Compile Include="Helpers\StorageHelper.cs" />
     <Compile Include="Helpers\ThemeExtension.cs" />
     <Compile Include="Helpers\VisualTreeHelperExtension.cs" />

@@ -1,10 +1,9 @@
-﻿using Opportunity.MvvmUniverse.Helpers;
-using System;
+﻿using System;
 using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class Command : CommandBaseVoid
+    public class Command : CommandBase
     {
         public Command(Action execute, Func<bool> canExecute)
         {

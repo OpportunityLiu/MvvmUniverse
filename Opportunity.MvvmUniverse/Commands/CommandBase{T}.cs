@@ -4,21 +4,40 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Opportunity.MvvmUniverse.Helpers;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public abstract class CommandBase<T> : CommandBase, ICommand
+    public abstract class CommandBase<T> : ObservableObject, ICommand
     {
-        private static T Cast(object obj)
+        public event EventHandler CanExecuteChanged;
+
+        private bool isEnabled = true;
+        public bool IsEnabled
         {
-            if (obj is T p)
-                return p;
-            else 
-                return default(T);
+            get => this.isEnabled;
+            set
+            {
+                if (Set(ref this.isEnabled, value))
+                    RaiseCanExecuteChanged();
+            }
         }
 
-        bool ICommand.CanExecute(object parameter) => CanExecute(Cast(parameter));
+        private object tag;
+        public object Tag
+        {
+            get => this.tag;
+            set => ForceSet(ref this.tag, value);
+        }
+
+        public void RaiseCanExecuteChanged()
+        {
+            var temp = CanExecuteChanged;
+            if (temp == null)
+                return;
+            DispatcherHelper.BeginInvoke(() => temp(this, EventArgs.Empty));
+        }
+
+        bool ICommand.CanExecute(object parameter) => CanExecute((T)parameter);
 
         public bool CanExecute(T parameter)
         {
@@ -29,7 +48,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected virtual bool CanExecuteOverride(T parameter) => true;
 
-        void ICommand.Execute(object parameter) => Execute(Cast(parameter));
+        void ICommand.Execute(object parameter) => Execute((T)parameter);
 
         public bool Execute(T parameter)
         {

@@ -111,8 +111,8 @@ namespace Opportunity.MvvmUniverse.Settings
 
         private static object serializeValue(object value)
         {
-            if (value is Enum)
-                return value.ToString();
+            if (value is Enum e)
+                return e.ToUInt64();
             else
                 return value;
         }
@@ -120,7 +120,7 @@ namespace Opportunity.MvvmUniverse.Settings
         private static T deserializeValue<T>(object value)
         {
             if (default(T) is Enum)
-                return (T)Enum.Parse(typeof(T), value.ToString());
+                return ((ulong)value).ToEnum<T>();
             return (T)value;
         }
     }

@@ -11,12 +11,11 @@ namespace System
     public static class EnumExtension
     {
         private static class EnumExtentionCache<T>
-            where T : struct, IComparable, IFormattable, IConvertible
         {
             static EnumExtentionCache()
             {
                 TType = typeof(T);
-                TTypeCode = default(T).GetTypeCode();
+                TTypeCode = ((IConvertible)default(T)).GetTypeCode();
                 var info = TType.GetTypeInfo();
                 IsFlag = info.GetCustomAttribute<FlagsAttribute>() != null;
                 var names = Enum.GetNames(TType);
@@ -51,15 +50,13 @@ namespace System
 
             public static ulong ToUInt64(T value)
             {
-                ulong result = 0;
                 switch (TTypeCode)
                 {
                 case TypeCode.SByte:
                 case TypeCode.Int16:
                 case TypeCode.Int32:
                 case TypeCode.Int64:
-                    result = unchecked((ulong)Convert.ToInt64(value, Globalization.CultureInfo.InvariantCulture));
-                    break;
+                    return unchecked((ulong)Convert.ToInt64(value, Globalization.CultureInfo.InvariantCulture));
 
                 case TypeCode.Byte:
                 case TypeCode.UInt16:
@@ -67,10 +64,9 @@ namespace System
                 case TypeCode.UInt64:
                 case TypeCode.Boolean:
                 case TypeCode.Char:
-                    result = Convert.ToUInt64(value, Globalization.CultureInfo.InvariantCulture);
-                    break;
+                    return Convert.ToUInt64(value, Globalization.CultureInfo.InvariantCulture);
                 }
-                return result;
+                throw new ArgumentException();
             }
 
             public static T FromUInt64(ulong value)
@@ -171,16 +167,31 @@ namespace System
             }
         }
 
-        public static ulong ToUInt64<T>(this T that)
-            where T : struct, IComparable, IFormattable, IConvertible
+        public static ulong ToUInt64(this Enum that)
         {
-            return EnumExtentionCache<T>.ToUInt64(that);
+            var c = (IConvertible)that;
+            switch (c.GetTypeCode())
+            {
+            case TypeCode.SByte:
+            case TypeCode.Int16:
+            case TypeCode.Int32:
+            case TypeCode.Int64:
+                return unchecked((ulong)c.ToInt64(Globalization.CultureInfo.InvariantCulture));
+
+            case TypeCode.Byte:
+            case TypeCode.UInt16:
+            case TypeCode.UInt32:
+            case TypeCode.UInt64:
+            case TypeCode.Boolean:
+            case TypeCode.Char:
+                return c.ToUInt64(Globalization.CultureInfo.InvariantCulture);
+            }
+            throw new ArgumentException("Can't convert.");
         }
 
         public static T ToEnum<T>(this ulong that)
-            where T : struct, IComparable, IFormattable, IConvertible
         {
-            return EnumExtentionCache<T>.FromUInt64(that);
+            return (T)Enum.ToObject(typeof(T), that);
         }
 
         public static string ToFriendlyNameString<T>(this T that, Func<T, string> nameProvider)

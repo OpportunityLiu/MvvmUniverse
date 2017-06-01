@@ -1,11 +1,10 @@
 ﻿using Opportunity.MvvmUniverse.Delegates;
-using Opportunity.MvvmUniverse.Helpers;
 using System;
 using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class WeakCommand : CommandBaseVoid
+    public class WeakCommand : CommandBase
     {
         public WeakCommand(Action execute, Func<bool> canExecute)
         {

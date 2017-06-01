@@ -8,7 +8,6 @@ using Windows.UI.Xaml;
 using Opportunity.MvvmUniverse.Collections;
 using System;
 using System.Collections.Specialized;
-using Opportunity.MvvmUniverse.Helpers;
 
 namespace Opportunity.MvvmUniverse.Views
 {

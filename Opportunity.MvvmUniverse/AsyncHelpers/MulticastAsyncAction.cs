@@ -7,7 +7,7 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.AsyncHelpers
 {
-    public sealed class MulticastAsyncAction : IAsyncAction
+    internal sealed class MulticastAsyncAction : IAsyncAction
     {
         private IAsyncAction action;
 

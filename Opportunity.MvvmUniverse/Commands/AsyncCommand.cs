@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class AsyncCommand : CommandBaseVoid
+    public class AsyncCommand : CommandBase
     {
         public AsyncCommand(AsyncAction execute, Func<bool> canExecute)
         {

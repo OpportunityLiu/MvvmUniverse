@@ -7,7 +7,7 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.AsyncHelpers
 {
-    public sealed class MulticastAsyncOperation<T, TProgress> : IAsyncOperationWithProgress<T, TProgress>
+    internal sealed class MulticastAsyncOperation<T, TProgress> : IAsyncOperationWithProgress<T, TProgress>
     {
         private IAsyncOperationWithProgress<T, TProgress> action;
 
