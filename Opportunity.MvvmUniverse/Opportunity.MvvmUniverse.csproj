@@ -108,8 +108,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncHelpers\AsyncWrapper.cs" />
-    <Compile Include="AsyncHelpers\CastAcyncOperation.cs" />
-    <Compile Include="AsyncHelpers\CastAcyncOperation1.cs" />
+    <Compile Include="AsyncHelpers\CastAcyncOperation{TFrom,TTo}.cs" />
+    <Compile Include="AsyncHelpers\CastAcyncOperation{TFrom,TTo,TProgress}.cs" />
     <Compile Include="AsyncHelpers\CastExtension.cs" />
     <Compile Include="AsyncHelpers\CompletedAsyncAction.cs" />
     <Compile Include="AsyncHelpers\CompletedAsyncAction{TProgress}.cs" />
