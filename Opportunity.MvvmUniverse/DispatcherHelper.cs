@@ -23,14 +23,24 @@ namespace Opportunity.MvvmUniverse
 
         private static CoreDispatcher dispatcher;
 
-        public static void Init()
+        public static bool Initialized => dispatcher != null;
+
+        public static CoreDispatcher Dispatcher => dispatcher;
+
+        public static bool Initialize()
         {
             dispatcher = Window.Current?.Dispatcher;
+            return dispatcher != null;
         }
 
-        public static void Init(CoreDispatcher dispatcher)
+        public static void Initialize(CoreDispatcher dispatcher)
         {
-            DispatcherHelper.dispatcher = dispatcher;
+            DispatcherHelper.dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        }
+
+        public static void Uninitialize()
+        {
+            dispatcher = null;
         }
 
         public static bool UseForNotification { get; set; } = false;
@@ -45,7 +55,7 @@ namespace Opportunity.MvvmUniverse
 
         public static void BeginInvokeOnUIThread(DispatchedHandler action)
         {
-            if (dispatcher == null || dispatcher.HasThreadAccess)
+            if (dispatcher == null)
             {
                 action();
                 return;
@@ -57,8 +67,11 @@ namespace Opportunity.MvvmUniverse
         {
             if (UseForNotification)
                 return RunAsyncOnUIThread(action);
-            action();
-            return AsyncWrapper.CreateCompleted();
+            else
+            {
+                action();
+                return AsyncWrapper.CreateCompleted();
+            }
         }
 
         public static IAsyncAction RunAsyncOnUIThread(DispatchedHandler action)
