@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -21,26 +22,24 @@ namespace Opportunity.MvvmUniverse
             return ApplicationView.GetApplicationViewIdForWindow(window.CoreWindow);
         }
 
-        private static CoreDispatcher dispatcher;
+        public static bool Initialized => Dispatcher != null;
 
-        public static bool Initialized => dispatcher != null;
-
-        public static CoreDispatcher Dispatcher => dispatcher;
+        public static CoreDispatcher Dispatcher { get; private set; }
 
         public static bool Initialize()
         {
-            dispatcher = Window.Current?.Dispatcher;
-            return dispatcher != null;
+            Dispatcher = Window.Current?.Dispatcher;
+            return Initialized;
         }
 
         public static void Initialize(CoreDispatcher dispatcher)
         {
-            DispatcherHelper.dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+            Dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         }
 
         public static void Uninitialize()
         {
-            dispatcher = null;
+            Dispatcher = null;
         }
 
         public static bool UseForNotification { get; set; } = false;
@@ -55,12 +54,12 @@ namespace Opportunity.MvvmUniverse
 
         public static void BeginInvokeOnUIThread(DispatchedHandler action)
         {
-            if (dispatcher == null)
+            if (Dispatcher == null)
             {
                 action();
                 return;
             }
-            var task = dispatcher.RunAsync(CoreDispatcherPriority.Normal, action);
+            Dispatcher.Begin(action, CoreDispatcherPriority.Normal);
         }
 
         public static IAsyncAction RunAsync(DispatchedHandler action)
@@ -76,12 +75,27 @@ namespace Opportunity.MvvmUniverse
 
         public static IAsyncAction RunAsyncOnUIThread(DispatchedHandler action)
         {
-            if (dispatcher == null || dispatcher.HasThreadAccess)
+            if (Dispatcher == null || Dispatcher.HasThreadAccess)
             {
                 action();
                 return AsyncWrapper.CreateCompleted();
             }
-            return dispatcher.RunAsync(CoreDispatcherPriority.Normal, action);
+            return Dispatcher.RunAsync(CoreDispatcherPriority.Normal, action);
+        }
+
+        public static DispatcherAwaiterSource Yield()
+        {
+            return new DispatcherAwaiterSource(Dispatcher, CoreDispatcherPriority.Normal);
+        }
+
+        public static DispatcherAwaiterSource Yield(CoreDispatcherPriority priority)
+        {
+            return new DispatcherAwaiterSource(Dispatcher, priority);
+        }
+
+        public static DispatcherAwaiterSource YieldIdle()
+        {
+            return new DispatcherAwaiterSource(Dispatcher, CoreDispatcherPriority.Idle);
         }
     }
 }
