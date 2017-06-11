@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class Command : CommandBase
+    public sealed class Command : CommandBase
     {
         public Command(Action execute, Func<bool> canExecute)
         {

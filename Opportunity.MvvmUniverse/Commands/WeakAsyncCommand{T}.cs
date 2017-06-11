@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class WeakAsyncCommand<T> : CommandBase<T>
+    public sealed class WeakAsyncCommand<T> : CommandBase<T>
     {
         public WeakAsyncCommand(WeakAsyncAction<T> execute, WeakPredicate<T> canExecute)
         {
@@ -28,7 +28,7 @@ namespace Opportunity.MvvmUniverse.Commands
         public bool Executing
         {
             get => this.executing;
-            protected set
+            private set
             {
                 if (Set(ref this.executing, value))
                     RaiseCanExecuteChanged();

@@ -130,7 +130,7 @@ namespace Opportunity.MvvmUniverse
             });
         }
 
-        private class MultiPropertyChangedEventArgs : PropertyChangedEventArgs
+        private sealed class MultiPropertyChangedEventArgs : PropertyChangedEventArgs
         {
             public MultiPropertyChangedEventArgs(IEnumerable<string> propertyNames) : base(null)
             {

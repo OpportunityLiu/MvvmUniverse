@@ -153,6 +153,7 @@
     <Compile Include="Delegates\WeakPredicate.cs" />
     <Compile Include="Delegates\WeakReferenceOfAttribute.cs" />
     <Compile Include="DispatcherHelper.cs" />
+    <Compile Include="Helpers\DispatcherExtension.cs" />
     <Compile Include="Helpers\EnumExtension.cs" />
     <Compile Include="AsyncHelpers\PollingAsyncWrapper.cs" />
     <Compile Include="Helpers\StorageHelper.cs" />

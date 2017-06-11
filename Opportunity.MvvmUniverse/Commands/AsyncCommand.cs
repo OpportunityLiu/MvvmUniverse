@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class AsyncCommand : CommandBase
+    public sealed class AsyncCommand : CommandBase
     {
         public AsyncCommand(AsyncAction execute, Func<bool> canExecute)
         {
@@ -26,7 +26,7 @@ namespace Opportunity.MvvmUniverse.Commands
         public bool Executing
         {
             get => this.executing;
-            protected set
+            private set
             {
                 if (Set(ref this.executing, value))
                     RaiseCanExecuteChanged();

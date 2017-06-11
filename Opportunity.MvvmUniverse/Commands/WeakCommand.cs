@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public class WeakCommand : CommandBase
+    public sealed class WeakCommand : CommandBase
     {
         public WeakCommand(Action execute, Func<bool> canExecute)
         {
