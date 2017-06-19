@@ -6,9 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.UI.Core;
 
-namespace Windows.UI
+namespace Windows.UI.Core
 {
     public static class DispatcherExtension
     {
@@ -31,8 +30,6 @@ namespace Windows.UI
 
         public static IAsyncAction RunAsync(this CoreDispatcher dispatcher, DispatchedHandler agileCallback)
         {
-            if (dispatcher == null)
-                throw new ArgumentNullException(nameof(dispatcher));
             return dispatcher.RunAsync(CoreDispatcherPriority.Normal, agileCallback);
         }
 
@@ -72,66 +69,87 @@ namespace Windows.UI
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public sealed class DispatcherAwaiterSource
+    public struct DispatcherAwaiterSource
     {
         internal DispatcherAwaiterSource(CoreDispatcher dispatcher, CoreDispatcherPriority priority)
         {
             if (priority > CoreDispatcherPriority.High)
-                throw new ArgumentOutOfRangeException(nameof(priority));
+                priority = CoreDispatcherPriority.High;
             if (priority < CoreDispatcherPriority.Idle)
-                throw new ArgumentOutOfRangeException(nameof(priority));
-            this.awaiter = new DispatcherAwaiter(dispatcher, priority);
+                priority = CoreDispatcherPriority.Idle;
+            if (dispatcher == null)
+                this.awaiter = new EmptyDispatcherAwaiter();
+            else if (priority == CoreDispatcherPriority.Idle)
+                this.awaiter = new IdleDispatcherAwaiter(dispatcher);
+            else
+                this.awaiter = new NormalDispatcherAwaiter(dispatcher, priority);
         }
 
-        private readonly DispatcherAwaiter awaiter;
+        private readonly IDispatcherAwaiter awaiter;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public DispatcherAwaiter GetAwaiter() => this.awaiter;
+        public IDispatcherAwaiter GetAwaiter() => this.awaiter;
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public struct DispatcherAwaiter : INotifyCompletion
+    public interface IDispatcherAwaiter : INotifyCompletion
+    {
+        bool IsCompleted { get; }
+
+        void GetResult();
+    }
+
+    internal sealed class EmptyDispatcherAwaiter : IDispatcherAwaiter
+    {
+        public EmptyDispatcherAwaiter() { }
+
+        public bool IsCompleted => true;
+
+        public void GetResult() { }
+
+        public void OnCompleted(Action continuation)
+        {
+            continuation();
+        }
+    }
+
+    internal sealed class IdleDispatcherAwaiter : IDispatcherAwaiter
+    {
+        private readonly CoreDispatcher dispatcher;
+
+        public IdleDispatcherAwaiter(CoreDispatcher dispatcher)
+        {
+            this.dispatcher = dispatcher;
+        }
+
+        public bool IsCompleted => false;
+
+        public void GetResult() { }
+
+        public async void OnCompleted(Action continuation)
+        {
+            await this.dispatcher.RunIdleAsync(a => continuation());
+        }
+    }
+
+    internal sealed class NormalDispatcherAwaiter : IDispatcherAwaiter
     {
         private readonly CoreDispatcher dispatcher;
         private readonly CoreDispatcherPriority priority;
 
-        internal DispatcherAwaiter(CoreDispatcher dispatcher, CoreDispatcherPriority priority)
+        internal NormalDispatcherAwaiter(CoreDispatcher dispatcher, CoreDispatcherPriority priority)
         {
             this.dispatcher = dispatcher;
             this.priority = priority;
         }
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public void OnCompleted(Action continuation)
-        {
-            if (this.dispatcher == null)
-                onCompletedNull(continuation);
-            else if (this.priority == CoreDispatcherPriority.Idle)
-                onCompletedIdle(continuation);
-            else
-                onCompleted(continuation);
-        }
+        public bool IsCompleted => false;
 
-        private void onCompletedNull(Action continuation)
-        {
-            continuation();
-        }
+        public void GetResult() { }
 
-        private async void onCompleted(Action continuation)
+        public async void OnCompleted(Action continuation)
         {
             await this.dispatcher.RunAsync(this.priority, () => continuation());
         }
-
-        private async void onCompletedIdle(Action continuation)
-        {
-            await this.dispatcher.RunIdleAsync(a => continuation());
-        }
-
-        // When dispatcher is null, OnCompleted shouldn't be called.
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool IsCompleted => this.dispatcher == null;
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public void GetResult() { }
     }
 }
