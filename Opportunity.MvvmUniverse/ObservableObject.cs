@@ -47,24 +47,32 @@ namespace Opportunity.MvvmUniverse
         protected void ForceSet<TProp>(ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;
+            if (PropertyChanged == null)
+                return;
             RaisePropertyChanged(propertyName);
         }
 
         protected void ForceSet<TProp>(string addtionalPropertyName, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;
+            if (PropertyChanged == null)
+                return;
             RaisePropertyChanged(propertyName, addtionalPropertyName);
         }
 
         protected void ForceSet<TProp>(string addtionalPropertyName0, string addtionalPropertyName1, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;
+            if (PropertyChanged == null)
+                return;
             RaisePropertyChanged(propertyName, addtionalPropertyName0, addtionalPropertyName1);
         }
 
         protected void ForceSet<TProp>(IEnumerable<string> addtionalPropertyNames, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;
+            if (PropertyChanged == null)
+                return;
             IEnumerable<string> g()
             {
                 yield return propertyName;
@@ -110,6 +118,8 @@ namespace Opportunity.MvvmUniverse
 
         protected void RaisePropertyChanged(params string[] propertyNames)
         {
+            if (PropertyChanged == null)
+                return;
             this.RaisePropertyChanged((IEnumerable<string>)propertyNames);
         }
 
