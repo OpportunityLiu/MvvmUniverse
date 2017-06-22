@@ -120,7 +120,7 @@ namespace Opportunity.MvvmUniverse.Settings
         private static T deserializeValue<T>(object value)
         {
             if (default(T) is Enum)
-                return ((ulong)value).ToEnum<T>();
+                return (T)Enum.ToObject(typeof(T), value);
             return (T)value;
         }
     }
