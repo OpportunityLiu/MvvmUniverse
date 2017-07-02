@@ -3,46 +3,79 @@ using System.Reflection;
 
 namespace Opportunity.MvvmUniverse.Delegates
 {
-    public class WeakDelegate
+    public class WeakDelegate<T>
+        where T : class
     {
-        public WeakDelegate(Delegate @delegate)
+        static WeakDelegate()
+        {
+            var tType = typeof(T);
+            var delType = typeof(Delegate);
+            if (!tType.GetTypeInfo().IsSubclassOf(delType))
+                throw new NotSupportedException($"{tType} is not a delegate type.");
+        }
+
+        public WeakDelegate(T @delegate)
         {
             if (@delegate == null)
                 throw new ArgumentNullException(nameof(@delegate));
-            if (@delegate.GetInvocationList().Length > 1)
+            var d = (Delegate)(object)@delegate;
+            if (d.GetInvocationList().Length > 1)
                 throw new NotSupportedException("Multicast delegate not supported.");
-            if (@delegate.Target != null)
-                this.target = new WeakReference(@delegate.Target);
-            this.method = @delegate.GetMethodInfo();
+            if (d.Target != null)
+            {
+                this.Target = new WeakReference(d.Target);
+                this.methodOrDelegate = d.GetMethodInfo();
+            }
+            else
+                this.methodOrDelegate = d;
         }
 
-        private WeakReference target;
-        private MethodInfo method;
+        protected WeakReference Target { get; }
+        protected bool IsDelegateOfStaticMethod => Target == null;
+        private readonly object methodOrDelegate;
+        protected MethodInfo Method
+        {
+            get
+            {
+                try
+                {
+                    return ((MethodInfo)this.methodOrDelegate);
+                }
+                catch (InvalidCastException)
+                {
+                    return null;
+                }
+            }
+        }
 
-        public bool IsAlive => this.target == null ? true : this.target.IsAlive;
+        protected T Delegate
+        {
+            get
+            {
+                try
+                {
+                    return ((T)this.methodOrDelegate);
+                }
+                catch (InvalidCastException)
+                {
+                    return null;
+                }
+            }
+        }
+
+        public bool IsAlive => this.IsDelegateOfStaticMethod ? true : this.Target.IsAlive;
 
         public object DynamicInvoke(params object[] parameters)
         {
-            if (this.target == null)
-                return this.method.Invoke(null, parameters);
+            if (IsDelegateOfStaticMethod)
+                return ((Delegate)this.methodOrDelegate).DynamicInvoke(parameters);
             else
             {
-                var tgtObj = this.target.Target;
+                var tgtObj = this.Target.Target;
                 if (tgtObj == null)
                     throw new InvalidOperationException("Delegate is not alive.");
-                return this.method.Invoke(tgtObj, parameters);
+                return ((MethodInfo)this.methodOrDelegate).Invoke(tgtObj, parameters);
             }
-        }
-    }
-
-    internal static class WeakDelegateExtension
-    {
-        public static TResult DynamicInvoke<TResult>(this WeakDelegate that, params object[] parameters)
-        {
-            var r = that.DynamicInvoke(parameters);
-            if (r is TResult res)
-                return res;
-            return default(TResult);
         }
     }
 }

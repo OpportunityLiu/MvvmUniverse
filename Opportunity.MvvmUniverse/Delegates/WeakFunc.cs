@@ -2,8 +2,7 @@
 
 namespace Opportunity.MvvmUniverse.Delegates
 {
-    [WeakReferenceOf(typeof(Func<>))]
-    public sealed class WeakFunc<TResult> : WeakDelegate
+    public sealed class WeakFunc<TResult> : WeakDelegate<Func<TResult>>
     {
         public WeakFunc(Func<TResult> @delegate) : base(@delegate)
         {
@@ -11,12 +10,14 @@ namespace Opportunity.MvvmUniverse.Delegates
 
         public TResult Invoke()
         {
-            return this.DynamicInvoke<TResult>();
+            if (this.IsDelegateOfStaticMethod)
+                return this.Delegate.Invoke();
+            else
+                return (TResult)this.DynamicInvoke();
         }
     }
 
-    [WeakReferenceOf(typeof(Func<,>))]
-    public sealed class WeakFunc<T, TResult> : WeakDelegate
+    public sealed class WeakFunc<T, TResult> : WeakDelegate<Func<T, TResult>>
     {
         public WeakFunc(Func<T, TResult> @delegate) : base(@delegate)
         {
@@ -24,7 +25,10 @@ namespace Opportunity.MvvmUniverse.Delegates
 
         public TResult Invoke(T obj)
         {
-            return this.DynamicInvoke<TResult>(obj);
+            if (this.IsDelegateOfStaticMethod)
+                return this.Delegate.Invoke(obj);
+            else
+                return (TResult)this.DynamicInvoke(obj);
         }
     }
 }

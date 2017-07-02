@@ -41,20 +41,30 @@ namespace Opportunity.MvvmUniverse.Views
             return true;
         }
 
-        public ObservableCollection<INavigationHandler> Handlers { get; private set; } 
-            = new ObservableCollection<INavigationHandler>();
+        public ObservableCollection<INavigationHandler> Handlers { get; } = new ObservableCollection<INavigationHandler>();
 
-        private SystemNavigationManager manager = SystemNavigationManager.GetForCurrentView();
+        public SystemNavigationManager NavigationManager { get; } = SystemNavigationManager.GetForCurrentView();
 
         private Navigator()
         {
-            this.manager.BackRequested += this.manager_BackRequested;
+            this.NavigationManager.BackRequested += this.manager_BackRequested;
             this.Handlers.CollectionChanged += this.handlers_CollectionChanged;
+        }
+
+        private void destory()
+        {
+            this.NavigationManager.BackRequested -= this.manager_BackRequested;
+            this.Handlers.CollectionChanged -= this.handlers_CollectionChanged;
+            foreach (var item in Handlers)
+            {
+                item.Parent = null;
+            }
+            this.Handlers.Clear();
         }
 
         private void handlers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if(e.OldItems!=null)
+            if (e.OldItems != null)
             {
                 foreach (var item in e.OldItems.OfType<INavigationHandler>())
                 {
@@ -107,8 +117,8 @@ namespace Opportunity.MvvmUniverse.Views
 
         public AppViewBackButtonVisibility AppViewBackButtonVisibility
         {
-            get => manager.AppViewBackButtonVisibility;
-            private set => manager.AppViewBackButtonVisibility = value;
+            get => NavigationManager.AppViewBackButtonVisibility;
+            private set => NavigationManager.AppViewBackButtonVisibility = value;
         }
 
         private AppViewBackButtonVisibility? appViewBackButtonVisibilityOverride = null;
@@ -128,19 +138,6 @@ namespace Opportunity.MvvmUniverse.Views
             {
                 e.Handled = true;
             }
-        }
-
-        private void destory()
-        {
-            this.manager.BackRequested -= this.manager_BackRequested;
-            this.manager = null;
-            this.Handlers.CollectionChanged -= this.handlers_CollectionChanged;
-            foreach (var item in Handlers)
-            {
-                item.Parent = null;
-            }
-            this.Handlers.Clear();
-            this.Handlers = null;
         }
     }
 }

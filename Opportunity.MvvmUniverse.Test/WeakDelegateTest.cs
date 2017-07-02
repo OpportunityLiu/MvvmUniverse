@@ -24,5 +24,12 @@ namespace Opportunity.MvvmUniverse.Test
             act += () => i++;
             Assert.ThrowsException<NotSupportedException>(() => new WeakAction(act));
         }
+
+        [TestMethod]
+        public void WeakDelegate()
+        {
+            var t1 = new WeakDelegate<Action>(() => 1.ToString());
+            Assert.ThrowsException<TypeInitializationException>(() => new WeakDelegate<string>(""));
+        }
     }
 }

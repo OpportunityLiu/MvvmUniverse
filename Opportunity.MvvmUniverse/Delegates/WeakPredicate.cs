@@ -2,8 +2,7 @@
 
 namespace Opportunity.MvvmUniverse.Delegates
 {
-    [WeakReferenceOf(typeof(Predicate<>))]
-    public sealed class WeakPredicate<T> : WeakDelegate
+    public sealed class WeakPredicate<T> : WeakDelegate<Predicate<T>>
     {
         public WeakPredicate(Predicate<T> @delegate) : base(@delegate)
         {
@@ -11,7 +10,10 @@ namespace Opportunity.MvvmUniverse.Delegates
 
         public bool Invoke(T obj)
         {
-            return this.DynamicInvoke<bool>(obj);
+            if (this.IsDelegateOfStaticMethod)
+                return this.Delegate.Invoke(obj);
+            else
+                return (bool)this.DynamicInvoke(obj);
         }
     }
 }

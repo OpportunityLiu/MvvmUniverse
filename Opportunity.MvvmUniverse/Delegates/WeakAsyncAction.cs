@@ -4,8 +4,7 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Delegates
 {
-    [WeakReferenceOf(typeof(AsyncAction))]
-    public sealed class WeakAsyncAction : WeakDelegate
+    public sealed class WeakAsyncAction : WeakDelegate<AsyncAction>
     {
         public WeakAsyncAction(AsyncAction @delegate) : base(@delegate)
         {
@@ -13,12 +12,14 @@ namespace Opportunity.MvvmUniverse.Delegates
 
         public Task Invoke()
         {
-            return this.DynamicInvoke<Task>();
+            if (this.IsDelegateOfStaticMethod)
+                return this.Delegate.Invoke();
+            else
+                return (Task)this.DynamicInvoke();
         }
     }
 
-    [WeakReferenceOf(typeof(AsyncAction<>))]
-    public sealed class WeakAsyncAction<T> : WeakDelegate
+    public sealed class WeakAsyncAction<T> : WeakDelegate<AsyncAction<T>>
     {
         public WeakAsyncAction(AsyncAction<T> @delegate) : base(@delegate)
         {
@@ -26,7 +27,10 @@ namespace Opportunity.MvvmUniverse.Delegates
 
         public Task Invoke(T obj)
         {
-            return this.DynamicInvoke<Task>(obj);
+            if (this.IsDelegateOfStaticMethod)
+                return this.Delegate.Invoke(obj);
+            else
+                return (Task)this.DynamicInvoke(obj);
         }
     }
 }

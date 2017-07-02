@@ -151,7 +151,6 @@
     <Compile Include="Delegates\WeakAction.cs" />
     <Compile Include="Delegates\WeakFunc.cs" />
     <Compile Include="Delegates\WeakPredicate.cs" />
-    <Compile Include="Delegates\WeakReferenceOfAttribute.cs" />
     <Compile Include="DispatcherHelper.cs" />
     <Compile Include="Helpers\DispatcherExtension.cs" />
     <Compile Include="AsyncHelpers\PollingAsyncWrapper.cs" />
