@@ -10,7 +10,7 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ObservableCollection<T> : ObservableCollectionBase, IList<T>, IReadOnlyList<T>, IList
+    public class ObservableCollection<T> : ObservableCollectionBase<T>, IList<T>, IReadOnlyList<T>, IList
     {
         protected List<T> Items { get; }
 
@@ -37,7 +37,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 return;
             Items.InsertRange(index, items);
             RaisePropertyChanged(nameof(Count));
-            RaiseCollectionAdd(CastView(items), index);
+            RaiseCollectionAdd(items, index);
         }
 
         protected virtual void RemoveItem(int index)
@@ -81,7 +81,7 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 Items[index + i] = items[i];
             }
-            RaiseCollectionReplace(CastView(items), oldItems, index);
+            RaiseCollectionReplace(items, oldItems, index);
         }
 
         protected virtual void MoveItem(int oldIndex, int newIndex)

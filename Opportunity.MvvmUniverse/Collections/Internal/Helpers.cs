@@ -6,14 +6,6 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 {
     internal static class Helpers
     {
-        public static IList CastView<T>(IList<T> items)
-        {
-            var r = items as IList;
-            if (r == null)
-                r = new List<T>(items);
-            return r;
-        }
-
         public static T CastValue<T>(object value)
         {
             if (value == null && default(T) == null)

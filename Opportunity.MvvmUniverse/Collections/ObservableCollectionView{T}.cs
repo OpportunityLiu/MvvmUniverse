@@ -13,7 +13,7 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ObservableCollectionView<T> : ObservableCollectionBase, IReadOnlyList<T>, IList, ICollection<T>
+    public class ObservableCollectionView<T> : ObservableCollectionBase<T>, IReadOnlyList<T>, IList, ICollection<T>
     {
         protected ObservableCollection<T> Collection { get; }
 

@@ -13,8 +13,8 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ObservableDictionaryView<TKey, TValue> : ObservableCollectionBase
-        , IReadOnlyDictionary<TKey, TValue>, IDictionary
+    public class ObservableDictionaryView<TKey, TValue> : ObservableCollectionBase<KeyValuePair<TKey, TValue>>
+        , IReadOnlyDictionary<TKey, TValue>, IOrderedDictionary
         , IReadOnlyList<KeyValuePair<TKey, TValue>>, IList, ICollection<KeyValuePair<TKey, TValue>>
     {
         protected ObservableDictionary<TKey, TValue> Dictionary { get; }
@@ -33,6 +33,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public TValue this[TKey key] => Dictionary[key];
 
+        public KeyValuePair<TKey, TValue> ItemAt(int index) => Dictionary.ItemAt(index);
+
         KeyValuePair<TKey, TValue> IReadOnlyList<KeyValuePair<TKey, TValue>>.this[int index]
             => ((IList<KeyValuePair<TKey, TValue>>)Dictionary)[index];
 
@@ -41,15 +43,20 @@ namespace Opportunity.MvvmUniverse.Collections
             get => ((IDictionary)Dictionary)[key];
             set => ThrowForReadOnlyCollection(Dictionary.ToString());
         }
+        object IOrderedDictionary.this[int index]
+        {
+            get => ((IOrderedDictionary)Dictionary)[index];
+            set => ThrowForReadOnlyCollection(Dictionary.ToString());
+        }
         object IList.this[int index]
         {
             get => ((IList)Dictionary)[index];
             set => ThrowForReadOnlyCollection(Dictionary.ToString());
         }
 
-        public ObservableDictionary<TKey, TValue>.ObservableKeyCollection Keys => Dictionary.Keys;
+        public ObservableDictionary<TKey, TValue>.ObservableKeyValueCollection<TKey> Keys => Dictionary.Keys;
 
-        public ObservableDictionary<TKey, TValue>.ObservableValueCollection Values => Dictionary.Values;
+        public ObservableDictionary<TKey, TValue>.ObservableKeyValueCollection<TValue> Values => Dictionary.Values;
 
         public int Count => Dictionary.Count;
 
@@ -108,6 +115,10 @@ namespace Opportunity.MvvmUniverse.Collections
 
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Dictionary).CopyTo(array, index);
 
+        public int IndexOfKey(TKey key) => Dictionary.IndexOfKey(key);
+
+        public int IndexOfValue(TValue value) => Dictionary.IndexOfValue(value);
+
         int IList.IndexOf(object value) => ((IList)Dictionary).IndexOf(value);
 
         void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
@@ -131,7 +142,8 @@ namespace Opportunity.MvvmUniverse.Collections
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
             => ThrowForReadOnlyCollection<bool>(Dictionary.ToString());
 
-        public List<KeyValuePair<TKey, TValue>>.Enumerator GetEnumerator() => Dictionary.GetEnumerator();
+        public ObservableDictionary<TKey, TValue>.DictionaryEnumerator GetEnumerator()
+            => Dictionary.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Dictionary).GetEnumerator();
 
@@ -139,5 +151,10 @@ namespace Opportunity.MvvmUniverse.Collections
             => ((IEnumerable<KeyValuePair<TKey, TValue>>)Dictionary).GetEnumerator();
 
         IDictionaryEnumerator IDictionary.GetEnumerator() => ((IDictionary)Dictionary).GetEnumerator();
+        IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => ((IDictionary)Dictionary).GetEnumerator();
+
+        void IOrderedDictionary.Insert(int index, object key, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
+
+        void IOrderedDictionary.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary.ToString());
     }
 }
