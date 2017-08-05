@@ -21,21 +21,21 @@ namespace Opportunity.MvvmUniverse.Commands
 
         private readonly AsyncAction execute;
         private readonly Func<bool> canExecute;
-        private bool executing = false;
+        private bool isExecuting = false;
 
-        public bool Executing
+        public bool IsExecuting
         {
-            get => this.executing;
+            get => this.isExecuting;
             private set
             {
-                if (Set(ref this.executing, value))
+                if (Set(ref this.isExecuting, value))
                     RaiseCanExecuteChanged();
             }
         }
 
         protected override bool CanExecuteOverride()
         {
-            if (this.Executing)
+            if (this.IsExecuting)
                 return false;
             if (this.canExecute == null)
                 return true;
@@ -44,14 +44,14 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected override async void ExecuteImpl()
         {
-            this.Executing = true;
+            this.IsExecuting = true;
             try
             {
                 await this.execute.Invoke();
             }
             finally
             {
-                this.Executing = false;
+                this.IsExecuting = false;
             }
         }
     }

@@ -21,16 +21,16 @@ namespace Opportunity.MvvmUniverse.Commands
 
         private readonly WeakAsyncAction<T> execute;
         private readonly WeakPredicate<T> canExecute;
-        private bool executing = false;
+        private bool isExecuting = false;
 
         public bool IsAlive => this.execute.IsAlive && (this.canExecute?.IsAlive == true);
 
-        public bool Executing
+        public bool IsExecuting
         {
-            get => this.executing;
+            get => this.isExecuting;
             private set
             {
-                if (Set(ref this.executing, value))
+                if (Set(ref this.isExecuting, value))
                     RaiseCanExecuteChanged();
             }
         }
@@ -39,23 +39,23 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (!IsAlive)
                 return false;
-            if (this.Executing)
+            if (this.IsExecuting)
                 return false;
-            if(this.canExecute == null)
+            if (this.canExecute == null)
                 return true;
             return this.canExecute.Invoke(parameter);
         }
 
         protected override async void ExecuteImpl(T parameter)
         {
-            this.Executing = true;
+            this.IsExecuting = true;
             try
             {
                 await this.execute.Invoke(parameter);
             }
             finally
             {
-                this.Executing = false;
+                this.IsExecuting = false;
             }
         }
     }

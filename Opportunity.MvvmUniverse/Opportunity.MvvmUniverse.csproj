@@ -137,6 +137,7 @@
     <Compile Include="Collections\ObservableCollectionBase.cs" />
     <Compile Include="Collections\RangedCollectionView{T}.cs" />
     <Compile Include="Commands\CommandBase.cs" />
+    <Compile Include="Commands\ExecuteNotification.cs" />
     <Compile Include="Commands\WeakAsyncCommand.cs" />
     <Compile Include="Commands\WeakAsyncCommand{T}.cs" />
     <Compile Include="Commands\AsyncCommand{T}.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="Delegates\AsyncAction.cs" />
     <Compile Include="Delegates\WeakAsyncAction.cs" />
     <Compile Include="Delegates\WeakAction.cs" />
+    <Compile Include="Delegates\WeakEvent.cs" />
     <Compile Include="Delegates\WeakFunc.cs" />
     <Compile Include="Delegates\WeakPredicate.cs" />
     <Compile Include="DispatcherHelper.cs" />

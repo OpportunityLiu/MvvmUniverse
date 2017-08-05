@@ -65,6 +65,29 @@ namespace Opportunity.MvvmUniverse.Delegates
 
         public bool IsAlive => this.IsDelegateOfStaticMethod ? true : this.Target.IsAlive;
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (!(obj is WeakDelegate<T> o))
+                return false;
+            if (this.IsDelegateOfStaticMethod)
+            {
+                if (o.IsDelegateOfStaticMethod)
+                    return this.Delegate.Equals(o.Delegate);
+                else
+                    return false;
+            }
+            if (o.IsDelegateOfStaticMethod)
+                return false;
+            return this.Method.Equals(o.Method) && this.Target.Target == o.Target.Target;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.methodOrDelegate.GetHashCode();
+        }
+
         public object DynamicInvoke(params object[] parameters)
         {
             if (IsDelegateOfStaticMethod)

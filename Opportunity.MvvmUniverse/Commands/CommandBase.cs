@@ -53,12 +53,39 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (CanExecute())
             {
-                ExecuteImpl();
+                var executing = this.Executing;
+                if (executing != null)
+                {
+                    var eventarg = new CommandExecutingEventArgs(null);
+                    executing.Invoke(this, eventarg);
+                    if (eventarg.Cancelled)
+                        return false;
+                }
+                var executed = this.Executed;
+                var exc = default(Exception);
+                try
+                {
+                    ExecuteImpl();
+                }
+                catch (Exception ex)
+                {
+                    if (executed == null)
+                        throw;
+                    exc = ex;
+                }
+                if (executed != null)
+                {
+                    var eventarg = new CommandExecutedEventArgs(null, exc);
+                    executed.Invoke(this, eventarg);
+                }
                 return true;
             }
             return false;
         }
 
         protected abstract void ExecuteImpl();
+
+        public event CommandExecutingEventHandler Executing;
+        public event CommandExecutedEventHandler Executed;
     }
 }
