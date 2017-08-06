@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Core;
@@ -26,10 +27,9 @@ namespace Opportunity.MvvmUniverse
 
         public static CoreDispatcher Dispatcher { get; private set; }
 
-        public static bool Initialize()
+        public static void Initialize()
         {
-            Dispatcher = Window.Current?.Dispatcher;
-            return Initialized;
+            Initialize(Window.Current?.Dispatcher);
         }
 
         public static void Initialize(CoreDispatcher dispatcher)

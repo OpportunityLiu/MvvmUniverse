@@ -10,10 +10,10 @@ using Windows.Storage;
 namespace Opportunity.MvvmUniverse.Test
 {
     [TestClass]
-    public class MyTestClass
+    public class SettingsTest
     {
         [TestMethod]
-        public void MyTestMethod()
+        public void Settings()
         {
             var c = new TestSettingCollection();
             c.MyProperty = 12;
@@ -26,49 +26,49 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.AreEqual(c.MyProperty, c2.MyProperty);
             Assert.AreEqual(c.MyProperty2, c2.MyProperty2);
         }
-    }
 
-    class TestSettingCollection : SettingCollection
-    {
-        public TestSettingCollection() : base(ApplicationData.Current.RoamingSettings,"haha")
+        class TestSettingCollection : SettingCollection
         {
+            public TestSettingCollection() : base(ApplicationData.Current.RoamingSettings, "haha")
+            {
 
-        }
-
-
-
-        public int MyProperty
-        {
-            get { return GetFromContainer(MyPropertyProperty); }
-            set { SetToContainer(MyPropertyProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
-        public static readonly SettingProperty<int> MyPropertyProperty =
-            new SettingProperty<int>("MyProperty", typeof(TestSettingCollection), 0, MtpropCB);
-
-
-        public static void MtpropCB(SettingCollection sender, SettingPropertyChangedEventArgs<int> e)
-        {
-
-        }
+            }
 
 
 
-        public StringComparison MyProperty2
-        {
-            get { return GetFromContainer(MyProperty2Property); }
-            set { SetToContainer(MyProperty2Property, value); }
-        }
+            public int MyProperty
+            {
+                get { return GetFromContainer(MyPropertyProperty); }
+                set { SetToContainer(MyPropertyProperty, value); }
+            }
 
-        // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
-        public static readonly SettingProperty<StringComparison> MyProperty2Property =
-            new SettingProperty<StringComparison>("MyProperty2", typeof(TestSettingCollection), 0, MtpropCB2);
+            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
+            public static readonly SettingProperty<int> MyPropertyProperty =
+                new SettingProperty<int>("MyProperty", typeof(TestSettingCollection), 0, MtpropCB);
 
 
-        public static void MtpropCB2(SettingCollection sender, SettingPropertyChangedEventArgs<StringComparison> e)
-        {
+            public static void MtpropCB(SettingCollection sender, SettingPropertyChangedEventArgs<int> e)
+            {
 
+            }
+
+
+
+            public StringComparison MyProperty2
+            {
+                get { return GetFromContainer(MyProperty2Property); }
+                set { SetToContainer(MyProperty2Property, value); }
+            }
+
+            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
+            public static readonly SettingProperty<StringComparison> MyProperty2Property =
+                new SettingProperty<StringComparison>("MyProperty2", typeof(TestSettingCollection), 0, MtpropCB2);
+
+
+            public static void MtpropCB2(SettingCollection sender, SettingPropertyChangedEventArgs<StringComparison> e)
+            {
+
+            }
         }
     }
 }

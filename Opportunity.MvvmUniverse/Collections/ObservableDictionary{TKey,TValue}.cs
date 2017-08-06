@@ -68,16 +68,20 @@ namespace Opportunity.MvvmUniverse.Collections
                 var c = KeySet.Count;
                 Debug.Assert(KeyItems.Count == c, "KeyItems.Count != KeySet.Count");
                 Debug.Assert(ValueItems.Count == c, "ValueItems.Count != KeySet.Count");
+                for (var i = 0; i < KeyItems.Count; i++)
+                {
+                    Debug.Assert(KeySet[KeyItems[i]] == i, $"Key in KeySet and KeyItems not match at {i}");
+                }
             }
         }
 
-        protected virtual void InsertItem(TKey key, TValue value, int index)
+        protected virtual void InsertItem(int index, TKey key, TValue value)
         {
             if (index < 0 || index > KeySet.Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
             KeySet.Add(key, index);
-            KeyItems.Add(key);
-            ValueItems.Add(value);
+            KeyItems.Insert(index, key);
+            ValueItems.Insert(index, value);
             updateIndex(index + 1, KeyItems.Count - index - 1);
             if (this.keys != null)
             {
@@ -97,6 +101,7 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void RemoveItem(TKey key)
         {
             var removedIndex = KeySet[key];
+            KeySet.Remove(key);
             KeyItems.RemoveAt(removedIndex);
             var removedValue = ValueItems[removedIndex];
             ValueItems.RemoveAt(removedIndex);
@@ -182,13 +187,10 @@ namespace Opportunity.MvvmUniverse.Collections
             if (KeySet.ContainsKey(key))
                 SetItem(key, value);
             else
-                InsertItem(key, value, Count);
+                InsertItem(Count, key, value);
         }
 
-        public void Move(TKey key, int newIndex)
-        {
-            MoveItem(key, newIndex);
-        }
+        public void Move(TKey key, int newIndex) => MoveItem(key, newIndex);
 
         public TValue this[TKey key]
         {
@@ -208,7 +210,7 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 var oldKey = KeyItems[index];
                 RemoveItem(oldKey);
-                InsertItem(value.Key, value.Value, index);
+                InsertItem(index, value.Key, value.Value);
             }
         }
         KeyValuePair<TKey, TValue> IReadOnlyList<KeyValuePair<TKey, TValue>>.this[int index]
@@ -273,7 +275,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         int ICollection.Count => throw new NotImplementedException();
 
-        public void Add(TKey key, TValue value) => InsertItem(key, value, Count);
+        public void Add(TKey key, TValue value) => InsertItem(Count, key, value);
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
         void IDictionary.Add(object key, object value) => Add(CastKey<TKey>(key), CastValue<TValue>(value));
         int IList.Add(object value)
@@ -282,7 +284,7 @@ namespace Opportunity.MvvmUniverse.Collections
             return this.Count - 1;
         }
 
-        public void Insert(int index, TKey key, TValue value) => InsertItem(key, value, index);
+        public void Insert(int index, TKey key, TValue value) => InsertItem(index, key, value);
         void IList<KeyValuePair<TKey, TValue>>.Insert(int index, KeyValuePair<TKey, TValue> item)
             => Insert(index, item.Key, item.Value);
         void IList.Insert(int index, object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Insert(index, CastKVP<TKey, TValue>(value));
@@ -366,13 +368,13 @@ namespace Opportunity.MvvmUniverse.Collections
             object IDictionaryEnumerator.Key => Key;
             object IDictionaryEnumerator.Value => Value;
 
-            object IEnumerator.Current => throw new NotImplementedException();
-
             public KeyValuePair<TKey, TValue> Current => CreateKVP(Key, Value);
+            object IEnumerator.Current => Current;
 
             void IDisposable.Dispose()
             {
-                throw new NotImplementedException();
+                this.keyEnumerator.Dispose();
+                this.valueEnumerator.Dispose();
             }
 
             public bool MoveNext()
