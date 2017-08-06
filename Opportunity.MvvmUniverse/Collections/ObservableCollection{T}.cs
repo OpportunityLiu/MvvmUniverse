@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Linq;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -24,85 +25,94 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.Items = new List<T>(items);
         }
 
-        protected virtual void InsertItem(int index, T item)
+        protected virtual void InsertItems(int index, IReadOnlyList<T> items)
         {
-            Items.Insert(index, item);
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionAdd(item, index);
-        }
-
-        protected virtual void InsertItems(int index, IList<T> items)
-        {
-            if (items == null || items.Count <= 0)
+            if ((items ?? throw new ArgumentNullException(nameof(items))).Count <= 0)
                 return;
             Items.InsertRange(index, items);
             RaisePropertyChanged(nameof(Count));
-            RaiseCollectionAdd(items, index);
-        }
-
-        protected virtual void RemoveItem(int index)
-        {
-            var removed = Items[index];
-            Items.RemoveAt(index);
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionRemove(removed, index);
+            if (items.Count == 1)
+                RaiseCollectionAdd(items[0], index);
+            else
+                RaiseCollectionAdd(items, index);
         }
 
         protected virtual void RemoveItems(int index, int count)
         {
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            if (count < 0 || index + count > Count)
+                throw new ArgumentOutOfRangeException(nameof(count));
             if (count <= 0)
                 return;
-            var removedItems = new T[count];
-            Items.CopyTo(index, removedItems, 0, count);
-            Items.RemoveRange(index, count);
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionRemove(removedItems, index);
+            if (count == 1)
+            {
+                var removedItem = Items[index];
+                Items.RemoveAt(index);
+                RaisePropertyChanged(nameof(Count));
+                RaiseCollectionRemove(removedItem, index);
+            }
+            else
+            {
+                var removedItems = new T[count];
+                Items.CopyTo(index, removedItems, 0, count);
+                Items.RemoveRange(index, count);
+                RaisePropertyChanged(nameof(Count));
+                RaiseCollectionRemove(removedItems, index);
+            }
         }
 
-        protected virtual void SetItem(int index, T item)
-        {
-            var old = Items[index];
-            Items[index] = item;
-            RaiseCollectionReplace(item, old, index);
-        }
-
-        protected virtual void SetItems(int index, IList<T> items)
+        protected virtual void SetItems(int index, IReadOnlyList<T> items)
         {
             if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            if (index < 0 || index + items.Count > this.Count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            if (items.Count <= 0)
                 return;
-            var count = items.Count;
-            if (count <= 0)
-                return;
-            if (index + count > Items.Count)
-                throw new ArgumentOutOfRangeException(nameof(items), "Too many items.");
-            var oldItems = new T[count];
-            Items.CopyTo(index, oldItems, 0, count);
-            for (var i = 0; i < count; i++)
+            if (items.Count == 1)
             {
-                Items[index + i] = items[i];
+                var oldItem = Items[index];
+                Items[index] = items[0];
+                RaiseCollectionReplace(items[0], oldItem, index);
             }
-            RaiseCollectionReplace(items, oldItems, index);
-        }
-
-        protected virtual void MoveItem(int oldIndex, int newIndex)
-        {
-            if (oldIndex == newIndex)
-                return;
-            var itemToMove = this[oldIndex];
-            Items.RemoveAt(oldIndex);
-            Items.Insert(newIndex, itemToMove);
-            RaiseCollectionMove(itemToMove, newIndex, oldIndex);
+            else
+            {
+                var oldItems = new T[items.Count];
+                this.Items.CopyTo(index, oldItems, 0, items.Count);
+                for (var i = 0; i < items.Count; i++)
+                {
+                    Items[index + i] = items[i];
+                }
+                RaiseCollectionReplace(items, oldItems, index);
+            }
         }
 
         protected virtual void MoveItems(int oldIndex, int newIndex, int count)
         {
-            if (oldIndex == newIndex || count <= 0)
+            if (oldIndex < 0)
+                throw new ArgumentOutOfRangeException(nameof(oldIndex));
+            if (count < 0 || oldIndex + count > Count)
+                throw new ArgumentOutOfRangeException(nameof(count));
+            if (newIndex + count > Count || newIndex < 0)
+                throw new ArgumentOutOfRangeException(nameof(newIndex));
+            if (oldIndex == newIndex || count == 0)
                 return;
-            var itemsToMove = new T[count];
-            Items.CopyTo(oldIndex, itemsToMove, 0, count);
-            Items.RemoveRange(oldIndex, count);
-            Items.InsertRange(newIndex, itemsToMove);
-            RaiseCollectionMove(itemsToMove, newIndex, oldIndex);
+            if (count == 1)
+            {
+                var itemToMove = this[oldIndex];
+                Items.RemoveAt(oldIndex);
+                Items.Insert(newIndex, itemToMove);
+                RaiseCollectionMove(itemToMove, newIndex, oldIndex);
+            }
+            else
+            {
+                var itemsToMove = new T[count];
+                Items.CopyTo(oldIndex, itemsToMove, 0, count);
+                Items.RemoveRange(oldIndex, count);
+                Items.InsertRange(newIndex, itemsToMove);
+                RaiseCollectionMove(itemsToMove, newIndex, oldIndex);
+            }
         }
 
         protected virtual void ClearItems()
@@ -132,75 +142,117 @@ namespace Opportunity.MvvmUniverse.Collections
         public T this[int index]
         {
             get => Items[index];
-            set => SetItem(index, value);
+            set => SetItems(index, new Box(value));
         }
-
         object IList.this[int index]
         {
             get => Items[index];
             set => this[index] = CastValue<T>(value);
         }
 
-        public void SetRange(int index, IList<T> items) => SetItems(index, items);
+        public void Add(T item) => InsertItems(Items.Count, new Box(item));
+        int IList.Add(object value)
+        {
+            Add(CastValue<T>(value));
+            return Items.Count - 1;
+        }
+        public void AddRange(IEnumerable<T> items)
+        {
+            if (items is IReadOnlyList<T> l)
+                InsertItems(Items.Count, l);
+            else
+                InsertItems(Items.Count, items.ToList());
+        }
 
-        public int IndexOf(T item) => Items.IndexOf(item);
+        public void Insert(int index, T item) => InsertItems(index, new Box(item));
+        void IList.Insert(int index, object value) => Insert(index, CastValue<T>(value));
+        public void InsertRange(int index, IEnumerable<T> items)
+        {
+            if (items is IReadOnlyList<T> l)
+                InsertItems(index, l);
+            else
+                InsertItems(index, items.ToList());
+        }
 
-        public void Insert(int index, T item) => InsertItem(index, item);
+        public void SetRange(int index, IEnumerable<T> items)
+        {
+            if (items is IReadOnlyList<T> l)
+                SetItems(index, l);
+            else
+                SetItems(index, items.ToList());
+        }
 
-        public void InsertRange(int index, IList<T> items) => InsertItems(index, items);
-
-        public void RemoveAt(int index) => RemoveItem(index);
-
-        public void RemoveRange(int index, int count) => RemoveItems(index, count);
-
-        public void Add(T item) => InsertItem(Items.Count, item);
-
-        public void AddRange(IList<T> items) => InsertItems(Items.Count, items);
-
-        public void Move(int oldIndex, int newIndex) => MoveItem(oldIndex, newIndex);
-
+        public void Move(int oldIndex, int newIndex) => MoveItems(oldIndex, newIndex, 1);
         public void MoveRange(int oldIndex, int newIndex, int count) => MoveItems(oldIndex, newIndex, count);
-
-        public void Clear() => ClearItems();
-
-        public bool Contains(T item) => Items.Contains(item);
-
-        void ICollection<T>.CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
 
         public bool Remove(T item)
         {
             var i = Items.IndexOf(item);
             if (i < 0)
                 return false;
-            RemoveAt(i);
+            RemoveItems(i, 1);
             return true;
         }
+        void IList.Remove(object value) => Remove(CastValue<T>(value));
+        public void RemoveAt(int index) => RemoveItems(index, 1);
+        public void RemoveRange(int index, int count) => RemoveItems(index, count);
+
+        public void Clear() => ClearItems();
+
+        public bool Contains(T item) => Items.Contains(item);
+        bool IList.Contains(object value) => Contains(CastValue<T>(value));
+
+        void ICollection<T>.CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
+        void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
 
         private ObservableCollectionView<T> readOnlyView;
 
         public ObservableCollectionView<T> AsReadOnly()
             => LazyInitializer.EnsureInitialized(ref this.readOnlyView, () => new ObservableCollectionView<T>(this));
 
-        public List<T>.Enumerator GetEnumerator() => Items.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => Items.GetEnumerator();
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => Items.GetEnumerator();
-
-        int IList.Add(object value)
-        {
-            Add(CastValue<T>(value));
-            return Items.Count - 1;
-        }
-
-        bool IList.Contains(object value) => Contains(CastValue<T>(value));
-
+        public int IndexOf(T item) => Items.IndexOf(item);
         int IList.IndexOf(object value) => IndexOf(CastValue<T>(value));
 
-        void IList.Insert(int index, object value) => Insert(index, CastValue<T>(value));
+        public List<T>.Enumerator GetEnumerator() => Items.GetEnumerator();
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => Items.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => Items.GetEnumerator();
 
-        void IList.Remove(object value) => Remove(CastValue<T>(value));
+        private sealed class Box : IReadOnlyList<T>, IList
+        {
+            public Box(T value) { this.Value = value; }
 
-        void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
+            public T Value { get; private set; }
+
+            T IReadOnlyList<T>.this[int index] => Value;
+
+            int IReadOnlyCollection<T>.Count => 1;
+            int ICollection.Count => 1;
+            bool IList.IsFixedSize => true;
+            bool IList.IsReadOnly => true;
+            bool ICollection.IsSynchronized => false;
+            object ICollection.SyncRoot => Value;
+            object IList.this[int index]
+            {
+                get => Value;
+                set => throw new InvalidOperationException();
+            }
+
+            IEnumerator<T> getEnumerator()
+            {
+                yield return Value;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator() => getEnumerator();
+            IEnumerator<T> IEnumerable<T>.GetEnumerator() => getEnumerator();
+
+            int IList.Add(object value) => throw new InvalidOperationException();
+            void IList.Clear() => throw new InvalidOperationException();
+            bool IList.Contains(object value) => EqualityComparer<T>.Default.Equals(Value, (T)value);
+            int IList.IndexOf(object value) => EqualityComparer<T>.Default.Equals(Value, (T)value) ? 0 : -1;
+            void IList.Insert(int index, object value) => throw new InvalidOperationException();
+            void IList.Remove(object value) => throw new InvalidOperationException();
+            void IList.RemoveAt(int index) => throw new InvalidOperationException();
+            void ICollection.CopyTo(Array array, int index) => ((T[])array)[index] = Value;
+        }
     }
 }

@@ -13,8 +13,8 @@ namespace Opportunity.MvvmUniverse.Collections
     {
         private sealed class ListWarpper : IList
         {
-            private readonly IList<T> list;
-            public ListWarpper(IList<T> toWarp)
+            private readonly IReadOnlyList<T> list;
+            public ListWarpper(IReadOnlyList<T> toWarp)
             {
                 this.list = toWarp;
             }
@@ -26,7 +26,6 @@ namespace Opportunity.MvvmUniverse.Collections
             }
 
             public bool IsFixedSize => false;
-
             public bool IsReadOnly => true;
 
             public int Count => this.list.Count;
@@ -53,13 +52,38 @@ namespace Opportunity.MvvmUniverse.Collections
             public void CopyTo(Array array, int index)
             {
                 if (array is T[] a)
-                    this.list.CopyTo(a, index);
+                {
+                    if (this.list is IList<T> l)
+                    {
+                        l.CopyTo(a, index);
+                        return;
+                    }
+                    if (this.list.Count + index > a.Length)
+                        throw new ArgumentException("Not enough space in array");
+                    for (var i = 0; i < this.list.Count; i++)
+                    {
+                        a[index + i] = this.list[i];
+                    }
+                    return;
+                }
                 throw new ArgumentException("Unsupported array", nameof(array));
             }
 
             public IEnumerator GetEnumerator() => this.list.GetEnumerator();
 
-            public int IndexOf(object value) => this.list.IndexOf((T)value);
+            public int IndexOf(object value)
+            {
+                var v = (T)value;
+                if (this.list is IList<T> l)
+                    return l.IndexOf(v);
+                var c = EqualityComparer<T>.Default;
+                for (var i = 0; i < this.list.Count; i++)
+                {
+                    if (c.Equals(v, this.list[i]))
+                        return i;
+                }
+                return -1;
+            }
 
             public void Insert(int index, object value) => throw new NotSupportedException("This is a read only list");
 
@@ -95,7 +119,7 @@ namespace Opportunity.MvvmUniverse.Collections
             RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
         }
 
-        protected void RaiseCollectionMove(IList<T> items, int newIndex, int oldIndex)
+        protected void RaiseCollectionMove(IReadOnlyList<T> items, int newIndex, int oldIndex)
         {
             if (CollectionChanged == null)
                 return;
@@ -111,7 +135,7 @@ namespace Opportunity.MvvmUniverse.Collections
             RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
         }
 
-        protected void RaiseCollectionAdd(IList<T> items, int index)
+        protected void RaiseCollectionAdd(IReadOnlyList<T> items, int index)
         {
             if (CollectionChanged == null)
                 return;
@@ -127,7 +151,7 @@ namespace Opportunity.MvvmUniverse.Collections
             RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
         }
 
-        protected void RaiseCollectionRemove(IList<T> items, int index)
+        protected void RaiseCollectionRemove(IReadOnlyList<T> items, int index)
         {
             if (CollectionChanged == null)
                 return;
@@ -143,7 +167,7 @@ namespace Opportunity.MvvmUniverse.Collections
             RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newItem, oldItem, index));
         }
 
-        protected void RaiseCollectionReplace(IList<T> newItems, IList<T> oldItems, int index)
+        protected void RaiseCollectionReplace(IReadOnlyList<T> newItems, IReadOnlyList<T> oldItems, int index)
         {
             if (CollectionChanged == null)
                 return;
