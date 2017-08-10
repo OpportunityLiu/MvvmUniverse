@@ -40,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Collections
             get
             {
                 if (unchecked((uint)index >= (uint)this.Count))
-                    throw new IndexOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 return this.items[this.StartIndex + index];
             }
         }
@@ -57,10 +57,10 @@ namespace Opportunity.MvvmUniverse.Collections
         bool IList.IsReadOnly => true;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool ICollection.IsSynchronized => false;
+        bool ICollection.IsSynchronized => (this.items as ICollection)?.IsSynchronized ?? false;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object ICollection.SyncRoot => throw new NotImplementedException();
+        object ICollection.SyncRoot => (this.items as ICollection)?.SyncRoot;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection<T>.IsReadOnly => true;

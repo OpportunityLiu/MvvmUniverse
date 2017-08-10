@@ -273,8 +273,6 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => ((ICollection)KeySet).SyncRoot;
 
-        int ICollection.Count => throw new NotImplementedException();
-
         public void Add(TKey key, TValue value) => InsertItem(Count, key, value);
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
         void IDictionary.Add(object key, object value) => Add(CastKey<TKey>(key), CastValue<TValue>(value));
@@ -371,7 +369,7 @@ namespace Opportunity.MvvmUniverse.Collections
             public KeyValuePair<TKey, TValue> Current => CreateKVP(Key, Value);
             object IEnumerator.Current => Current;
 
-            void IDisposable.Dispose()
+            public void Dispose()
             {
                 this.keyEnumerator.Dispose();
                 this.valueEnumerator.Dispose();

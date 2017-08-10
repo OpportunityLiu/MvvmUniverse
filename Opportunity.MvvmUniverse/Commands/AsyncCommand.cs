@@ -29,7 +29,7 @@ namespace Opportunity.MvvmUniverse.Commands
             private set
             {
                 if (Set(ref this.isExecuting, value))
-                    RaiseCanExecuteChanged();
+                    OnCanExecuteChanged();
             }
         }
 

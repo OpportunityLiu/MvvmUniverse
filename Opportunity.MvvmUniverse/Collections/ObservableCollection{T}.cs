@@ -202,7 +202,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public bool Contains(T item) => Items.Contains(item);
         bool IList.Contains(object value) => Contains(CastValue<T>(value));
 
-        void ICollection<T>.CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
+        public void CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
 
         private ObservableCollectionView<T> readOnlyView;

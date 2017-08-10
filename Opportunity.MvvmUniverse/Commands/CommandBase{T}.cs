@@ -7,36 +7,8 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public abstract class CommandBase<T> : ObservableObject, ICommand
+    public abstract class CommandBase<T> : CommandBaseBase, ICommand
     {
-        public event EventHandler CanExecuteChanged;
-
-        private bool isEnabled = true;
-        public bool IsEnabled
-        {
-            get => this.isEnabled;
-            set
-            {
-                if (Set(ref this.isEnabled, value))
-                    RaiseCanExecuteChanged();
-            }
-        }
-
-        private object tag;
-        public object Tag
-        {
-            get => this.tag;
-            set => ForceSet(ref this.tag, value);
-        }
-
-        public void RaiseCanExecuteChanged()
-        {
-            var temp = CanExecuteChanged;
-            if (temp == null)
-                return;
-            DispatcherHelper.BeginInvoke(() => temp(this, EventArgs.Empty));
-        }
-
         bool ICommand.CanExecute(object parameter) => CanExecute(cast(parameter));
 
         private static T cast(object parameter)
@@ -64,7 +36,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 var executing = this.Executing;
                 if (executing != null)
                 {
-                    var eventarg = new CommandExecutingEventArgs(parameter);
+                    var eventarg = new CommandExecutingEventArgs<T>(parameter);
                     executing.Invoke(this, eventarg);
                     if (eventarg.Cancelled)
                         return false;
@@ -83,7 +55,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 }
                 if (executed != null)
                 {
-                    var eventarg = new CommandExecutedEventArgs(parameter, exc);
+                    var eventarg = new CommandExecutedEventArgs<T>(parameter, exc);
                     executed.Invoke(this, eventarg);
                 }
                 return true;
@@ -93,7 +65,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected abstract void ExecuteImpl(T parameter);
 
-        public event CommandExecutingEventHandler Executing;
-        public event CommandExecutedEventHandler Executed;
+        public event CommandExecutingEventHandler<T> Executing;
+        public event CommandExecutedEventHandler<T> Executed;
     }
 }

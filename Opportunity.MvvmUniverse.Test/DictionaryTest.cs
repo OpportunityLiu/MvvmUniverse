@@ -12,13 +12,15 @@ namespace Opportunity.MvvmUniverse.Test
     public class DictionaryTest
     {
         [TestMethod]
-        public void Basic()
+        public void Create()
         {
             var dic1 = new ObservableDictionary<int, int>();
             var dic2 = new ObservableDictionary<object, int>();
             var dic3 = new ObservableDictionary<string, string>();
             var dic4 = new ObservableDictionary<string, object>();
+            Assert.AreEqual(EqualityComparer<string>.Default, dic4.Comparer);
             var dic5 = new ObservableDictionary<string, int>(StringComparer.CurrentCulture);
+            Assert.AreEqual(StringComparer.CurrentCulture, dic5.Comparer);
             Assert.ThrowsException<ArgumentNullException>(() => new ObservableDictionary<string, int>((IEqualityComparer<string>)null));
             var dic6 = new ObservableDictionary<string, int>((IDictionary<string, int>)null);
             var dic7 = new ObservableDictionary<string, int>(new Dictionary<string, int> { [""] = 1 });

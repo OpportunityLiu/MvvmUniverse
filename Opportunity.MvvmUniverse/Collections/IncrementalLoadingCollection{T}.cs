@@ -81,7 +81,7 @@ namespace Opportunity.MvvmUniverse.Collections
             });
         }
 
-        public event TypedEventHandler<IncrementalLoadingCollection<T>, LoadMoreItemsExceptionEventArgs> LoadMoreItemsException;
+        public event LoadMoreItemsExceptionEventHadler<T> LoadMoreItemsException;
 
         private async Task<bool> tryHandle(Exception ex)
         {

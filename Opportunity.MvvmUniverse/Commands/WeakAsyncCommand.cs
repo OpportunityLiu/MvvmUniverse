@@ -31,7 +31,7 @@ namespace Opportunity.MvvmUniverse.Commands
             private set
             {
                 if (Set(ref this.isExecuting, value))
-                    RaiseCanExecuteChanged();
+                    OnCanExecuteChanged();
             }
         }
 
@@ -41,7 +41,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 return false;
             if (this.IsExecuting)
                 return false;
-            if(this.canExecute == null)
+            if (this.canExecute == null)
                 return true;
             return this.canExecute.Invoke();
         }
