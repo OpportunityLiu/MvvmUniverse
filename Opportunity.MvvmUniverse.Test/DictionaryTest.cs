@@ -12,7 +12,7 @@ namespace Opportunity.MvvmUniverse.Test
     public class DictionaryTest
     {
         [TestMethod]
-        public void Create()
+        public void Basic()
         {
             var dic1 = new ObservableDictionary<int, int>();
             var dic2 = new ObservableDictionary<object, int>();
@@ -23,6 +23,7 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.AreEqual(StringComparer.CurrentCulture, dic5.Comparer);
             Assert.ThrowsException<ArgumentNullException>(() => new ObservableDictionary<string, int>((IEqualityComparer<string>)null));
             var dic6 = new ObservableDictionary<string, int>((IDictionary<string, int>)null);
+            Assert.AreEqual(0, dic6.Count);
             var dic7 = new ObservableDictionary<string, int>(new Dictionary<string, int> { [""] = 1 });
             Assert.AreEqual(1, dic7.Count);
             Assert.AreEqual(1, dic7[""]);

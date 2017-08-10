@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion(AssemblyInfo.Version)]
 [assembly: AssemblyFileVersion(AssemblyInfo.Version)]
 [assembly: ComVisible(false)]
-
+[assembly: InternalsVisibleTo("Opportunity.MvvmUniverse.Test")]
 
 internal static class AssemblyInfo
 {
