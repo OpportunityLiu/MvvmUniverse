@@ -6,12 +6,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Linq;
+using Windows.UI.Xaml.Interop;
+using Windows.Foundation.Collections;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ObservableCollection<T> : ObservableCollectionBase<T>, IList<T>, IReadOnlyList<T>, IList
+    public class ObservableCollection<T> : ObservableObject, IReadOnlyList<T>, IBindableObservableVector, IObservableVector<T>
     {
         protected List<T> Items { get; }
 
@@ -253,6 +255,24 @@ namespace Opportunity.MvvmUniverse.Collections
             void IList.Remove(object value) => throw new InvalidOperationException();
             void IList.RemoveAt(int index) => throw new InvalidOperationException();
             void ICollection.CopyTo(Array array, int index) => ((T[])array)[index] = Value;
+        }
+
+        public event BindableVectorChangedEventHandler VectorChanged;
+        private event VectorChangedEventHandler<T> VectorChanged2;
+
+        event VectorChangedEventHandler<T> IObservableVector<T>.VectorChanged
+        {
+            add
+            {
+                VectorChanged2 += value;
+                System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable < VectorChangedEventHandler<T> >
+                return EventResetMode.AutoReset;
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
