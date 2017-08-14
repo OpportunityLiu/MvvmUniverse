@@ -30,11 +30,11 @@ namespace Opportunity.MvvmUniverse.Collections
             if ((items ?? throw new ArgumentNullException(nameof(items))).Count <= 0)
                 return;
             Items.InsertRange(index, items);
-            RaisePropertyChanged(nameof(Count));
+            OnPropertyChanged(nameof(Count));
             if (items.Count == 1)
-                RaiseCollectionAdd(items[0], index);
+                OnCollectionAdd(items[0], index);
             else
-                RaiseCollectionAdd(items, index);
+                OnCollectionAdd(items, index);
         }
 
         protected virtual void RemoveItems(int index, int count)
@@ -49,16 +49,16 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 var removedItem = Items[index];
                 Items.RemoveAt(index);
-                RaisePropertyChanged(nameof(Count));
-                RaiseCollectionRemove(removedItem, index);
+                OnPropertyChanged(nameof(Count));
+                OnCollectionRemove(removedItem, index);
             }
             else
             {
                 var removedItems = new T[count];
                 Items.CopyTo(index, removedItems, 0, count);
                 Items.RemoveRange(index, count);
-                RaisePropertyChanged(nameof(Count));
-                RaiseCollectionRemove(removedItems, index);
+                OnPropertyChanged(nameof(Count));
+                OnCollectionRemove(removedItems, index);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 var oldItem = Items[index];
                 Items[index] = items[0];
-                RaiseCollectionReplace(items[0], oldItem, index);
+                OnCollectionReplace(items[0], oldItem, index);
             }
             else
             {
@@ -84,7 +84,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 {
                     Items[index + i] = items[i];
                 }
-                RaiseCollectionReplace(items, oldItems, index);
+                OnCollectionReplace(items, oldItems, index);
             }
         }
 
@@ -103,7 +103,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 var itemToMove = this[oldIndex];
                 Items.RemoveAt(oldIndex);
                 Items.Insert(newIndex, itemToMove);
-                RaiseCollectionMove(itemToMove, newIndex, oldIndex);
+                OnCollectionMove(itemToMove, newIndex, oldIndex);
             }
             else
             {
@@ -111,15 +111,15 @@ namespace Opportunity.MvvmUniverse.Collections
                 Items.CopyTo(oldIndex, itemsToMove, 0, count);
                 Items.RemoveRange(oldIndex, count);
                 Items.InsertRange(newIndex, itemsToMove);
-                RaiseCollectionMove(itemsToMove, newIndex, oldIndex);
+                OnCollectionMove(itemsToMove, newIndex, oldIndex);
             }
         }
 
         protected virtual void ClearItems()
         {
             Items.Clear();
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionReset();
+            OnPropertyChanged(nameof(Count));
+            OnCollectionReset();
         }
 
         public int Count => Items.Count;

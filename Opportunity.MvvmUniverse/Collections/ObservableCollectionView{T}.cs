@@ -25,8 +25,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         private void Collection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionChanged(e);
+            OnPropertyChanged(nameof(Count));
+            OnCollectionChanged(e);
         }
 
         public T this[int index] => Collection[index];

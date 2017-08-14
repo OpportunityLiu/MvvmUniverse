@@ -27,7 +27,7 @@ namespace Opportunity.MvvmUniverse.Settings
 
         protected virtual void RoamingDataChanged()
         {
-            RaisePropertyChanged((string)null);
+            OnPropertyChanged((string)null);
         }
 
         private static readonly List<WeakReference<SettingCollection>> roamingCollcetions
@@ -105,7 +105,7 @@ namespace Opportunity.MvvmUniverse.Settings
         private void setToContainerCore<T>(SettingProperty<T> property, T old, T value)
         {
             this.Container.Values[property.Name] = serializeValue(value);
-            RaisePropertyChanged(property.Name);
+            OnPropertyChanged(property.Name);
             property.RaisePropertyChanged(this, old, value);
         }
 

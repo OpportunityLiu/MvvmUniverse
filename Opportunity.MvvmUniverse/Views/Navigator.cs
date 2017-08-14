@@ -85,7 +85,7 @@ namespace Opportunity.MvvmUniverse.Views
             if (ov != nv)
             {
                 AppViewBackButtonVisibility = nv;
-                RaisePropertyChanged(nameof(AppViewBackButtonVisibility));
+                OnPropertyChanged(nameof(AppViewBackButtonVisibility));
             }
         }
 

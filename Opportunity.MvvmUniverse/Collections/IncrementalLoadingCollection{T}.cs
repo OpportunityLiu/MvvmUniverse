@@ -48,7 +48,7 @@ namespace Opportunity.MvvmUniverse.Collections
             this.pageCount = 0;
             this.recordCount = 0;
             Clear();
-            RaisePropertyChanged(nameof(LoadedPageCount), nameof(PageCount), nameof(RecordCount), nameof(IsEmpty), nameof(HasMoreItems));
+            OnPropertyChanged(nameof(LoadedPageCount), nameof(PageCount), nameof(RecordCount), nameof(IsEmpty), nameof(HasMoreItems));
         }
 
         private IAsyncOperation<LoadMoreItemsResult> loading;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -49,7 +50,7 @@ namespace Opportunity.MvvmUniverse
             field = value;
             if (PropertyChanged == null)
                 return;
-            RaisePropertyChanged(propertyName);
+            OnPropertyChanged(propertyName);
         }
 
         protected void ForceSet<TProp>(string addtionalPropertyName, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
@@ -57,7 +58,7 @@ namespace Opportunity.MvvmUniverse
             field = value;
             if (PropertyChanged == null)
                 return;
-            RaisePropertyChanged(propertyName, addtionalPropertyName);
+            OnPropertyChanged(propertyName, addtionalPropertyName);
         }
 
         protected void ForceSet<TProp>(string addtionalPropertyName0, string addtionalPropertyName1, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
@@ -65,7 +66,7 @@ namespace Opportunity.MvvmUniverse
             field = value;
             if (PropertyChanged == null)
                 return;
-            RaisePropertyChanged(propertyName, addtionalPropertyName0, addtionalPropertyName1);
+            OnPropertyChanged(propertyName, addtionalPropertyName0, addtionalPropertyName1);
         }
 
         protected void ForceSet<TProp>(IEnumerable<string> addtionalPropertyNames, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
@@ -83,81 +84,141 @@ namespace Opportunity.MvvmUniverse
                     yield return item;
                 }
             }
-            RaisePropertyChanged(g());
+            OnPropertyChanged(g());
         }
 
-        protected void RaisePropertyChanged([CallerMemberName]string propertyName = null)
+        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
-            IEnumerable<string> g()
-            {
-                yield return propertyName;
-            }
-            RaisePropertyChanged(g());
+            if (PropertyChanged == null)
+                return;
+            OnPropertyChanged(new SinglePropertyChangedEventArgsSource(propertyName));
         }
 
-        protected void RaisePropertyChanged(string propertyName0, string propertyName1)
+        protected void OnPropertyChanged(string propertyName0, string propertyName1)
         {
+            if (PropertyChanged == null)
+                return;
             IEnumerable<string> g()
             {
                 yield return propertyName0;
                 yield return propertyName1;
             }
-            RaisePropertyChanged(g());
+            OnPropertyChanged(g());
         }
 
-        protected void RaisePropertyChanged(string propertyName0, string propertyName1, string propertyName2)
+        protected void OnPropertyChanged(string propertyName0, string propertyName1, string propertyName2)
         {
+            if (PropertyChanged == null)
+                return;
             IEnumerable<string> g()
             {
                 yield return propertyName0;
                 yield return propertyName1;
                 yield return propertyName2;
             }
-            RaisePropertyChanged(g());
+            OnPropertyChanged(g());
         }
 
-        protected void RaisePropertyChanged(params string[] propertyNames)
+        protected void OnPropertyChanged(params string[] propertyNames)
         {
             if (PropertyChanged == null)
                 return;
-            this.RaisePropertyChanged((IEnumerable<string>)propertyNames);
+            this.OnPropertyChanged(new MultiPropertyChangedEventArgsSource(propertyNames));
         }
 
-        protected virtual void RaisePropertyChanged(IEnumerable<string> propertyNames)
+        protected void OnPropertyChanged(IEnumerable<string> propertyNames)
         {
-            if (propertyNames == null)
+            if (PropertyChanged == null)
+                return;
+            this.OnPropertyChanged(new MultiPropertyChangedEventArgsSource(propertyNames));
+        }
+
+        protected virtual void OnPropertyChanged(PropertyChangedEventArgsSource args)
+        {
+            if (args == null)
                 return;
             var temp = PropertyChanged;
             if (temp == null)
                 return;
-            var args = new MultiPropertyChangedEventArgs(propertyNames);
             DispatcherHelper.BeginInvoke(() =>
             {
-                while (args.MoveNext())
+                foreach (var item in args)
                 {
-                    temp(this, args);
+                    temp(this, item);
                 }
             });
         }
+    }
 
-        private sealed class MultiPropertyChangedEventArgs : PropertyChangedEventArgs
+    public abstract class PropertyChangedEventArgsSource : IEnumerable<PropertyChangedEventArgs>
+    {
+        public abstract IEnumerator<PropertyChangedEventArgs> GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        protected class EditablePropertyChangedEventArgs : PropertyChangedEventArgs
         {
-            public MultiPropertyChangedEventArgs(IEnumerable<string> propertyNames) : base(null)
+            public EditablePropertyChangedEventArgs() : base(null) { }
+
+            public override string PropertyName => this.pName;
+
+            private string pName;
+
+            public void SetpropertyName(string propertyName) => this.pName = propertyName;
+        }
+    }
+
+    public sealed class SinglePropertyChangedEventArgsSource : PropertyChangedEventArgsSource
+    {
+        private readonly string name;
+
+        public SinglePropertyChangedEventArgsSource(string propertyName)
+        {
+            this.name = propertyName;
+        }
+
+        public override IEnumerator<PropertyChangedEventArgs> GetEnumerator()
+        {
+            yield return new PropertyChangedEventArgs(this.name);
+        }
+    }
+
+    public sealed class MultiPropertyChangedEventArgsSource : PropertyChangedEventArgsSource
+    {
+        public MultiPropertyChangedEventArgsSource(IEnumerable<string> propertyNames)
+        {
+            this.names = propertyNames ?? throw new ArgumentNullException(nameof(propertyNames));
+        }
+
+        private readonly IEnumerable<string> names;
+        public override IEnumerator<PropertyChangedEventArgs> GetEnumerator() => new MultiPropertyChangedEventArgsEnumerator(this.names);
+
+        private sealed class MultiPropertyChangedEventArgsEnumerator : IEnumerator<PropertyChangedEventArgs>
+        {
+            public MultiPropertyChangedEventArgsEnumerator(IEnumerable<string> propertyNames)
             {
                 this.enumrator = propertyNames.GetEnumerator();
             }
 
             private IEnumerator<string> enumrator;
 
-            public override string PropertyName => this.enumrator.Current;
-
-            public bool MoveNext()
+            private EditablePropertyChangedEventArgs args = new EditablePropertyChangedEventArgs();
+            public PropertyChangedEventArgs Current
             {
-                if (this.enumrator.MoveNext())
-                    return true;
-                this.enumrator.Dispose();
-                return false;
+                get
+                {
+                    this.args.SetpropertyName(this.enumrator.Current);
+                    return this.args;
+                }
             }
+
+            object IEnumerator.Current => Current;
+
+            public bool MoveNext() => this.enumrator.MoveNext();
+
+            public void Reset() => this.enumrator.Reset();
+
+            public void Dispose() => this.enumrator.Dispose();
         }
     }
 }

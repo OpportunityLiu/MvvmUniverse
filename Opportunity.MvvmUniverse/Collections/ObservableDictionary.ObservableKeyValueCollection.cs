@@ -28,25 +28,25 @@ namespace Opportunity.MvvmUniverse.Collections
             }
 
             internal void RaiseCountChangedInternal()
-                => this.RaisePropertyChanged(nameof(Count));
+                => this.OnPropertyChanged(nameof(Count));
 
             internal void RaiseCollectionChangedInternal(NotifyCollectionChangedEventArgs e)
-                => this.RaiseCollectionChanged(e);
+                => this.OnCollectionChanged(e);
 
             internal void RaiseCollectionResetInternal()
-                => RaiseCollectionReset();
+                => OnCollectionReset();
 
             internal void RaiseCollectionMoveInternal(T item, int newIndex, int oldIndex)
-                => RaiseCollectionMove(item, newIndex, oldIndex);
+                => OnCollectionMove(item, newIndex, oldIndex);
 
             internal void RaiseCollectionAddInternal(T item, int index)
-                => RaiseCollectionAdd(item, index);
+                => OnCollectionAdd(item, index);
 
             internal void RaiseCollectionRemoveInternal(T item, int index)
-                => RaiseCollectionRemove(item, index);
+                => OnCollectionRemove(item, index);
 
             internal void RaiseCollectionReplaceInternal(T newItem, T oldItem, int index)
-                => RaiseCollectionReplace(newItem, oldItem, index);
+                => OnCollectionReplace(newItem, oldItem, index);
 
             public T this[int index] => this.Collection[index];
 

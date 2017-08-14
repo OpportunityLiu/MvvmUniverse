@@ -93,8 +93,8 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.values.RaiseCountChangedInternal();
                 this.values.RaiseCollectionAddInternal(value, ValueItems.Count - 1);
             }
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionAdd(CreateKVP(key, value), KeySet.Count - 1);
+            OnPropertyChanged(nameof(Count));
+            OnCollectionAdd(CreateKVP(key, value), KeySet.Count - 1);
             check();
         }
 
@@ -116,8 +116,8 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.values.RaiseCountChangedInternal();
                 this.values.RaiseCollectionRemoveInternal(removedValue, removedIndex);
             }
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionRemove(CreateKVP(key, removedValue), removedIndex);
+            OnPropertyChanged(nameof(Count));
+            OnCollectionRemove(CreateKVP(key, removedValue), removedIndex);
             check();
         }
 
@@ -131,7 +131,7 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 this.values.RaiseCollectionReplaceInternal(value, oldValue, index);
             }
-            RaiseCollectionReplace(CreateKVP(key, value), CreateKVP(key, oldValue), index);
+            OnCollectionReplace(CreateKVP(key, value), CreateKVP(key, oldValue), index);
             check();
         }
 
@@ -158,7 +158,7 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 this.values.RaiseCollectionMoveInternal(value, newIndex, oldIndex);
             }
-            RaiseCollectionMove(CreateKVP(key, value), newIndex, oldIndex);
+            OnCollectionMove(CreateKVP(key, value), newIndex, oldIndex);
             check();
         }
 
@@ -177,8 +177,8 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.values.RaiseCountChangedInternal();
                 this.values.RaiseCollectionResetInternal();
             }
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionReset();
+            OnPropertyChanged(nameof(Count));
+            OnCollectionReset();
             check();
         }
 

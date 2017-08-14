@@ -94,7 +94,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        protected virtual void RaiseCollectionChanged(NotifyCollectionChangedEventArgs args)
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs args)
         {
             var temp = CollectionChanged;
             if (temp == null)
@@ -105,69 +105,69 @@ namespace Opportunity.MvvmUniverse.Collections
             });
         }
 
-        protected void RaiseCollectionReset()
+        protected void OnCollectionReset()
         {
             if (CollectionChanged == null)
                 return;
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
-        protected void RaiseCollectionMove(T item, int newIndex, int oldIndex)
+        protected void OnCollectionMove(T item, int newIndex, int oldIndex)
         {
             if (CollectionChanged == null)
                 return;
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
         }
 
-        protected void RaiseCollectionMove(IReadOnlyList<T> items, int newIndex, int oldIndex)
-        {
-            if (CollectionChanged == null)
-                return;
-            if (!(items is IList list))
-                list = new ListWarpper(items);
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, list, newIndex, oldIndex));
-        }
-
-        protected void RaiseCollectionAdd(T item, int index)
-        {
-            if (CollectionChanged == null)
-                return;
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
-        }
-
-        protected void RaiseCollectionAdd(IReadOnlyList<T> items, int index)
+        protected void OnCollectionMove(IReadOnlyList<T> items, int newIndex, int oldIndex)
         {
             if (CollectionChanged == null)
                 return;
             if (!(items is IList list))
                 list = new ListWarpper(items);
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, list, index));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, list, newIndex, oldIndex));
         }
 
-        protected void RaiseCollectionRemove(T item, int index)
+        protected void OnCollectionAdd(T item, int index)
         {
             if (CollectionChanged == null)
                 return;
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
         }
 
-        protected void RaiseCollectionRemove(IReadOnlyList<T> items, int index)
+        protected void OnCollectionAdd(IReadOnlyList<T> items, int index)
         {
             if (CollectionChanged == null)
                 return;
             if (!(items is IList list))
                 list = new ListWarpper(items);
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, index));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, list, index));
         }
 
-        protected void RaiseCollectionReplace(T newItem, T oldItem, int index)
+        protected void OnCollectionRemove(T item, int index)
         {
             if (CollectionChanged == null)
                 return;
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newItem, oldItem, index));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
         }
 
-        protected void RaiseCollectionReplace(IReadOnlyList<T> newItems, IReadOnlyList<T> oldItems, int index)
+        protected void OnCollectionRemove(IReadOnlyList<T> items, int index)
+        {
+            if (CollectionChanged == null)
+                return;
+            if (!(items is IList list))
+                list = new ListWarpper(items);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, index));
+        }
+
+        protected void OnCollectionReplace(T newItem, T oldItem, int index)
+        {
+            if (CollectionChanged == null)
+                return;
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newItem, oldItem, index));
+        }
+
+        protected void OnCollectionReplace(IReadOnlyList<T> newItems, IReadOnlyList<T> oldItems, int index)
         {
             if (CollectionChanged == null)
                 return;
@@ -175,7 +175,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 newList = new ListWarpper(newItems);
             if (!(oldItems is IList oldList))
                 oldList = new ListWarpper(oldItems);
-            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newList, oldList, index));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newList, oldList, index));
         }
     }
 }

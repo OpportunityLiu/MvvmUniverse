@@ -27,8 +27,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         private void Dictionary_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(Count));
-            RaiseCollectionChanged(e);
+            OnPropertyChanged(nameof(Count));
+            OnCollectionChanged(e);
         }
 
         public TValue this[TKey key] => Dictionary[key];
