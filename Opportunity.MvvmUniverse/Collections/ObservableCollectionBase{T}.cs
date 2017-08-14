@@ -5,8 +5,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml.Interop;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
