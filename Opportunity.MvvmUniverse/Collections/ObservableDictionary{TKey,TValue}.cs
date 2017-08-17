@@ -341,11 +341,11 @@ namespace Opportunity.MvvmUniverse.Collections
             return true;
         }
 
-        public DictionaryEnumerator GetEnumerator() => new DictionaryEnumerator(this);
+        public DictionaryEnumerator GetEnumerator() => new DictionaryEnumerator(this, 0);
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => GetEnumerator();
-        IDictionaryEnumerator IDictionary.GetEnumerator() => GetEnumerator();
+        IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => new DictionaryEnumerator(this, 0);
+        IDictionaryEnumerator IDictionary.GetEnumerator() => ((IOrderedDictionary)this).GetEnumerator();
 
         public void ForEach(Action<TKey, TValue> action)
         {
@@ -378,11 +378,13 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             private List<TKey>.Enumerator keyEnumerator;
             private List<TValue>.Enumerator valueEnumerator;
+            private int type;
 
-            internal DictionaryEnumerator(ObservableDictionary<TKey, TValue> parent)
+            internal DictionaryEnumerator(ObservableDictionary<TKey, TValue> parent, int type)
             {
                 this.keyEnumerator = parent.KeyItems.GetEnumerator();
                 this.valueEnumerator = parent.ValueItems.GetEnumerator();
+                this.type = type;
             }
 
             DictionaryEntry IDictionaryEnumerator.Entry => new DictionaryEntry(Key, Value);
@@ -394,7 +396,7 @@ namespace Opportunity.MvvmUniverse.Collections
             object IDictionaryEnumerator.Value => Value;
 
             public KeyValuePair<TKey, TValue> Current => CreateKVP(Key, Value);
-            object IEnumerator.Current => new DictionaryEntry(Key, Value);
+            object IEnumerator.Current => this.type == 0 ? (object)Current : new DictionaryEntry(Key, Value);
 
             public void Dispose()
             {

@@ -131,12 +131,11 @@ namespace Opportunity.MvvmUniverse.Collections
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection<T>.IsReadOnly => false;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool IList.IsReadOnly => false;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IList.IsFixedSize => false;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool IList.IsReadOnly => false;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection.IsSynchronized => false;
