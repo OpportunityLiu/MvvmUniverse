@@ -158,30 +158,33 @@ namespace Opportunity.MvvmUniverse.Collections
             Add(CastValue<T>(value));
             return Items.Count - 1;
         }
-        public void AddRange(IEnumerable<T> items)
+        public int AddRange(IEnumerable<T> items)
         {
-            if (items is IReadOnlyList<T> l)
-                InsertItems(Items.Count, l);
-            else
-                InsertItems(Items.Count, items.ToList());
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            var toAdd = (items as IReadOnlyList<T>) ?? items.ToList();
+            InsertItems(Count, toAdd);
+            return toAdd.Count;
         }
 
         public void Insert(int index, T item) => InsertItems(index, new Box(item));
         void IList.Insert(int index, object value) => Insert(index, CastValue<T>(value));
-        public void InsertRange(int index, IEnumerable<T> items)
+        public int InsertRange(int index, IEnumerable<T> items)
         {
-            if (items is IReadOnlyList<T> l)
-                InsertItems(index, l);
-            else
-                InsertItems(index, items.ToList());
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            var toAdd = (items as IReadOnlyList<T>) ?? items.ToList();
+            InsertItems(index, toAdd);
+            return toAdd.Count;
         }
 
-        public void SetRange(int index, IEnumerable<T> items)
+        public int SetRange(int index, IEnumerable<T> items)
         {
-            if (items is IReadOnlyList<T> l)
-                SetItems(index, l);
-            else
-                SetItems(index, items.ToList());
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            var toSet = (items as IReadOnlyList<T>) ?? items.ToList();
+            SetItems(index, toSet);
+            return toSet.Count;
         }
 
         public void Move(int oldIndex, int newIndex) => MoveItems(oldIndex, newIndex, 1);

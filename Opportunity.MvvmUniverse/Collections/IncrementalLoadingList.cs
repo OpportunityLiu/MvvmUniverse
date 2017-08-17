@@ -33,7 +33,7 @@ namespace Opportunity.MvvmUniverse.Collections
             protected set => Set(nameof(HasMoreItems), ref this.pageCount, value);
         }
 
-        protected abstract IAsyncOperation<IList<T>> LoadPageAsync(int pageIndex);
+        protected abstract IAsyncOperation<IEnumerable<T>> LoadPageAsync(int pageIndex);
 
         public bool IsEmpty => this.RecordCount == 0;
 
@@ -68,12 +68,12 @@ namespace Opportunity.MvvmUniverse.Collections
                 if (!this.HasMoreItems)
                     return new LoadMoreItemsResult();
                 var lp = LoadPageAsync(this.loadedPageCount);
-                IList<T> re = null;
+                var lc = 0;
                 token.Register(lp.Cancel);
                 try
                 {
-                    re = await lp;
-                    this.AddRange(re);
+                    var re = await lp;
+                    lc = this.AddRange(re);
                     this.LoadedPageCount++;
                 }
                 catch (Exception ex)
@@ -81,7 +81,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     if (!await tryHandle(ex))
                         throw;
                 }
-                return new LoadMoreItemsResult() { Count = re == null ? 0u : (uint)re.Count };
+                return new LoadMoreItemsResult() { Count = (uint)lc };
             });
         }
 
