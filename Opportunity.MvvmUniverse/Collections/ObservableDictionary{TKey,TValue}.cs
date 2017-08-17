@@ -385,7 +385,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.valueEnumerator = parent.ValueItems.GetEnumerator();
             }
 
-            DictionaryEntry IDictionaryEnumerator.Entry => new DictionaryEntry();
+            DictionaryEntry IDictionaryEnumerator.Entry => new DictionaryEntry(Key, Value);
 
             public TKey Key => this.keyEnumerator.Current;
             public TValue Value => this.valueEnumerator.Current;
@@ -394,7 +394,7 @@ namespace Opportunity.MvvmUniverse.Collections
             object IDictionaryEnumerator.Value => Value;
 
             public KeyValuePair<TKey, TValue> Current => CreateKVP(Key, Value);
-            object IEnumerator.Current => Current;
+            object IEnumerator.Current => new DictionaryEntry(Key, Value);
 
             public void Dispose()
             {
