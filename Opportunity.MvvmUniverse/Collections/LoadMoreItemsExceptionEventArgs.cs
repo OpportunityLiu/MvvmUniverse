@@ -2,7 +2,7 @@
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public delegate void LoadMoreItemsExceptionEventHadler<T>(IncrementalLoadingCollection<T> sender, LoadMoreItemsExceptionEventArgs e);
+    public delegate void LoadMoreItemsExceptionEventHadler<T>(IncrementalLoadingList<T> sender, LoadMoreItemsExceptionEventArgs e);
 
     public class LoadMoreItemsExceptionEventArgs : EventArgs
     {

@@ -13,8 +13,12 @@ using static System.Runtime.InteropServices.WindowsRuntime.AsyncInfo;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public abstract class IncrementalLoadingCollection<T> : ObservableCollection<T>, ISupportIncrementalLoading
+    public abstract class IncrementalLoadingList<T> : ObservableList<T>, ISupportIncrementalLoading
     {
+        protected IncrementalLoadingList() { }
+
+        protected IncrementalLoadingList(IEnumerable<T> items) : base(items) { }
+
         private int recordCount;
         public int RecordCount
         {

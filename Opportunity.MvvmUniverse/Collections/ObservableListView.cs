@@ -13,11 +13,11 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ObservableCollectionView<T> : ObservableCollectionBase<T>, IReadOnlyList<T>, IList, ICollection<T>
+    public class ObservableListView<T> : ObservableCollectionBase<T>, IReadOnlyList<T>, IList, ICollection<T>
     {
-        protected ObservableCollection<T> Collection { get; }
+        protected ObservableList<T> Collection { get; }
 
-        public ObservableCollectionView(ObservableCollection<T> collection)
+        public ObservableListView(ObservableList<T> collection)
         {
             this.Collection = collection ?? throw new ArgumentNullException(nameof(collection));
             collection.CollectionChanged += this.Collection_CollectionChanged;

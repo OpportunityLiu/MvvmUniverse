@@ -10,17 +10,17 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public struct RangedCollectionView<T> : IReadOnlyList<T>, ICollection<T>, IList
+    public struct RangedListView<T> : IReadOnlyList<T>, ICollection<T>, IList
     {
-        public static RangedCollectionView<T> Empty { get; }
-            = new RangedCollectionView<T>(Array.Empty<T>(), 0, 0);
+        public static RangedListView<T> Empty { get; }
+            = new RangedListView<T>(Array.Empty<T>(), 0, 0);
 
-        public RangedCollectionView(IReadOnlyList<T> items, ItemIndexRange range)
+        public RangedListView(IReadOnlyList<T> items, ItemIndexRange range)
             : this(items, range.FirstIndex, (int)range.Length)
         {
         }
 
-        public RangedCollectionView(IReadOnlyList<T> items, int startIndex, int count)
+        public RangedListView(IReadOnlyList<T> items, int startIndex, int count)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
@@ -152,13 +152,13 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public struct RangedCollectionViewEnumerator : IEnumerator<T>
         {
-            internal RangedCollectionViewEnumerator(RangedCollectionView<T> parent)
+            internal RangedCollectionViewEnumerator(RangedListView<T> parent)
             {
                 this.parent = parent;
                 this.currentPosition = parent.StartIndex - 1;
             }
 
-            private RangedCollectionView<T> parent;
+            private RangedListView<T> parent;
             private int currentPosition;
 
             public T Current => this.parent.items[this.currentPosition];

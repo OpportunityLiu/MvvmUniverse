@@ -11,13 +11,13 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ObservableCollection<T> : ObservableCollectionBase<T>, IList<T>, IReadOnlyList<T>, IList
+    public class ObservableList<T> : ObservableCollectionBase<T>, IList<T>, IReadOnlyList<T>, IList
     {
         protected List<T> Items { get; }
 
-        public ObservableCollection() : this(null) { }
+        public ObservableList() : this(null) { }
 
-        public ObservableCollection(IEnumerable<T> items)
+        public ObservableList(IEnumerable<T> items)
         {
             if (items == null)
                 this.Items = new List<T>();
@@ -117,6 +117,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         protected virtual void ClearItems()
         {
+            if (Count == 0)
+                return;
             Items.Clear();
             OnPropertyChanged(nameof(Count));
             OnCollectionReset();
@@ -199,16 +201,46 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public void Clear() => ClearItems();
 
+        public void Update(IReadOnlyList<T> newList)
+        {
+            if (newList == null)
+                throw new ArgumentNullException(nameof(newList));
+            if (newList.Count <= 0)
+            {
+                ClearItems();
+                return;
+            }
+            if (Count == 0)
+            {
+                InsertItems(0, newList);
+                return;
+            }
+            var editDistanceArray = new int[this.Count + 1, newList.Count + 1];
+        }
+
+        public void ForEach(Action<T> action) => Items.ForEach(action);
+        public void ForEach(Action<int, T> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            var i = 0;
+            foreach (var item in Items)
+            {
+                action(i, item);
+                i++;
+            }
+        }
+
         public bool Contains(T item) => Items.Contains(item);
         bool IList.Contains(object value) => Contains(CastValue<T>(value));
 
         public void CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
 
-        private ObservableCollectionView<T> readOnlyView;
+        private ObservableListView<T> readOnlyView;
 
-        public ObservableCollectionView<T> AsReadOnly()
-            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, () => new ObservableCollectionView<T>(this));
+        public ObservableListView<T> AsReadOnly()
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, () => new ObservableListView<T>(this));
 
         public int IndexOf(T item) => Items.IndexOf(item);
         int IList.IndexOf(object value) => IndexOf(CastValue<T>(value));

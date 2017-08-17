@@ -54,9 +54,9 @@ namespace Opportunity.MvvmUniverse.Collections
             set => ThrowForReadOnlyCollection(Dictionary.ToString());
         }
 
-        public ObservableDictionary<TKey, TValue>.ObservableKeyValueCollection<TKey> Keys => Dictionary.Keys;
+        public ObservableDictionary<TKey, TValue>.ObservableKeyCollection Keys => Dictionary.Keys;
 
-        public ObservableDictionary<TKey, TValue>.ObservableKeyValueCollection<TValue> Values => Dictionary.Values;
+        public ObservableDictionary<TKey, TValue>.ObservableValueCollection Values => Dictionary.Values;
 
         public int Count => Dictionary.Count;
 
@@ -79,15 +79,13 @@ namespace Opportunity.MvvmUniverse.Collections
         ICollection IDictionary.Keys => Dictionary.Keys;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
-            => ((IReadOnlyDictionary<TKey, TValue>)Dictionary).Keys;
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Dictionary.Keys;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ICollection IDictionary.Values => Dictionary.Values;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
-            => ((IReadOnlyDictionary<TKey, TValue>)Dictionary).Values;
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Dictionary.Values;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection.IsSynchronized => ((ICollection)Dictionary).IsSynchronized;
@@ -96,65 +94,45 @@ namespace Opportunity.MvvmUniverse.Collections
         object ICollection.SyncRoot => ((ICollection)Dictionary).SyncRoot;
 
         public bool ContainsKey(TKey key) => Dictionary.ContainsKey(key);
-
         public bool ConatinsValue(TValue value) => Dictionary.ContainsValue(value);
+        bool IDictionary.Contains(object key) => ((IDictionary)Dictionary).Contains(key);
+        bool IList.Contains(object value) => ((IList)Dictionary).Contains(value);
+        bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
+            => ((ICollection<KeyValuePair<TKey, TValue>>)Dictionary).Contains(item);
 
         public bool TryGetValue(TKey key, out TValue value) => Dictionary.TryGetValue(key, out value);
 
         void IDictionary.Add(object key, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
-
         int IList.Add(object value) => ThrowForReadOnlyCollection<int>(Dictionary.ToString());
+        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection(Dictionary.ToString());
+
+        void IOrderedDictionary.Insert(int index, object key, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
+        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
 
         void IDictionary.Clear() => ThrowForReadOnlyCollection(Dictionary.ToString());
-
         void IList.Clear() => ThrowForReadOnlyCollection(Dictionary.ToString());
-
-        bool IDictionary.Contains(object key) => ((IDictionary)Dictionary).Contains(key);
-
-        bool IList.Contains(object value) => ((IList)Dictionary).Contains(value);
-
-        void ICollection.CopyTo(Array array, int index) => ((ICollection)Dictionary).CopyTo(array, index);
-
-        public int IndexOfKey(TKey key) => Dictionary.IndexOfKey(key);
-
-        public int IndexOfValue(TValue value) => Dictionary.IndexOfValue(value);
+        void ICollection<KeyValuePair<TKey, TValue>>.Clear() => ThrowForReadOnlyCollection(Dictionary.ToString());
 
         int IList.IndexOf(object value) => ((IList)Dictionary).IndexOf(value);
 
-        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+            => Dictionary.CopyTo(array, arrayIndex);
+        void ICollection.CopyTo(Array array, int index) => ((ICollection)Dictionary).CopyTo(array, index);
 
         void IDictionary.Remove(object key) => ThrowForReadOnlyCollection(Dictionary.ToString());
-
         void IList.Remove(object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
+        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection<bool>(Dictionary.ToString());
 
         void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary.ToString());
-
-        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection(Dictionary.ToString());
-
-        void ICollection<KeyValuePair<TKey, TValue>>.Clear() => ThrowForReadOnlyCollection(Dictionary.ToString());
-
-        bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
-            => ((ICollection<KeyValuePair<TKey, TValue>>)Dictionary).Contains(item);
-
-        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-            => ((ICollection<KeyValuePair<TKey, TValue>>)Dictionary).CopyTo(array, arrayIndex);
-
-        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
-            => ThrowForReadOnlyCollection<bool>(Dictionary.ToString());
-
-        public ObservableDictionary<TKey, TValue>.DictionaryEnumerator GetEnumerator()
-            => Dictionary.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Dictionary).GetEnumerator();
-
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
-            => ((IEnumerable<KeyValuePair<TKey, TValue>>)Dictionary).GetEnumerator();
-
-        IDictionaryEnumerator IDictionary.GetEnumerator() => ((IDictionary)Dictionary).GetEnumerator();
-        IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => ((IDictionary)Dictionary).GetEnumerator();
-
-        void IOrderedDictionary.Insert(int index, object key, object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
-
         void IOrderedDictionary.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary.ToString());
+
+        public ObservableDictionary<TKey, TValue>.DictionaryEnumerator GetEnumerator() => Dictionary.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
+        IDictionaryEnumerator IDictionary.GetEnumerator() => GetEnumerator();
+        IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => GetEnumerator();
+
+        public void ForEach(Action<TKey, TValue> action) => Dictionary.ForEach(action);
+        public void ForEach(Action<int, TKey, TValue> action) => Dictionary.ForEach(action);
     }
 }

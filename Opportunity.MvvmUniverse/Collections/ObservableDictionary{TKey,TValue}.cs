@@ -227,14 +227,14 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private ObservableKeyValueCollection<TKey> keys;
+        private ObservableKeyCollection keys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private ObservableKeyValueCollection<TValue> values;
+        private ObservableValueCollection values;
 
-        public ObservableKeyValueCollection<TKey> Keys
-            => LazyInitializer.EnsureInitialized(ref this.keys, () => new ObservableKeyValueCollection<TKey>(this, true));
-        public ObservableKeyValueCollection<TValue> Values
-            => LazyInitializer.EnsureInitialized(ref this.values, () => new ObservableKeyValueCollection<TValue>(this, false));
+        public ObservableKeyCollection Keys
+            => LazyInitializer.EnsureInitialized(ref this.keys, () => new ObservableKeyCollection(this));
+        public ObservableValueCollection Values
+            => LazyInitializer.EnsureInitialized(ref this.values, () => new ObservableValueCollection(this));
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ICollection<TKey> IDictionary<TKey, TValue>.Keys => Keys;
@@ -271,7 +271,7 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection.IsSynchronized => false;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object ICollection.SyncRoot => ((ICollection)KeySet).SyncRoot;
+        object ICollection.SyncRoot => ((ICollection)this.KeySet).SyncRoot;
 
         public void Add(TKey key, TValue value) => InsertItem(Count, key, value);
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
@@ -347,6 +347,33 @@ namespace Opportunity.MvvmUniverse.Collections
         IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => GetEnumerator();
         IDictionaryEnumerator IDictionary.GetEnumerator() => GetEnumerator();
 
+        public void ForEach(Action<TKey, TValue> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            using (var e = this.GetEnumerator())
+            {
+                while (e.MoveNext())
+                {
+                    action(e.Key, e.Value);
+                }
+            }
+        }
+        public void ForEach(Action<int, TKey, TValue> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            var i = 0;
+            using (var e = this.GetEnumerator())
+            {
+                while (e.MoveNext())
+                {
+                    action(i, e.Key, e.Value);
+                    i++;
+                }
+            }
+        }
+
         public struct DictionaryEnumerator : IDictionaryEnumerator, IEnumerator<KeyValuePair<TKey, TValue>>
         {
             private List<TKey>.Enumerator keyEnumerator;
@@ -409,13 +436,6 @@ namespace Opportunity.MvvmUniverse.Collections
         void ICollection.CopyTo(Array array, int index)
             => CopyTo((KeyValuePair<TKey, TValue>[])array, index);
 
-        public int IndexOfKey(TKey key)
-        {
-            if (KeySet.TryGetValue(key, out var index))
-                return index;
-            return -1;
-        }
-        public int IndexOfValue(TValue value) => ValueItems.IndexOf(value);
         int IList<KeyValuePair<TKey, TValue>>.IndexOf(KeyValuePair<TKey, TValue> item)
         {
             if (!KeySet.TryGetValue(item.Key, out var index))

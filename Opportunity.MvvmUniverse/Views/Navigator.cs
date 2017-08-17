@@ -41,7 +41,7 @@ namespace Opportunity.MvvmUniverse.Views
             return true;
         }
 
-        public ObservableCollection<INavigationHandler> Handlers { get; } = new ObservableCollection<INavigationHandler>();
+        public ObservableList<INavigationHandler> Handlers { get; } = new ObservableList<INavigationHandler>();
 
         public SystemNavigationManager NavigationManager { get; } = SystemNavigationManager.GetForCurrentView();
 

@@ -47,6 +47,9 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.AreEqual(2, dic.ItemAt(0).Key);
             Assert.AreEqual(0, dic.ItemAt(1).Key);
             Assert.AreEqual(1, dic.ItemAt(2).Key);
+            Assert.AreEqual(2, dic.ItemAt(0).Value);
+            Assert.AreEqual(1, dic.ItemAt(1).Value);
+            Assert.AreEqual(1, dic.ItemAt(2).Value);
         }
 
         [TestMethod]
@@ -71,8 +74,8 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.AreEqual(4, dic.ItemAt(2).Key);
             Assert.AreEqual(4, dic.ItemAt(2).Value);
             Assert.AreEqual(5, dic[5]);
-            Assert.AreEqual(3, dic.IndexOfKey(5));
-            Assert.AreEqual(3, dic.IndexOfValue(5));
+            Assert.AreEqual(3, dic.Keys.IndexOf(5));
+            Assert.AreEqual(3, dic.Values.IndexOf(5));
         }
 
         [TestMethod]

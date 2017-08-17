@@ -40,12 +40,12 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 
         public static void ThrowForReadOnlyCollection(string parent)
         {
-            throw new InvalidOperationException($"This collection is a read only view of {parent}.");
+            throw new InvalidOperationException($"This collection is a read only view of \"{parent}\".");
         }
 
         public static T ThrowForReadOnlyCollection<T>(string parent)
         {
-            throw new InvalidOperationException($"This collection is a read only view of {parent}.");
+            throw new InvalidOperationException($"This collection is a read only view of \"{parent}\".");
         }
     }
 }
