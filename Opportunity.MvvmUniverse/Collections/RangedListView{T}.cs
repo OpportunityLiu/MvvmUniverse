@@ -20,6 +20,9 @@ namespace Opportunity.MvvmUniverse.Collections
         {
         }
 
+        public RangedListView(IReadOnlyList<T> items, int startIndex)
+            : this(items, startIndex, (items ?? throw new ArgumentNullException(nameof(items))).Count - startIndex) { }
+
         public RangedListView(IReadOnlyList<T> items, int startIndex, int count)
         {
             if (items == null)
@@ -55,6 +58,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IList.IsReadOnly => true;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool ICollection<T>.IsReadOnly => true;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection.IsSynchronized => (this.items as ICollection)?.IsSynchronized ?? false;
@@ -62,52 +67,49 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => (this.items as ICollection)?.SyncRoot;
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool ICollection<T>.IsReadOnly => true;
-
         object IList.this[int index]
         {
             get => this[index];
             set => ThrowForReadOnlyCollection(this.items.ToString());
         }
 
-        public RangedCollectionViewEnumerator GetEnumerator()
-        {
-            return new RangedCollectionViewEnumerator(this);
-        }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
         int IList.Add(object value) => ThrowForReadOnlyCollection<int>(this.items.ToString());
-
-        void IList.Clear() => ThrowForReadOnlyCollection(this.items.ToString());
-
-        bool IList.Contains(object value)
-        {
-            var i = ((IList)this).IndexOf(value);
-            return i != -1;
-        }
-
-        int IList.IndexOf(object value)
-        {
-            var v = CastValue<T>(value);
-            var c = EqualityComparer<T>.Default;
-            for (var i = 0; i < Count; i++)
-            {
-                if (c.Equals(v, this[i]))
-                    return i;
-            }
-            return -1;
-        }
+        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(this.items.ToString());
 
         void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(this.items.ToString());
 
-        void IList.Remove(object value) => ThrowForReadOnlyCollection(this.items.ToString());
+        void IList.Clear() => ThrowForReadOnlyCollection(this.items.ToString());
+        void ICollection<T>.Clear() => ThrowForReadOnlyCollection(this.items.ToString());
 
-        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(this.items.ToString());
+        public bool Contains(T item) => IndexOf(item) >= 0;
+        bool IList.Contains(object value) => Contains(CastValue<T>(value));
 
+        public int IndexOf(T item)
+        {
+            var c = EqualityComparer<T>.Default;
+            var ii = 0;
+            foreach (var i in this)
+            {
+                if (c.Equals(i, item))
+                    return ii;
+                ii++;
+            }
+            return -1;
+        }
+        int IList.IndexOf(object value) => IndexOf(CastValue<T>(value));
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+            if (array.Length - arrayIndex < Count)
+                throw new ArgumentException("Array size not enough", nameof(array));
+            foreach (var item in this)
+            {
+                array[arrayIndex] = item;
+                arrayIndex++;
+            }
+        }
         void ICollection.CopyTo(Array array, int index)
         {
             if (array == null)
@@ -117,38 +119,16 @@ namespace Opportunity.MvvmUniverse.Collections
             var a = array as T[];
             if (a == null)
                 throw new ArgumentException("Wrong array type", nameof(array));
-            ((ICollection<T>)this).CopyTo(a, index);
-        }
-
-        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(this.items.ToString());
-
-        void ICollection<T>.Clear() => ThrowForReadOnlyCollection(this.items.ToString());
-
-        bool ICollection<T>.Contains(T item)
-        {
-            var c = EqualityComparer<T>.Default;
-            foreach (var i in this)
-            {
-                if (c.Equals(i, item))
-                    return true;
-            }
-            return false;
-        }
-
-        void ICollection<T>.CopyTo(T[] array, int arrayIndex)
-        {
-            if (array == null)
-                throw new ArgumentException("Wrong array type", nameof(array));
-            if (array.Length - arrayIndex < Count)
-                throw new ArgumentException("Array size not enough", nameof(array));
-            foreach (var item in this)
-            {
-                array[arrayIndex] = item;
-                arrayIndex++;
-            }
+            CopyTo(a, index);
         }
 
         bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(this.items.ToString());
+        void IList.Remove(object value) => ThrowForReadOnlyCollection(this.items.ToString());
+        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(this.items.ToString());
+
+        public RangedCollectionViewEnumerator GetEnumerator() => new RangedCollectionViewEnumerator(this);
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public struct RangedCollectionViewEnumerator : IEnumerator<T>
         {
@@ -165,9 +145,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             object IEnumerator.Current => this.Current;
 
-            public void Dispose()
-            {
-            }
+            void IDisposable.Dispose() { }
 
             public bool MoveNext()
             {

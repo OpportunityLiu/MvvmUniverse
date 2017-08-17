@@ -19,41 +19,9 @@ namespace Opportunity.MvvmUniverse.Collections
 
         protected IncrementalLoadingList(IEnumerable<T> items) : base(items) { }
 
-        private int recordCount;
-        public int RecordCount
-        {
-            get => this.recordCount;
-            protected set => Set(nameof(IsEmpty), ref this.recordCount, value);
-        }
+        public abstract bool HasMoreItems { get; }
 
-        private int pageCount;
-        public int PageCount
-        {
-            get => this.pageCount;
-            protected set => Set(nameof(HasMoreItems), ref this.pageCount, value);
-        }
-
-        protected abstract IAsyncOperation<IEnumerable<T>> LoadPageAsync(int pageIndex);
-
-        public bool IsEmpty => this.RecordCount == 0;
-
-        private int loadedPageCount;
-        public int LoadedPageCount
-        {
-            get => this.loadedPageCount;
-            protected set => Set(nameof(HasMoreItems), ref this.loadedPageCount, value);
-        }
-
-        public bool HasMoreItems => this.loadedPageCount < this.pageCount;
-
-        protected void ResetAll()
-        {
-            this.loadedPageCount = 0;
-            this.pageCount = 0;
-            this.recordCount = 0;
-            Clear();
-            OnPropertyChanged(nameof(LoadedPageCount), nameof(PageCount), nameof(RecordCount), nameof(IsEmpty), nameof(HasMoreItems));
-        }
+        protected abstract IAsyncOperation<IEnumerable<T>> LoadMoreItemsImplementAsync(int count);
 
         private IAsyncOperation<LoadMoreItemsResult> loading;
 
@@ -67,14 +35,13 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 if (!this.HasMoreItems)
                     return new LoadMoreItemsResult();
-                var lp = LoadPageAsync(this.loadedPageCount);
+                var lp = LoadMoreItemsImplementAsync((int)count);
                 var lc = 0;
                 token.Register(lp.Cancel);
                 try
                 {
                     var re = await lp;
                     lc = this.AddRange(re);
-                    this.LoadedPageCount++;
                 }
                 catch (Exception ex)
                 {

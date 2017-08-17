@@ -15,8 +15,10 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void Settings()
         {
-            var c = new TestSettingCollection();
-            c.MyProperty = 12;
+            var c = new TestSettingCollection
+            {
+                MyProperty = 12
+            };
             var c2 = new TestSettingCollection();
             c.MyProperty2 = StringComparison.CurrentCulture;
             Assert.AreEqual(c.MyProperty, c2.MyProperty);
@@ -38,8 +40,8 @@ namespace Opportunity.MvvmUniverse.Test
 
             public int MyProperty
             {
-                get { return GetFromContainer(MyPropertyProperty); }
-                set { SetToContainer(MyPropertyProperty, value); }
+                get => GetFromContainer(MyPropertyProperty);
+                set => SetToContainer(MyPropertyProperty, value);
             }
 
             // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
@@ -56,8 +58,8 @@ namespace Opportunity.MvvmUniverse.Test
 
             public StringComparison MyProperty2
             {
-                get { return GetFromContainer(MyProperty2Property); }
-                set { SetToContainer(MyProperty2Property, value); }
+                get => GetFromContainer(MyProperty2Property);
+                set => SetToContainer(MyProperty2Property, value);
             }
 
             // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...

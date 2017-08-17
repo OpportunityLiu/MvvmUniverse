@@ -54,36 +54,29 @@ namespace Opportunity.MvvmUniverse.Collections
             set => ThrowForReadOnlyCollection(Dictionary.ToString());
         }
 
-        public ObservableDictionary<TKey, TValue>.ObservableKeyCollection Keys => Dictionary.Keys;
-
-        public ObservableDictionary<TKey, TValue>.ObservableValueCollection Values => Dictionary.Values;
-
         public int Count => Dictionary.Count;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IDictionary.IsFixedSize => ((IDictionary)Dictionary).IsFixedSize;
-
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IList.IsFixedSize => ((IList)Dictionary).IsFixedSize;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IDictionary.IsReadOnly => true;
-
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IList.IsReadOnly => true;
-
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => true;
 
+        public ObservableDictionary<TKey, TValue>.ObservableKeyCollection Keys => Dictionary.Keys;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ICollection IDictionary.Keys => Dictionary.Keys;
-
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Dictionary.Keys;
 
+        public ObservableDictionary<TKey, TValue>.ObservableValueCollection Values => Dictionary.Values;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ICollection IDictionary.Values => Dictionary.Values;
-
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Dictionary.Values;
 
@@ -115,14 +108,12 @@ namespace Opportunity.MvvmUniverse.Collections
 
         int IList.IndexOf(object value) => ((IList)Dictionary).IndexOf(value);
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-            => Dictionary.CopyTo(array, arrayIndex);
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => Dictionary.CopyTo(array, arrayIndex);
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Dictionary).CopyTo(array, index);
 
         void IDictionary.Remove(object key) => ThrowForReadOnlyCollection(Dictionary.ToString());
         void IList.Remove(object value) => ThrowForReadOnlyCollection(Dictionary.ToString());
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection<bool>(Dictionary.ToString());
-
         void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary.ToString());
         void IOrderedDictionary.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary.ToString());
 

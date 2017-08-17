@@ -30,7 +30,6 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         public T this[int index] => Collection[index];
-
         object IList.this[int index]
         {
             get => ((IList)Collection)[index];
@@ -44,6 +43,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IList.IsReadOnly => true;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool ICollection<T>.IsReadOnly => true;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection.IsSynchronized => ((ICollection)Collection).IsSynchronized;
@@ -51,39 +52,34 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => ((ICollection)Collection).SyncRoot;
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool ICollection<T>.IsReadOnly => true;
-
-        public List<T>.Enumerator GetEnumerator() => Collection.GetEnumerator();
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => Collection.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Collection).GetEnumerator();
 
         int IList.Add(object value) => ThrowForReadOnlyCollection<int>(Collection.ToString());
+        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(Collection.ToString());
 
         void IList.Clear() => ThrowForReadOnlyCollection(Collection.ToString());
 
         bool IList.Contains(object value) => ((IList)Collection).Contains(value);
 
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Collection).CopyTo(array, index);
-
-        int IList.IndexOf(object value) => ((IList)Collection).IndexOf(value);
+        public void CopyTo(T[] array, int arrayIndex) => Collection.CopyTo(array, arrayIndex);
 
         void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Collection.ToString());
 
         void IList.Remove(object value) => ThrowForReadOnlyCollection(Collection.ToString());
-
         void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Collection.ToString());
-
-        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(Collection.ToString());
+        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(Collection.ToString());
 
         void ICollection<T>.Clear() => ThrowForReadOnlyCollection(Collection.ToString());
 
-        public bool Contains(T item) => ((ICollection<T>)Collection).Contains(item);
+        public List<T>.Enumerator GetEnumerator() => Collection.GetEnumerator();
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => Collection.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => Collection.GetEnumerator();
 
-        public void CopyTo(T[] array, int arrayIndex) => ((ICollection<T>)Collection).CopyTo(array, arrayIndex);
+        int IList.IndexOf(object value) => ((IList)Collection).IndexOf(value);
 
-        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(Collection.ToString());
+        public bool Contains(T item) => Collection.Contains(item);
+
+        public void ForEach(Action<T> action) => Collection.ForEach(action);
+        public void ForEach(Action<int, T> action) => Collection.ForEach(action);
     }
 }

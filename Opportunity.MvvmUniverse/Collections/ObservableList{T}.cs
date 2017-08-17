@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Linq;
+using System.Collections.Specialized;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ObservableList<T> : ObservableCollectionBase<T>, IList<T>, IReadOnlyList<T>, IList
+    public partial class ObservableList<T> : ObservableCollectionBase<T>, IList<T>, IReadOnlyList<T>, IList
     {
         protected List<T> Items { get; }
 
@@ -204,21 +205,31 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public void Clear() => ClearItems();
 
-        public void Update(IReadOnlyList<T> newList)
+        /// <summary>
+        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
+        /// </summary>
+        /// <param name="newList">The target content</param>
+        /// <returns>The minimum editing distance of the edit</returns>
+        /// <remarks>
+        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"> * <see cref="Count"/> > 1_000_000</c>,
+        /// MED computing will not be executed and -1 will be returned.</remarks>
+        public int Update(IReadOnlyList<T> newList) => Update(newList, EqualityComparer<T>.Default);
+        /// <summary>
+        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
+        /// </summary>
+        /// <param name="newList">The target content</param>
+        /// <param name="comparer">The comparer to compare items in two lists</param>
+        /// <returns>The minimum editing distance of the edit</returns>
+        /// <remarks>
+        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"> * <see cref="Count"/> > 1_000_000</c>,
+        /// MED computing will not be executed and -1 will be returned.</remarks>
+        public int Update(IReadOnlyList<T> newList, IEqualityComparer<T> comparer)
         {
             if (newList == null)
                 throw new ArgumentNullException(nameof(newList));
-            if (newList.Count <= 0)
-            {
-                ClearItems();
-                return;
-            }
-            if (Count == 0)
-            {
-                InsertItems(0, newList);
-                return;
-            }
-            var editDistanceArray = new int[this.Count + 1, newList.Count + 1];
+            if (comparer == null)
+                throw new ArgumentNullException(nameof(comparer));
+            return Updater.Update(this, newList, comparer);
         }
 
         public void ForEach(Action<T> action) => Items.ForEach(action);

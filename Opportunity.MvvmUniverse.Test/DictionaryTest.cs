@@ -32,8 +32,10 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void AddElements()
         {
-            var dic = new ObservableDictionary<int, int>();
-            dic.Add(0, 0);
+            var dic = new ObservableDictionary<int, int>
+            {
+                { 0, 0 }
+            };
             Assert.AreEqual(0, dic[0]);
             Assert.ThrowsException<ArgumentException>(() => dic.Add(0, 1));
             dic[0] = 1;
@@ -55,13 +57,15 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void RemoveElements()
         {
-            var dic = new ObservableDictionary<int, int>();
-            dic.Add(0, 0);
-            dic.Add(1, 1);
-            dic.Add(2, 2);
-            dic.Add(3, 3);
-            dic.Add(4, 4);
-            dic.Add(5, 5);
+            var dic = new ObservableDictionary<int, int>
+            {
+                { 0, 0 },
+                { 1, 1 },
+                { 2, 2 },
+                { 3, 3 },
+                { 4, 4 },
+                { 5, 5 }
+            };
             Assert.AreEqual(6, dic.Count);
             Assert.AreEqual(true, dic.Remove(0));
             Assert.AreEqual(5, dic.Count);
@@ -81,13 +85,15 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void MoveElements()
         {
-            var dic = new ObservableDictionary<int, int>();
-            dic.Add(0, 0);
-            dic.Add(1, 1);
-            dic.Add(2, 2);
-            dic.Add(3, 3);
-            dic.Add(4, 4);
-            dic.Add(5, 5);
+            var dic = new ObservableDictionary<int, int>
+            {
+                { 0, 0 },
+                { 1, 1 },
+                { 2, 2 },
+                { 3, 3 },
+                { 4, 4 },
+                { 5, 5 }
+            };
             dic.Move(0, 1);
             Assert.AreEqual(1, dic.ItemAt(0).Key);
             Assert.AreEqual(0, dic.ItemAt(1).Key);
