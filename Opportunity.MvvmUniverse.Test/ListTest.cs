@@ -39,14 +39,16 @@ namespace Opportunity.MvvmUniverse.Test
             var l = new CharList();
             var sourceArray = source.ToCharArray();
             var targetArray = target.ToCharArray();
-            for (var i = 0; i < 100; i++)
-            {
-                l.AddRange(sourceArray);
-                var m = l.Update(targetArray);
-                CollectionAssert.AreEqual(targetArray, l);
-                Assert.AreEqual(med, m);
-                l.Clear();
-            }
+            l.AddRange(sourceArray);
+            var m = l.Update(targetArray, EqualityComparer<char>.Default, Assert.AreEqual);
+            CollectionAssert.AreEqual(targetArray, l);
+            Assert.AreEqual(med, m);
+            l.Clear();
+            l.AddRange(sourceArray);
+            l.Update(targetArray);
+            CollectionAssert.AreEqual(targetArray, l);
+            Assert.AreEqual(med, m);
+            l.Clear();
         }
 
         public class CharList : ObservableList<char>

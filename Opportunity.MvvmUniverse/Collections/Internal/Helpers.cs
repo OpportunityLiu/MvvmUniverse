@@ -47,5 +47,21 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
         {
             throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
         }
+
+        public static bool IsValueType<T>() => TypeInfo<T>.IsValueType;
+
+        private static class TypeInfo<T>
+        {
+            static TypeInfo()
+            {
+                if (default(T) != null)
+                    IsValueType = true;
+                if (Nullable.GetUnderlyingType(typeof(T)) != null)
+                    IsValueType = false;
+                IsValueType = true;
+            }
+
+            public static bool IsValueType { get; }
+        }
     }
 }

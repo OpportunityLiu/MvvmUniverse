@@ -10,7 +10,7 @@ namespace Opportunity.MvvmUniverse.Collections
     {
         static class Updater
         {
-            public static int Update(ObservableList<T> source, IReadOnlyList<T> target, IEqualityComparer<T> comparer)
+            public static int Update(ObservableList<T> source, IReadOnlyList<T> target, IEqualityComparer<T> comparer, ItemUpdater<T> itemUpdater)
             {
                 var sourceCount = source.Count;
                 var targetCount = target.Count;
@@ -38,7 +38,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     Swap(source, target);
                     return distance;
                 }
-                swapMED(source, target, mat);
+                swapMED(source, target, mat, itemUpdater);
                 return distance;
             }
 
@@ -75,7 +75,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 return mat;
             }
 
-            private static void swapMED(ObservableList<T> source, IReadOnlyList<T> target, int[,] medMat)
+            private static void swapMED(ObservableList<T> source, IReadOnlyList<T> target, int[,] medMat, ItemUpdater<T> itemUpdater)
             {
                 var i = source.Count;
                 var j = target.Count;
@@ -113,6 +113,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 DIAG_NO_OPERATION:
                     i--;
                     j--;
+                    itemUpdater?.Invoke(source[i], target[j]);
                     continue;
 
                 SUBSTITUTION:
