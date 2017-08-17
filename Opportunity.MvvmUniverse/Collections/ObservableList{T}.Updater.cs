@@ -80,8 +80,9 @@ namespace Opportunity.MvvmUniverse.Collections
                 var i = source.Count;
                 var j = target.Count;
                 var remainDistance = medMat[i, j];
-                while (remainDistance > 0)
+                while (itemUpdater == null ? remainDistance > 0 : i > 0 || j > 0)
                 {
+                    // if itemUpdater is not null, we must iterate all common elements regardless of the remainDistance
                     if (i == 0)
                         // Up only
                         goto INSERTION;
