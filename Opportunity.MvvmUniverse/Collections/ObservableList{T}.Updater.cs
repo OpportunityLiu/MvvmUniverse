@@ -38,7 +38,10 @@ namespace Opportunity.MvvmUniverse.Collections
                     Swap(source, target);
                     return distance;
                 }
-                swapMED(source, target, mat, itemUpdater);
+                if (itemUpdater == null)
+                    swapMEDFast(source, target, mat);
+                else
+                    swapMEDFull(source, target, mat, itemUpdater);
                 return distance;
             }
 
@@ -75,12 +78,74 @@ namespace Opportunity.MvvmUniverse.Collections
                 return mat;
             }
 
-            private static void swapMED(ObservableList<T> source, IReadOnlyList<T> target, int[,] medMat, ItemUpdater<T> itemUpdater)
+            private static void swapMEDFast(ObservableList<T> source, IReadOnlyList<T> target, int[,] medMat)
             {
                 var i = source.Count;
                 var j = target.Count;
                 var remainDistance = medMat[i, j];
-                while (itemUpdater == null ? remainDistance > 0 : i > 0 || j > 0)
+                while (remainDistance > 0)
+                {
+                    // if itemUpdater is null, we can finish iterate when remainDistance becomes 0
+                    if (i == 0)
+                        // Up only
+                        goto INSERTION;
+                    else if (j == 0)
+                        // Left only
+                        goto DELETION;
+                    else
+                    {
+                        var left = medMat[i - 1, j];
+                        var up = medMat[i, j - 1];
+                        var diag = medMat[i - 1, j - 1];
+                        if (diag <= left && diag <= up)
+                        {
+                            if (remainDistance == diag)
+                                goto DIAG_NO_OPERATION;
+                            else
+                                goto SUBSTITUTION;
+                        }
+                        else if (left == remainDistance - 1)
+                        {
+                            goto DELETION;
+                        }
+                        else
+                        {
+                            goto INSERTION;
+                        }
+                    }
+
+                DIAG_NO_OPERATION:
+                    i--;
+                    j--;
+                    continue;
+
+                SUBSTITUTION:
+                    i--;
+                    j--;
+                    source[i] = target[j];
+                    remainDistance--;
+                    continue;
+
+                DELETION:
+                    i--;
+                    source.RemoveAt(i);
+                    remainDistance--;
+                    continue;
+
+                INSERTION:
+                    j--;
+                    source.Insert(i, target[j]);
+                    remainDistance--;
+                    continue;
+                }
+            }
+
+            private static void swapMEDFull(ObservableList<T> source, IReadOnlyList<T> target, int[,] medMat, ItemUpdater<T> itemUpdater)
+            {
+                var i = source.Count;
+                var j = target.Count;
+                var remainDistance = medMat[i, j];
+                while (i > 0 || j > 0)
                 {
                     // if itemUpdater is not null, we must iterate all common elements regardless of the remainDistance
                     if (i == 0)
@@ -114,7 +179,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 DIAG_NO_OPERATION:
                     i--;
                     j--;
-                    itemUpdater?.Invoke(source[i], target[j]);
+                    itemUpdater(source[i], target[j]);
                     continue;
 
                 SUBSTITUTION:
