@@ -70,16 +70,16 @@ namespace Opportunity.MvvmUniverse.Collections
         object IList.this[int index]
         {
             get => this[index];
-            set => ThrowForReadOnlyCollection(this.items.ToString());
+            set => ThrowForReadOnlyCollection(this.items);
         }
 
-        int IList.Add(object value) => ThrowForReadOnlyCollection<int>(this.items.ToString());
-        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(this.items.ToString());
+        int IList.Add(object value) => ThrowForReadOnlyCollection(this.items, 0);
+        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(this.items);
 
-        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(this.items.ToString());
+        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(this.items);
 
-        void IList.Clear() => ThrowForReadOnlyCollection(this.items.ToString());
-        void ICollection<T>.Clear() => ThrowForReadOnlyCollection(this.items.ToString());
+        void IList.Clear() => ThrowForReadOnlyCollection(this.items);
+        void ICollection<T>.Clear() => ThrowForReadOnlyCollection(this.items);
 
         public bool Contains(T item) => IndexOf(item) >= 0;
         bool IList.Contains(object value) => Contains(CastValue<T>(value));
@@ -122,9 +122,9 @@ namespace Opportunity.MvvmUniverse.Collections
             CopyTo(a, index);
         }
 
-        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(this.items.ToString());
-        void IList.Remove(object value) => ThrowForReadOnlyCollection(this.items.ToString());
-        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(this.items.ToString());
+        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection(this.items, false);
+        void IList.Remove(object value) => ThrowForReadOnlyCollection(this.items);
+        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(this.items);
 
         public RangedCollectionViewEnumerator GetEnumerator() => new RangedCollectionViewEnumerator(this);
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();

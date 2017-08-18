@@ -38,12 +38,12 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
             return new KeyValuePair<TKey, TValue>(key, value);
         }
 
-        public static void ThrowForReadOnlyCollection(string parent)
+        public static void ThrowForReadOnlyCollection(object parent)
         {
             throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
         }
 
-        public static T ThrowForReadOnlyCollection<T>(string parent)
+        public static T ThrowForReadOnlyCollection<T>(object parent, T value = default(T))
         {
             throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
         }

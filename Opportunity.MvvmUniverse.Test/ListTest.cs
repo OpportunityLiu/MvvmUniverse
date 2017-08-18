@@ -36,18 +36,16 @@ namespace Opportunity.MvvmUniverse.Test
         [DataTestMethod]
         public void Update(int med, string source, string target)
         {
-            var l = new CharList();
-            var sourceArray = source.ToCharArray();
+            var l = new CharList(source);
             var targetArray = target.ToCharArray();
-            l.AddRange(sourceArray);
             var m = l.Update(targetArray, EqualityComparer<char>.Default, Assert.AreEqual);
-            CollectionAssert.AreEqual(targetArray, l);
             Assert.AreEqual(med, m);
+            CollectionAssert.AreEqual(targetArray, l);
             l.Clear();
-            l.AddRange(sourceArray);
+
+            l.AddRange(source);
             l.Update(targetArray);
             CollectionAssert.AreEqual(targetArray, l);
-            Assert.AreEqual(med, m);
             l.Clear();
         }
 

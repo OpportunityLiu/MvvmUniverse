@@ -10,7 +10,7 @@ using System.Collections.Specialized;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public delegate void ItemUpdater<T>(T existItem, T newItem);
+    public delegate void ItemUpdater<in T>(T existItem, T newItem);
 
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
@@ -34,10 +34,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 return;
             Items.InsertRange(index, items);
             OnPropertyChanged(nameof(Count));
-            if (items.Count == 1)
-                OnCollectionAdd(items[0], index);
-            else
-                OnCollectionAdd(items, index);
+            OnCollectionAdd(items, index);
         }
 
         protected virtual void RemoveItems(int index, int count)

@@ -22,7 +22,7 @@ namespace Opportunity.MvvmUniverse.Collections
             object IList.this[int index]
             {
                 get => this[index];
-                set => ThrowForReadOnlyCollection(Parent.ToString());
+                set => ThrowForReadOnlyCollection(Parent);
             }
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -57,11 +57,11 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
             }
 
-            int IList.Add(object value) => ThrowForReadOnlyCollection<int>(Parent.ToString());
-            void ICollection<TKey>.Add(TKey item) => ThrowForReadOnlyCollection(Parent.ToString());
+            int IList.Add(object value) => ThrowForReadOnlyCollection(Parent, 0);
+            void ICollection<TKey>.Add(TKey item) => ThrowForReadOnlyCollection(Parent);
 
-            void IList.Clear() => ThrowForReadOnlyCollection(Parent.ToString());
-            void ICollection<TKey>.Clear() => ThrowForReadOnlyCollection(Parent.ToString());
+            void IList.Clear() => ThrowForReadOnlyCollection(Parent);
+            void ICollection<TKey>.Clear() => ThrowForReadOnlyCollection(Parent);
 
             public bool Contains(TKey key) => this.Parent.ContainsKey(key);
             bool IList.Contains(object value) => Contains(CastKey<TKey>(value));
@@ -77,12 +77,12 @@ namespace Opportunity.MvvmUniverse.Collections
             }
             int IList.IndexOf(object value) => IndexOf(CastKey<TKey>(value));
 
-            void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Parent.ToString());
+            void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Parent);
 
-            void IList.Remove(object value) => ThrowForReadOnlyCollection(Parent.ToString());
-            bool ICollection<TKey>.Remove(TKey item) => ThrowForReadOnlyCollection<bool>(Parent.ToString());
+            void IList.Remove(object value) => ThrowForReadOnlyCollection(Parent);
+            bool ICollection<TKey>.Remove(TKey item) => ThrowForReadOnlyCollection(Parent, false);
 
-            void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Parent.ToString());
+            void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Parent);
         }
     }
 }

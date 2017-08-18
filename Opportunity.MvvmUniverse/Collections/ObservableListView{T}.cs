@@ -33,7 +33,7 @@ namespace Opportunity.MvvmUniverse.Collections
         object IList.this[int index]
         {
             get => ((IList)Collection)[index];
-            set => ThrowForReadOnlyCollection(Collection.ToString());
+            set => ThrowForReadOnlyCollection(Collection);
         }
 
         public int Count => Collection.Count;
@@ -53,23 +53,23 @@ namespace Opportunity.MvvmUniverse.Collections
         object ICollection.SyncRoot => ((ICollection)Collection).SyncRoot;
 
 
-        int IList.Add(object value) => ThrowForReadOnlyCollection<int>(Collection.ToString());
-        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(Collection.ToString());
+        int IList.Add(object value) => ThrowForReadOnlyCollection(Collection, 0);
+        void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(Collection);
 
-        void IList.Clear() => ThrowForReadOnlyCollection(Collection.ToString());
+        void IList.Clear() => ThrowForReadOnlyCollection(Collection);
 
         bool IList.Contains(object value) => ((IList)Collection).Contains(value);
 
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Collection).CopyTo(array, index);
         public void CopyTo(T[] array, int arrayIndex) => Collection.CopyTo(array, arrayIndex);
 
-        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Collection.ToString());
+        void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Collection);
 
-        void IList.Remove(object value) => ThrowForReadOnlyCollection(Collection.ToString());
-        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Collection.ToString());
-        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(Collection.ToString());
+        void IList.Remove(object value) => ThrowForReadOnlyCollection(Collection);
+        void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Collection);
+        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection(Collection, false);
 
-        void ICollection<T>.Clear() => ThrowForReadOnlyCollection(Collection.ToString());
+        void ICollection<T>.Clear() => ThrowForReadOnlyCollection(Collection);
 
         public List<T>.Enumerator GetEnumerator() => Collection.GetEnumerator();
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => Collection.GetEnumerator();

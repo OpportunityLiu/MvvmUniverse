@@ -19,7 +19,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     source.ClearItems();
                     return sourceCount;
                 }
-                if (sourceCount == 0)
+                if (sourceCount <= 0)
                 {
                     source.InsertItems(0, target);
                     return targetCount;
@@ -114,25 +114,25 @@ namespace Opportunity.MvvmUniverse.Collections
                         }
                     }
 
-                DIAG_NO_OPERATION:
+                    DIAG_NO_OPERATION:
                     i--;
                     j--;
                     continue;
 
-                SUBSTITUTION:
+                    SUBSTITUTION:
                     i--;
                     j--;
                     source[i] = target[j];
                     remainDistance--;
                     continue;
 
-                DELETION:
+                    DELETION:
                     i--;
                     source.RemoveAt(i);
                     remainDistance--;
                     continue;
 
-                INSERTION:
+                    INSERTION:
                     j--;
                     source.Insert(i, target[j]);
                     remainDistance--;
@@ -176,26 +176,26 @@ namespace Opportunity.MvvmUniverse.Collections
                         }
                     }
 
-                DIAG_NO_OPERATION:
+                    DIAG_NO_OPERATION:
                     i--;
                     j--;
                     itemUpdater(source[i], target[j]);
                     continue;
 
-                SUBSTITUTION:
+                    SUBSTITUTION:
                     i--;
                     j--;
                     source[i] = target[j];
                     remainDistance--;
                     continue;
 
-                DELETION:
+                    DELETION:
                     i--;
                     source.RemoveAt(i);
                     remainDistance--;
                     continue;
 
-                INSERTION:
+                    INSERTION:
                     j--;
                     source.Insert(i, target[j]);
                     remainDistance--;
