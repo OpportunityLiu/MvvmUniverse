@@ -38,14 +38,14 @@ namespace Opportunity.MvvmUniverse.Test
         {
             var l = new CharList(source);
             var targetArray = target.ToCharArray();
-            var m = l.Update(targetArray, EqualityComparer<char>.Default, Assert.AreEqual);
+            var m = l.Update(targetArray, Comparer<char>.Default, Assert.AreEqual);
             Assert.AreEqual(med, m);
-            CollectionAssert.AreEqual(targetArray, l);
+            CollectionAssert.AreEqual(targetArray, l, Comparer<char>.Default);
             l.Clear();
 
             l.AddRange(source);
             l.Update(targetArray);
-            CollectionAssert.AreEqual(targetArray, l);
+            CollectionAssert.AreEqual(targetArray, l, Comparer<char>.Default);
             l.Clear();
         }
 

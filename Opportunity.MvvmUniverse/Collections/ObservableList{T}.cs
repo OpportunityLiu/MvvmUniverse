@@ -211,7 +211,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> > 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList) => Update(newList, null, null);
+        public int Update(IReadOnlyList<T> newList) => Update(newList, default(IComparer<T>), null);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>
@@ -221,7 +221,28 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> > 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IEqualityComparer<T> comparer) => Update(newList, comparer, null);
+        public int Update(IReadOnlyList<T> newList, IComparer<T> comparer) => Update(newList, comparer, null);
+        /// <summary>
+        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
+        /// </summary>
+        /// <param name="newList">The target content</param>
+        /// <param name="comparison">The comparison to compare items in two lists</param>
+        /// <returns>The minimum editing distance of the edit</returns>
+        /// <remarks>
+        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> > 1_000_000</c>,
+        /// MED computing will not be executed and -1 will be returned.</remarks>
+        public int Update(IReadOnlyList<T> newList, Comparison<T> comparison) => Update(newList, Comparer<T>.Create(comparison), null);
+        /// <summary>
+        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
+        /// </summary>
+        /// <param name="newList">The target content</param>
+        /// <param name="comparison">The comparison to compare items in two lists</param>
+        /// <param name="itemUpdater">The delegate to move data from elements in <paramref name="newList"/> to elements in this <see cref="ObservableList{T}"/></param>
+        /// <returns>The minimum editing distance of the edit</returns>
+        /// <remarks>
+        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> > 1_000_000</c>,
+        /// MED computing will not be executed and -1 will be returned.</remarks>
+        public int Update(IReadOnlyList<T> newList, Comparison<T> comparison, ItemUpdater<T> itemUpdater) => Update(newList, Comparer<T>.Create(comparison), itemUpdater);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>
@@ -232,11 +253,11 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> > 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IEqualityComparer<T> comparer, ItemUpdater<T> itemUpdater)
+        public int Update(IReadOnlyList<T> newList, IComparer<T> comparer, ItemUpdater<T> itemUpdater)
         {
             if (newList == null)
                 throw new ArgumentNullException(nameof(newList));
-            comparer = comparer ?? EqualityComparer<T>.Default;
+            comparer = comparer ?? Comparer<T>.Default;
             return Updater.Update(this, newList, comparer, itemUpdater);
         }
 

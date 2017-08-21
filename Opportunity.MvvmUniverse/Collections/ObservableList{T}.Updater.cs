@@ -10,7 +10,7 @@ namespace Opportunity.MvvmUniverse.Collections
     {
         static class Updater
         {
-            public static int Update(ObservableList<T> source, IReadOnlyList<T> target, IEqualityComparer<T> comparer, ItemUpdater<T> itemUpdater)
+            public static int Update(ObservableList<T> source, IReadOnlyList<T> target, IComparer<T> comparer, ItemUpdater<T> itemUpdater)
             {
                 var sourceCount = source.Count;
                 var targetCount = target.Count;
@@ -45,7 +45,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 return distance;
             }
 
-            private static int[,] computeMED(ObservableList<T> source, IReadOnlyList<T> target, IEqualityComparer<T> comparer)
+            private static int[,] computeMED(ObservableList<T> source, IReadOnlyList<T> target, IComparer<T> comparer)
             {
                 var sourceCount = source.Count;
                 var targetCount = target.Count;
@@ -69,7 +69,7 @@ namespace Opportunity.MvvmUniverse.Collections
                         var diag = mat[i - 1, j - 1];
                         var lu_1 = (left < up ? left : up);
                         lu_1++;
-                        if (!comparer.Equals(source.Items[i - 1], target[j - 1]))
+                        if (comparer.Compare(source.Items[i - 1], target[j - 1]) != 0)
                             diag++;
                         mat[i, j] = (lu_1 < diag) ? lu_1 : diag;
                     }
