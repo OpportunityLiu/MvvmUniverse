@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opportunity.MvvmUniverse", "Opportunity.MvvmUniverse\Opportunity.MvvmUniverse.csproj", "{6D61BE50-8FD4-4457-8A8A-CC21859D03C0}"
 EndProject
@@ -35,9 +35,9 @@ Global
 		{6D61BE50-8FD4-4457-8A8A-CC21859D03C0}.Release|x64.Build.0 = Release|x64
 		{6D61BE50-8FD4-4457-8A8A-CC21859D03C0}.Release|x86.ActiveCfg = Release|x86
 		{6D61BE50-8FD4-4457-8A8A-CC21859D03C0}.Release|x86.Build.0 = Release|x86
-		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|Any CPU.Build.0 = Debug|x64
-		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|Any CPU.Build.0 = Debug|x86
+		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|Any CPU.Deploy.0 = Debug|x86
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|ARM.ActiveCfg = Debug|ARM
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|ARM.Build.0 = Debug|ARM
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|ARM.Deploy.0 = Debug|ARM
@@ -47,9 +47,7 @@ Global
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|x86.ActiveCfg = Debug|x86
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|x86.Build.0 = Debug|x86
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Debug|x86.Deploy.0 = Debug|x86
-		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Release|Any CPU.ActiveCfg = Debug|x64
-		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Release|Any CPU.Build.0 = Debug|x64
-		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Release|Any CPU.Deploy.0 = Debug|x64
+		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Release|Any CPU.ActiveCfg = Debug|x86
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Release|ARM.ActiveCfg = Debug|ARM
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Release|ARM.Build.0 = Debug|ARM
 		{2A9F8E46-0562-453E-BD93-1CE6547098F9}.Release|ARM.Deploy.0 = Debug|ARM
