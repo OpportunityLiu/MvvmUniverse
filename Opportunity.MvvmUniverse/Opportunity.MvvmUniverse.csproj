@@ -112,19 +112,21 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncHelpers\AsyncWrapper.cs" />
-    <Compile Include="AsyncHelpers\CastAcyncOperation{TFrom,TTo}.cs" />
-    <Compile Include="AsyncHelpers\CastAcyncOperation{TFrom,TTo,TProgress}.cs" />
-    <Compile Include="AsyncHelpers\CastExtension.cs" />
-    <Compile Include="AsyncHelpers\CompletedAsyncAction.cs" />
-    <Compile Include="AsyncHelpers\CompletedAsyncAction{TProgress}.cs" />
-    <Compile Include="AsyncHelpers\CompletedAsyncOperation{T,TProgress}.cs" />
-    <Compile Include="AsyncHelpers\CompletedAsyncOperation{T}.cs" />
-    <Compile Include="AsyncHelpers\MulticastAsyncAction.cs" />
-    <Compile Include="AsyncHelpers\MulticastAsyncAction{TProgress}.cs" />
-    <Compile Include="AsyncHelpers\MulticastAsyncOperation{T,TProgress}.cs" />
-    <Compile Include="AsyncHelpers\MulticastAsyncOperation{T}.cs" />
-    <Compile Include="AsyncHelpers\MulticastExtension.cs" />
+    <Compile Include="AsyncHelpers\..Cast\CastWrapper.cs" />
+    <Compile Include="AsyncHelpers\..Completed\AsyncWrapper.cs" />
+    <Compile Include="AsyncHelpers\..Cast\CastAcyncOperation{TFrom,TTo}.cs" />
+    <Compile Include="AsyncHelpers\..Cast\CastAcyncOperation{TFrom,TTo,TProgress}.cs" />
+    <Compile Include="AsyncHelpers\..Cast\CastAsyncAction{T,TProgress}.cs" />
+    <Compile Include="AsyncHelpers\..Cast\CastAsyncAction{T}.cs" />
+    <Compile Include="AsyncHelpers\..Completed\CompletedAsyncAction.cs" />
+    <Compile Include="AsyncHelpers\..Completed\CompletedAsyncAction{TProgress}.cs" />
+    <Compile Include="AsyncHelpers\..Completed\CompletedAsyncOperation{T,TProgress}.cs" />
+    <Compile Include="AsyncHelpers\..Completed\CompletedAsyncOperation{T}.cs" />
+    <Compile Include="AsyncHelpers\..Multicast\MulticastAsyncAction.cs" />
+    <Compile Include="AsyncHelpers\..Multicast\MulticastAsyncAction{TProgress}.cs" />
+    <Compile Include="AsyncHelpers\..Multicast\MulticastAsyncOperation{T,TProgress}.cs" />
+    <Compile Include="AsyncHelpers\..Multicast\MulticastAsyncOperation{T}.cs" />
+    <Compile Include="AsyncHelpers\..Multicast\MulticastWrapper.cs" />
     <Compile Include="Collections\ObservableList{T}.Updater.cs" />
     <Compile Include="Collections\PagingList{T}.cs" />
     <Compile Include="Collections\IncrementalLoadingList{T}.cs" />
