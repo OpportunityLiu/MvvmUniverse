@@ -7,7 +7,7 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.AsyncHelpers
 {
-    public static class MulticastExtension
+    public static class MulticastWrapper
     {
         public static IAsyncAction AsMulticast(this IAsyncAction action)
         {

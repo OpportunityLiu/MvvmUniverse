@@ -32,6 +32,8 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if ((items ?? throw new ArgumentNullException(nameof(items))).Count <= 0)
                 return;
+            if (ReferenceEquals(items, this))
+                items = items.ToList();
             Items.InsertRange(index, items);
             OnPropertyChanged(nameof(Count));
             OnCollectionAdd(items, index);
@@ -70,6 +72,8 @@ namespace Opportunity.MvvmUniverse.Collections
                 throw new ArgumentOutOfRangeException(nameof(index));
             if (items.Count <= 0)
                 return;
+            if (ReferenceEquals(items, this))
+                items = items.ToList();
             if (items.Count == 1)
             {
                 var oldItem = Items[index];
