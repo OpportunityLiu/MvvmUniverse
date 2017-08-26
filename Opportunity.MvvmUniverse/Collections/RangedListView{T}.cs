@@ -126,13 +126,13 @@ namespace Opportunity.MvvmUniverse.Collections
         void IList.Remove(object value) => ThrowForReadOnlyCollection(this.items);
         void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(this.items);
 
-        public RangedCollectionViewEnumerator GetEnumerator() => new RangedCollectionViewEnumerator(this);
+        public Enumerator GetEnumerator() => new Enumerator(this);
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public struct RangedCollectionViewEnumerator : IEnumerator<T>
+        public struct Enumerator : IEnumerator<T>
         {
-            internal RangedCollectionViewEnumerator(RangedListView<T> parent)
+            internal Enumerator(RangedListView<T> parent)
             {
                 this.parent = parent;
                 this.currentPosition = parent.StartIndex - 1;
