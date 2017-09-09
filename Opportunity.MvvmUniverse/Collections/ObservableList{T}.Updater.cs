@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -10,7 +6,7 @@ namespace Opportunity.MvvmUniverse.Collections
     {
         static class Updater
         {
-            public static int Update(ObservableList<T> source, IReadOnlyList<T> target, IComparer<T> comparer, ItemUpdater<T> itemUpdater)
+            public static int Update(ObservableList<T> source, IReadOnlyList<T> target, IEqualityComparer<T> comparer, ItemUpdater<T> itemUpdater)
             {
                 var sourceCount = source.Count;
                 var targetCount = target.Count;
@@ -45,7 +41,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 return distance;
             }
 
-            private static int[,] computeMED(ObservableList<T> source, IReadOnlyList<T> target, IComparer<T> comparer)
+            private static int[,] computeMED(ObservableList<T> source, IReadOnlyList<T> target, IEqualityComparer<T> comparer)
             {
                 var sourceCount = source.Count;
                 var targetCount = target.Count;
@@ -69,7 +65,7 @@ namespace Opportunity.MvvmUniverse.Collections
                         var diag = mat[i - 1, j - 1];
                         var lu_1 = (left < up ? left : up);
                         lu_1++;
-                        if (comparer.Compare(source.Items[i - 1], target[j - 1]) != 0)
+                        if (!comparer.Equals(source.Items[i - 1], target[j - 1]))
                             diag++;
                         mat[i, j] = (lu_1 < diag) ? lu_1 : diag;
                     }
@@ -114,25 +110,25 @@ namespace Opportunity.MvvmUniverse.Collections
                         }
                     }
 
-                    DIAG_NO_OPERATION:
+                DIAG_NO_OPERATION:
                     i--;
                     j--;
                     continue;
 
-                    SUBSTITUTION:
+                SUBSTITUTION:
                     i--;
                     j--;
                     source[i] = target[j];
                     remainDistance--;
                     continue;
 
-                    DELETION:
+                DELETION:
                     i--;
                     source.RemoveAt(i);
                     remainDistance--;
                     continue;
 
-                    INSERTION:
+                INSERTION:
                     j--;
                     source.Insert(i, target[j]);
                     remainDistance--;
@@ -176,26 +172,26 @@ namespace Opportunity.MvvmUniverse.Collections
                         }
                     }
 
-                    DIAG_NO_OPERATION:
+                DIAG_NO_OPERATION:
                     i--;
                     j--;
                     itemUpdater(source[i], target[j]);
                     continue;
 
-                    SUBSTITUTION:
+                SUBSTITUTION:
                     i--;
                     j--;
                     source[i] = target[j];
                     remainDistance--;
                     continue;
 
-                    DELETION:
+                DELETION:
                     i--;
                     source.RemoveAt(i);
                     remainDistance--;
                     continue;
 
-                    INSERTION:
+                INSERTION:
                     j--;
                     source.Insert(i, target[j]);
                     remainDistance--;
