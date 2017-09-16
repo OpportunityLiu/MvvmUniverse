@@ -24,39 +24,42 @@ namespace Opportunity.MvvmUniverse.Commands
 
         public bool Execute()
         {
-            if (CanExecute())
-            {
-                var executing = this.Executing;
-                if (executing != null)
-                {
-                    var eventarg = new CommandExecutingEventArgs();
-                    executing.Invoke(this, eventarg);
-                    if (eventarg.Cancelled)
-                        return false;
-                }
-                var executed = this.Executed;
-                var exc = default(Exception);
-                try
-                {
-                    ExecuteImpl();
-                }
-                catch (Exception ex)
-                {
-                    if (executed == null)
-                        throw;
-                    exc = ex;
-                }
-                if (executed != null)
-                {
-                    var eventarg = new CommandExecutedEventArgs(exc);
-                    executed.Invoke(this, eventarg);
-                }
-                return true;
-            }
-            return false;
+            if (!CanExecute())
+                return false;
+            if (!OnStarting())
+                return false;
+
+            StartExecution();
+            return true;
         }
 
-        protected abstract void ExecuteImpl();
+        protected abstract void StartExecution();
+
+        protected virtual bool OnStarting()
+        {
+            var executing = this.Executing;
+            if (executing == null)
+                return true;
+            var eventarg = new CommandExecutingEventArgs();
+            executing.Invoke(this, eventarg);
+            return !eventarg.Cancelled;
+        }
+
+        protected virtual void OnFinished()
+        {
+            var executed = Executed;
+            if (executed == null)
+                return;
+            DispatcherHelper.BeginInvoke(() => executed.Invoke(this, CommandExecutedEventArgs.Succeed));
+        }
+
+        protected virtual void OnError(Exception error)
+        {
+            var executed = Executed;
+            if (executed == null)
+                throw new InvalidOperationException("Executed is null, can't handle error", error);
+            DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new CommandExecutedEventArgs(error)));
+        }
 
         public event CommandExecutingEventHandler Executing;
         public event CommandExecutedEventHandler Executed;

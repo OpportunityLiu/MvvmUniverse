@@ -1,11 +1,12 @@
 ﻿{
   "dependencies": {
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
-    "Opportunity.ResourceGenerator": "1.1.7",
+    "Opportunity.Helpers": "1.0.4",
+    "Opportunity.ResourceGenerator": "1.1.9",
     "System.Collections.Specialized": "4.3.0"
   },
   "frameworks": {
-    "uap10.0": {}
+    "uap10.0.10586": {}
   },
   "runtimes": {
     "win10-arm": {},

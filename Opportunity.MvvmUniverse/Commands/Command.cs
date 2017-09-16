@@ -25,9 +25,17 @@ namespace Opportunity.MvvmUniverse.Commands
             return this.canExecute.Invoke();
         }
 
-        protected override void ExecuteImpl()
+        protected override void StartExecution()
         {
-            this.execute.Invoke();
+            try
+            {
+                this.execute.Invoke();
+                OnFinished();
+            }
+            catch (Exception ex)
+            {
+                OnError(ex);
+            }
         }
     }
 }

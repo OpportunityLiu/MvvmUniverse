@@ -42,12 +42,17 @@ namespace Opportunity.MvvmUniverse.Commands
             return this.canExecute.Invoke();
         }
 
-        protected override async void ExecuteImpl()
+        protected override async void StartExecution()
         {
             this.IsExecuting = true;
             try
             {
                 await this.execute.Invoke();
+                OnFinished();
+            }
+            catch (Exception ex)
+            {
+                OnError(ex);
             }
             finally
             {

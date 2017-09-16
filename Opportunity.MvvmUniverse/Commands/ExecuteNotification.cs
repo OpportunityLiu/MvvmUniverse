@@ -34,6 +34,8 @@ namespace Opportunity.MvvmUniverse.Commands
 
     public class CommandExecutedEventArgs : EventArgs
     {
+        internal static CommandExecutedEventArgs Succeed { get; } = new CommandExecutedEventArgs(null);
+
         public CommandExecutedEventArgs(Exception exception)
         {
             this.Exception = exception;

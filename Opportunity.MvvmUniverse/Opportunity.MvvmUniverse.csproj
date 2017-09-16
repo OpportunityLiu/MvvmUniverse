@@ -165,7 +165,6 @@
     <Compile Include="Delegates\WeakFunc.cs" />
     <Compile Include="Delegates\WeakPredicate.cs" />
     <Compile Include="DispatcherHelper.cs" />
-    <Compile Include="Helpers\CastHelper.cs" />
     <Compile Include="Helpers\DispatcherExtension.cs" />
     <Compile Include="AsyncHelpers\PollingAsyncWrapper.cs" />
     <Compile Include="Helpers\StorageHelper.cs" />
