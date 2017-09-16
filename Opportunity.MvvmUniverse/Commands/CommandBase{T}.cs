@@ -64,7 +64,7 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             var executed = Executed;
             if (executed == null)
-                throw new InvalidOperationException("Executed is null, can't handle error", error);
+                ThrowUnhandledError(error);
             DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new CommandExecutedEventArgs<T>(parameter, error)));
         }
 

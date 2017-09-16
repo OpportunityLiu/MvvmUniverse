@@ -29,6 +29,19 @@ namespace Opportunity.MvvmUniverse.Commands
             set => ForceSet(ref this.tag, value);
         }
 
+        protected virtual void ThrowUnhandledError(Exception error)
+        {
+            if (error == null)
+                return;
+            DispatcherHelper.BeginInvoke(() =>
+            {
+                if (error is AggregateException ae)
+                    throw new AggregateException(ae.InnerExceptions);
+                else
+                    throw new AggregateException(error);
+            });
+        }
+
         public virtual void OnCanExecuteChanged()
         {
             var temp = CanExecuteChanged;
