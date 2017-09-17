@@ -113,21 +113,6 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncHelpers\..Cast\CastWrapper.cs" />
-    <Compile Include="AsyncHelpers\..Completed\AsyncWrapper.cs" />
-    <Compile Include="AsyncHelpers\..Cast\CastAcyncOperation{TFrom,TTo}.cs" />
-    <Compile Include="AsyncHelpers\..Cast\CastAcyncOperation{TFrom,TTo,TProgress}.cs" />
-    <Compile Include="AsyncHelpers\..Cast\CastAsyncAction{T,TProgress}.cs" />
-    <Compile Include="AsyncHelpers\..Cast\CastAsyncAction{T}.cs" />
-    <Compile Include="AsyncHelpers\..Completed\CompletedAsyncAction.cs" />
-    <Compile Include="AsyncHelpers\..Completed\CompletedAsyncAction{TProgress}.cs" />
-    <Compile Include="AsyncHelpers\..Completed\CompletedAsyncOperation{T,TProgress}.cs" />
-    <Compile Include="AsyncHelpers\..Completed\CompletedAsyncOperation{T}.cs" />
-    <Compile Include="AsyncHelpers\..Multicast\MulticastAsyncAction.cs" />
-    <Compile Include="AsyncHelpers\..Multicast\MulticastAsyncAction{TProgress}.cs" />
-    <Compile Include="AsyncHelpers\..Multicast\MulticastAsyncOperation{T,TProgress}.cs" />
-    <Compile Include="AsyncHelpers\..Multicast\MulticastAsyncOperation{T}.cs" />
-    <Compile Include="AsyncHelpers\..Multicast\MulticastWrapper.cs" />
     <Compile Include="Collections\ObservableList{T}.Updater.cs" />
     <Compile Include="Collections\PagingList{T}.cs" />
     <Compile Include="Collections\IncrementalLoadingList{T}.cs" />
@@ -164,13 +149,8 @@
     <Compile Include="Delegates\WeakEvent.cs" />
     <Compile Include="Delegates\WeakFunc.cs" />
     <Compile Include="Delegates\WeakPredicate.cs" />
-    <Compile Include="DispatcherHelper.cs" />
-    <Compile Include="Helpers\DispatcherExtension.cs" />
-    <Compile Include="AsyncHelpers\PollingAsyncWrapper.cs" />
-    <Compile Include="Helpers\StorageHelper.cs" />
-    <Compile Include="Helpers\ThemeExtension.cs" />
-    <Compile Include="Helpers\VisualTreeHelperExtension.cs" />
     <Compile Include="Delegates\WeakDelegate.cs" />
+    <Compile Include="DispatcherHelper.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\SettingCollection.cs" />

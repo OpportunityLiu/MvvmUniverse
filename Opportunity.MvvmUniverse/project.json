@@ -1,8 +1,7 @@
 ﻿{
   "dependencies": {
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
-    "Opportunity.Helpers": "1.0.4",
-    "Opportunity.ResourceGenerator": "1.1.9",
+    "Opportunity.Helpers.Universal": "1.1.2",
     "System.Collections.Specialized": "4.3.0"
   },
   "frameworks": {

@@ -1,4 +1,4 @@
-﻿using Opportunity.MvvmUniverse.AsyncHelpers;
+﻿using Opportunity.Helpers.Universal.AsyncHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,19 +83,10 @@ namespace Opportunity.MvvmUniverse
             return Dispatcher.RunAsync(CoreDispatcherPriority.Normal, action);
         }
 
-        public static DispatcherAwaiterSource Yield()
-        {
-            return new DispatcherAwaiterSource(Dispatcher, CoreDispatcherPriority.Normal);
-        }
+        public static DispatcherAwaiterSource Yield() => Dispatcher.Yield();
 
-        public static DispatcherAwaiterSource Yield(CoreDispatcherPriority priority)
-        {
-            return new DispatcherAwaiterSource(Dispatcher, priority);
-        }
+        public static DispatcherAwaiterSource Yield(CoreDispatcherPriority priority) => Dispatcher.Yield(priority);
 
-        public static DispatcherAwaiterSource YieldIdle()
-        {
-            return new DispatcherAwaiterSource(Dispatcher, CoreDispatcherPriority.Idle);
-        }
+        public static DispatcherAwaiterSource YieldIdle() => Dispatcher.YieldIdle();
     }
 }
