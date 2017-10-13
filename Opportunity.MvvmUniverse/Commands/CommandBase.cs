@@ -57,7 +57,10 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             var executed = Executed;
             if (executed == null)
+            {
                 ThrowUnhandledError(error);
+                return;
+            }
             DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new CommandExecutedEventArgs(error)));
         }
 
