@@ -6,7 +6,6 @@ namespace Opportunity.MvvmUniverse.Views
     {
         bool CanGoBack();
         void GoBack();
-        Navigator Parent { get; set; }
     }
 
     public static class INavigationHandlerExtension
@@ -15,7 +14,17 @@ namespace Opportunity.MvvmUniverse.Views
         {
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
-            handler.Parent?.UpdateAppViewBackButtonVisibility();
+            if (!NavigationHandlerCollection.NavigationHandlerDic.TryGetValue(handler, out var navigator))
+                return;
+            navigator.UpdateAppViewBackButtonVisibility();
+        }
+
+        public static Navigator GetNavigator(this INavigationHandler handler)
+        {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+            NavigationHandlerCollection.NavigationHandlerDic.TryGetValue(handler, out var navigator);
+            return navigator;
         }
     }
 }

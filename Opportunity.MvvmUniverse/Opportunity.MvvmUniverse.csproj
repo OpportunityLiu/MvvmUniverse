@@ -11,7 +11,7 @@
     <AssemblyName>Opportunity.MvvmUniverse</AssemblyName>
     <DefaultLanguage>zh-CN</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.14393.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.16299.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10586.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -168,6 +168,7 @@
     <Compile Include="ViewModelBase.cs" />
     <Compile Include="Views\FrameWrapper.cs" />
     <Compile Include="Views\INavigationHandler.cs" />
+    <Compile Include="Views\NavigationHandlerCollection.cs" />
     <Compile Include="Views\Navigator.cs" />
     <EmbeddedResource Include="Properties\Opportunity.MvvmUniverse.rd.xml" />
   </ItemGroup>
