@@ -10,8 +10,9 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public struct RangedListView<T> : IReadOnlyList<T>, ICollection<T>, IList
+    public readonly struct RangedListView<T> : IReadOnlyList<T>, ICollection<T>, IList
     {
+
         public static RangedListView<T> Empty { get; }
             = new RangedListView<T>(Array.Empty<T>(), 0, 0);
 

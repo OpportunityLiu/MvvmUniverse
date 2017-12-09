@@ -36,8 +36,6 @@ namespace Opportunity.MvvmUniverse.Views
             }
         }
 
-        public Navigator Parent { get; set; }
-
         public bool CanGoBack()
         {
             var f = Frame;
@@ -52,7 +50,6 @@ namespace Opportunity.MvvmUniverse.Views
             if (f == null)
                 return;
             f.GoBack();
-            this.RaiseCanGoBackChanged();
         }
     }
 }
