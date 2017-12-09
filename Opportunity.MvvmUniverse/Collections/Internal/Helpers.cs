@@ -8,8 +8,8 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
     {
         public static T CastValue<T>(object value)
         {
-            if (value == null && default(T) == null)
-                return default(T);
+            if (value is null && Opportunity.Helpers.TypeTraits.Of<T>().CanBeNull)
+                return default;
             if (value is T v)
                 return v;
             throw new ArgumentException("Wrong type of value", nameof(value));
@@ -43,25 +43,9 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
             throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
         }
 
-        public static T ThrowForReadOnlyCollection<T>(object parent, T value = default(T))
+        public static T ThrowForReadOnlyCollection<T>(object parent, T value = default)
         {
             throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
-        }
-
-        public static bool IsValueType<T>() => TypeInfo<T>.IsValueType;
-
-        private static class TypeInfo<T>
-        {
-            static TypeInfo()
-            {
-                if (default(T) != null)
-                    IsValueType = true;
-                if (Nullable.GetUnderlyingType(typeof(T)) != null)
-                    IsValueType = false;
-                IsValueType = true;
-            }
-
-            public static bool IsValueType { get; }
         }
     }
 }
