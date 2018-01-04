@@ -6,10 +6,12 @@ namespace Opportunity.MvvmUniverse.Collections
     {
         private class EqualityComparerAdapter : IEqualityComparer<T>
         {
-            public static EqualityComparerAdapter Create(IComparer<T> comparer)
+            public static IEqualityComparer<T> Create(IComparer<T> comparer)
             {
                 if (comparer == null)
                     return null;
+                if (comparer is IEqualityComparer<T> ec)
+                    return ec;
                 return new EqualityComparerAdapter(comparer);
             }
 

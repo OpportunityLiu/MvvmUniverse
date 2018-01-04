@@ -214,7 +214,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList) => Update(newList, default(IComparer<T>), null);
+        public int Update(IReadOnlyList<T> newList) => Update(newList, default(IEqualityComparer<T>), null);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>
