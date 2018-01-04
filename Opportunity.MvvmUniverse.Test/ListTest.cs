@@ -9,8 +9,8 @@ namespace Opportunity.MvvmUniverse.Test
     public class ListTest
     {
         [DataRow(5, "123", "asfui", DisplayName = "Irrelevant short to long")]
-        [DataRow(8, "21365489", "asfui", DisplayName = "Irrelevant 2 long to short")]
-        [DataRow(5, "21365", "asfui", DisplayName = "Irrelevant 2 length equles")]
+        [DataRow(8, "21365489", "asfui", DisplayName = "Irrelevant long to short")]
+        [DataRow(5, "21365", "asfui", DisplayName = "Irrelevant length equles")]
         [DataRow(5, "", "asfui", DisplayName = "Fill")]
         [DataRow(3, "123", "", DisplayName = "Empty")]
         [DataRow(0, "asfasdg", "asfasdg", DisplayName = "Keep")]

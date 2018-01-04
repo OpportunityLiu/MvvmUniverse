@@ -282,7 +282,7 @@ namespace Opportunity.MvvmUniverse.Collections
             if (newList == null)
                 throw new ArgumentNullException(nameof(newList));
             comparer = comparer ?? EqualityComparer<T>.Default;
-            return Updater.Update(this, newList, comparer, itemUpdater);
+            return new Updater(this, newList, comparer, itemUpdater).Update();
         }
 
         public void ForEach(Action<T> action) => Items.ForEach(action);
