@@ -42,9 +42,11 @@ namespace Opportunity.MvvmUniverse.Settings
 
         internal void RaisePropertyChanged(SettingCollection sender, T oldValue, T newValue)
         {
-            if (PropertyChangedCallback == null)
+            var cb = PropertyChangedCallback;
+            if (cb == null)
                 return;
-            DispatcherHelper.BeginInvoke(() => PropertyChangedCallback(sender, new SettingPropertyChangedEventArgs<T>(this, oldValue, newValue)));
+            var arg = new SettingPropertyChangedEventArgs<T>(this, oldValue, newValue);
+            DispatcherHelper.BeginInvoke(() => cb(sender, arg));
         }
     }
 }

@@ -83,7 +83,17 @@ namespace Opportunity.MvvmUniverse.Collections
         void ICollection<T>.Clear() => ThrowForReadOnlyCollection(this.items);
 
         public bool Contains(T item) => IndexOf(item) >= 0;
-        bool IList.Contains(object value) => Contains(CastValue<T>(value));
+        bool IList.Contains(object value)
+        {
+            try
+            {
+                return Contains(CastValue<T>(value));
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+        }
 
         public int IndexOf(T item)
         {
@@ -97,7 +107,17 @@ namespace Opportunity.MvvmUniverse.Collections
             }
             return -1;
         }
-        int IList.IndexOf(object value) => IndexOf(CastValue<T>(value));
+        int IList.IndexOf(object value)
+        {
+            try
+            {
+                return IndexOf(CastValue<T>(value));
+            }
+            catch (ArgumentException)
+            {
+                return -1;
+            }
+        }
 
         public void CopyTo(T[] array, int arrayIndex)
         {
@@ -150,8 +170,11 @@ namespace Opportunity.MvvmUniverse.Collections
 
             public bool MoveNext()
             {
+                var ub = this.parent.StartIndex + this.parent.Count;
+                if (this.currentPosition >= ub)
+                    return false;
                 this.currentPosition++;
-                return this.currentPosition < this.parent.StartIndex + this.parent.Count;
+                return this.currentPosition < ub;
             }
 
             public void Reset()

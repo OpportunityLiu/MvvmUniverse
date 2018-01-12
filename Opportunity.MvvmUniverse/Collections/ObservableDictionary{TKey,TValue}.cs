@@ -209,8 +209,15 @@ namespace Opportunity.MvvmUniverse.Collections
             set
             {
                 var oldKey = KeyItems[index];
-                RemoveItem(oldKey);
-                InsertItem(index, value.Key, value.Value);
+                if (Comparer.Equals(oldKey, value.Key))
+                    SetItem(value.Key, value.Value);
+                else if (ContainsKey(value.Key))
+                    throw new InvalidOperationException($"Item of same key is at a position other than index({index}) of the ObservableDictionary");
+                else
+                {
+                    RemoveItem(oldKey);
+                    InsertItem(index, value.Key, value.Value);
+                }
             }
         }
         KeyValuePair<TKey, TValue> IReadOnlyList<KeyValuePair<TKey, TValue>>.this[int index]
@@ -291,7 +298,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public bool ContainsKey(TKey key) => KeySet.ContainsKey(key);
         public bool ContainsValue(TValue value) => ValueItems.Contains(value);
-        bool IDictionary.Contains(object key) => ContainsKey(CastKey<TKey>(key));
+        bool IDictionary.Contains(object key) => ((IDictionary)KeySet).Contains(key);
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
         {
             if (TryGetValue(item.Key, out var value))
@@ -301,7 +308,16 @@ namespace Opportunity.MvvmUniverse.Collections
             return false;
         }
         bool IList.Contains(object value)
-            => ((IList<KeyValuePair<TKey, TValue>>)this).Contains(CastKVP<TKey, TValue>(value));
+        {
+            try
+            {
+                return ((IList<KeyValuePair<TKey, TValue>>)this).Contains(CastKVP<TKey, TValue>(value));
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+        }
 
         public bool Remove(TKey key)
         {
@@ -448,7 +464,16 @@ namespace Opportunity.MvvmUniverse.Collections
             return -1;
         }
         int IList.IndexOf(object value)
-            => ((IList<KeyValuePair<TKey, TValue>>)this).IndexOf(CastKVP<TKey, TValue>(value));
+        {
+            try
+            {
+                return ((IList<KeyValuePair<TKey, TValue>>)this).IndexOf(CastKVP<TKey, TValue>(value));
+            }
+            catch (ArgumentException)
+            {
+                return -1;
+            }
+        }
 
         public void Clear() => ClearItems();
     }

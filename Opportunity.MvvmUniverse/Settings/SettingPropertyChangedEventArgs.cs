@@ -1,8 +1,10 @@
-﻿namespace Opportunity.MvvmUniverse.Settings
+﻿using System;
+
+namespace Opportunity.MvvmUniverse.Settings
 {
     public delegate void SettingPropertyChangedCallback<T>(SettingCollection sender, SettingPropertyChangedEventArgs<T> e);
 
-    public sealed class SettingPropertyChangedEventArgs<T>
+    public sealed class SettingPropertyChangedEventArgs<T>:EventArgs
     {
         internal SettingPropertyChangedEventArgs(SettingProperty<T> prop, T oldValue, T newValue)
         {
