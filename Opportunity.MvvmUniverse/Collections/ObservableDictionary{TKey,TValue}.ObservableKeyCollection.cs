@@ -26,7 +26,7 @@ namespace Opportunity.MvvmUniverse.Collections
             }
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            bool IList.IsFixedSize => true;
+            bool IList.IsFixedSize => false;
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool IList.IsReadOnly => true;
@@ -64,7 +64,7 @@ namespace Opportunity.MvvmUniverse.Collections
             void ICollection<TKey>.Clear() => ThrowForReadOnlyCollection(Parent);
 
             public bool Contains(TKey key) => this.Parent.ContainsKey(key);
-            bool IList.Contains(object value) => Contains(CastKey<TKey>(value));
+            bool IList.Contains(object value) => ((IDictionary)this.Parent).Contains(value);
 
             public void CopyTo(TKey[] array, int arrayIndex) => this.Parent.KeyItems.CopyTo(array, arrayIndex);
             void ICollection.CopyTo(Array array, int index) => ((ICollection)this.Parent.KeyItems).CopyTo(array, index);
@@ -75,7 +75,17 @@ namespace Opportunity.MvvmUniverse.Collections
                     return index;
                 return -1;
             }
-            int IList.IndexOf(object value) => IndexOf(CastKey<TKey>(value));
+            int IList.IndexOf(object value)
+            {
+                try
+                {
+                    return IndexOf(CastKey<TKey>(value));
+                }
+                catch (ArgumentException)
+                {
+                    return -1;
+                }
+            }
 
             void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Parent);
 

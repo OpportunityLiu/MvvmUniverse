@@ -299,7 +299,7 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         public bool Contains(T item) => Items.Contains(item);
-        bool IList.Contains(object value) => Contains(CastValue<T>(value));
+        bool IList.Contains(object value) => ((IList)Items).Contains(value);
 
         public void CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
@@ -310,7 +310,7 @@ namespace Opportunity.MvvmUniverse.Collections
             => LazyInitializer.EnsureInitialized(ref this.readOnlyView, () => new ObservableListView<T>(this));
 
         public int IndexOf(T item) => Items.IndexOf(item);
-        int IList.IndexOf(object value) => IndexOf(CastValue<T>(value));
+        int IList.IndexOf(object value) => ((IList)Items).IndexOf(value);
 
         public List<T>.Enumerator GetEnumerator() => Items.GetEnumerator();
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => Items.GetEnumerator();
