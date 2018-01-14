@@ -6,17 +6,17 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public sealed class WeakCommand<T> : CommandBase<T>
     {
-        public WeakCommand(Action<T> execute, Predicate<T> canExecute)
+        internal WeakCommand(WeakAction<T> execute, WeakPredicate<T> canExecute)
         {
-            if (execute == null)
-                throw new ArgumentNullException(nameof(execute));
-            this.execute = new WeakAction<T>(execute);
-            if (canExecute != null)
-                this.canExecute = new WeakPredicate<T>(canExecute);
+            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            this.canExecute = canExecute;
         }
 
-        public WeakCommand(Action<T> execute) : this(execute, null)
+        internal WeakCommand(Action<T> execute, Predicate<T> canExecute)
         {
+            this.execute = new WeakAction<T>(execute ?? throw new ArgumentNullException(nameof(execute)));
+            if (canExecute != null)
+                this.canExecute = new WeakPredicate<T>(canExecute);
         }
 
         private readonly WeakAction<T> execute;

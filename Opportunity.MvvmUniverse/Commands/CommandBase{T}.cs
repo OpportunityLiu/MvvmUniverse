@@ -9,26 +9,35 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public abstract class CommandBase<T> : CommandBaseBase, ICommand
     {
-        bool ICommand.CanExecute(object parameter) => CanExecute(cast(parameter));
-
-        private static T cast(object parameter)
+        bool ICommand.CanExecute(object parameter)
         {
-            if (default(T) != null && parameter == null)
-                return default(T);
-            return (T)parameter;
+            try
+            {
+                return CanExecute((T)parameter);
+            }
+            catch { return false; }
         }
 
         public bool CanExecute(T parameter)
         {
             if (!IsEnabled)
                 return false;
-            return CanExecuteOverride(parameter);
+            try
+            {
+                return CanExecuteOverride(parameter);
+            }
+            catch { return false; }
         }
 
         protected virtual bool CanExecuteOverride(T parameter) => true;
 
-        void ICommand.Execute(object parameter) => Execute(cast(parameter));
+        void ICommand.Execute(object parameter) => Execute((T)parameter);
 
+        /// <summary>
+        /// Execute the <see cref="ICommand"/>.
+        /// </summary>
+        /// <param name="parameter">parameter of execution</param>
+        /// <returns>Whether execution started or not.</returns>
         public bool Execute(T parameter)
         {
             if (!CanExecute(parameter))

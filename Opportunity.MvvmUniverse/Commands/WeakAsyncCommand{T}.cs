@@ -9,14 +9,17 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public sealed class WeakAsyncCommand<T> : CommandBase<T>
     {
-        public WeakAsyncCommand(WeakAsyncAction<T> execute, WeakPredicate<T> canExecute)
+        internal WeakAsyncCommand(AsyncAction<T> execute, Predicate<T> canExecute)
+        {
+            this.execute = new WeakAsyncAction<T>(execute ?? throw new ArgumentNullException(nameof(execute)));
+            if (canExecute != null)
+                this.canExecute = new WeakPredicate<T>(canExecute);
+        }
+
+        internal WeakAsyncCommand(WeakAsyncAction<T> execute, WeakPredicate<T> canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
-        }
-
-        public WeakAsyncCommand(WeakAsyncAction<T> execute) : this(execute, null)
-        {
         }
 
         private readonly WeakAsyncAction<T> execute;

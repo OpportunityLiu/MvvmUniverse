@@ -9,14 +9,26 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public sealed class WeakAsyncCommand : CommandBase
     {
-        public WeakAsyncCommand(WeakAsyncAction execute, WeakFunc<bool> canExecute)
+        public static WeakAsyncCommand Create(AsyncAction execute) => new WeakAsyncCommand(execute, null);
+        public static WeakAsyncCommand Create(WeakAsyncAction execute) => new WeakAsyncCommand(execute, null);
+        public static WeakAsyncCommand Create(AsyncAction execute, Func<bool> canExecute) => new WeakAsyncCommand(execute, canExecute);
+        public static WeakAsyncCommand Create(WeakAsyncAction execute, WeakFunc<bool> canExecute) => new WeakAsyncCommand(execute, canExecute);
+        public static WeakAsyncCommand<T> Create<T>(AsyncAction<T> execute) => new WeakAsyncCommand<T>(execute, null);
+        public static WeakAsyncCommand<T> Create<T>(WeakAsyncAction<T> execute) => new WeakAsyncCommand<T>(execute, null);
+        public static WeakAsyncCommand<T> Create<T>(AsyncAction<T> execute, Predicate<T> canExecute) => new WeakAsyncCommand<T>(execute, canExecute);
+        public static WeakAsyncCommand<T> Create<T>(WeakAsyncAction<T> execute, WeakPredicate<T> canExecute) => new WeakAsyncCommand<T>(execute, canExecute);
+
+        internal WeakAsyncCommand(AsyncAction execute, Func<bool> canExecute)
+        {
+            this.execute = new WeakAsyncAction(execute ?? throw new ArgumentNullException(nameof(execute)));
+            if (canExecute != null)
+                this.canExecute = new WeakFunc<bool>(canExecute);
+        }
+
+        internal WeakAsyncCommand(WeakAsyncAction execute, WeakFunc<bool> canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
-        }
-
-        public WeakAsyncCommand(WeakAsyncAction execute) : this(execute, null)
-        {
         }
 
         private readonly WeakAsyncAction execute;

@@ -9,14 +9,15 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public sealed class AsyncCommand : CommandBase
     {
-        public AsyncCommand(AsyncAction execute, Func<bool> canExecute)
+        public static AsyncCommand Create(AsyncAction execute) => new AsyncCommand(execute, null);
+        public static AsyncCommand Create(AsyncAction execute, Func<bool> canExecute) => new AsyncCommand(execute, canExecute);
+        public static AsyncCommand<T> Create<T>(AsyncAction<T> execute) => new AsyncCommand<T>(execute, null);
+        public static AsyncCommand<T> Create<T>(AsyncAction<T> execute, Predicate<T> canExecute) => new AsyncCommand<T>(execute, canExecute);
+
+        internal AsyncCommand(AsyncAction execute, Func<bool> canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
-        }
-
-        public AsyncCommand(AsyncAction execute) : this(execute, null)
-        {
         }
 
         private readonly AsyncAction execute;

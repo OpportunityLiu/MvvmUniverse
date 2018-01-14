@@ -6,17 +6,26 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public sealed class WeakCommand : CommandBase
     {
-        public WeakCommand(Action execute, Func<bool> canExecute)
+        public static WeakCommand Create(Action execute) => new WeakCommand(execute, null);
+        public static WeakCommand Create(WeakAction execute) => new WeakCommand(execute, null);
+        public static WeakCommand Create(Action execute, Func<bool> canExecute) => new WeakCommand(execute, canExecute);
+        public static WeakCommand Create(WeakAction execute, WeakFunc<bool> canExecute) => new WeakCommand(execute, canExecute);
+        public static WeakCommand<T> Create<T>(Action<T> execute) => new WeakCommand<T>(execute, null);
+        public static WeakCommand<T> Create<T>(WeakAction<T> execute) => new WeakCommand<T>(execute, null);
+        public static WeakCommand<T> Create<T>(Action<T> execute, Predicate<T> canExecute) => new WeakCommand<T>(execute, canExecute);
+        public static WeakCommand<T> Create<T>(WeakAction<T> execute, WeakPredicate<T> canExecute) => new WeakCommand<T>(execute, canExecute);
+
+        internal WeakCommand(WeakAction execute, WeakFunc<bool> canExecute)
         {
-            if (execute == null)
-                throw new ArgumentNullException(nameof(execute));
-            this.execute = new WeakAction(execute);
-            if (canExecute != null)
-                this.canExecute = new WeakFunc<bool>(canExecute);
+            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            this.canExecute = canExecute;
         }
 
-        public WeakCommand(Action execute) : this(execute, null)
+        internal WeakCommand(Action execute, Func<bool> canExecute)
         {
+            this.execute = new WeakAction(execute ?? throw new ArgumentNullException(nameof(execute)));
+            if (canExecute != null)
+                this.canExecute = new WeakFunc<bool>(canExecute);
         }
 
         private readonly WeakAction execute;

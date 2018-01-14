@@ -15,13 +15,21 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (!IsEnabled)
                 return false;
-            return CanExecuteOverride();
+            try
+            {
+                return CanExecuteOverride();
+            }
+            catch { return false; }
         }
 
         protected virtual bool CanExecuteOverride() => true;
 
         void ICommand.Execute(object parameter) => Execute();
 
+        /// <summary>
+        /// Execute the <see cref="ICommand"/>.
+        /// </summary>
+        /// <returns>Whether execution started or not.</returns>
         public bool Execute()
         {
             if (!CanExecute())

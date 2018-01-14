@@ -5,14 +5,10 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public sealed class Command<T> : CommandBase<T>
     {
-        public Command(Action<T> execute, Predicate<T> canExecute)
+        internal Command(Action<T> execute, Predicate<T> canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
-        }
-
-        public Command(Action<T> execute) : this(execute, null)
-        {
         }
 
         private readonly Action<T> execute;
