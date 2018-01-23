@@ -17,13 +17,13 @@ namespace Opportunity.MvvmUniverse.Delegates
         }
     }
 
-    public sealed class WeakAction<T> : WeakDelegate<Action<T>>
+    public sealed class WeakAction<TResult> : WeakDelegate<Action<TResult>>
     {
-        public WeakAction(Action<T> @delegate) : base(@delegate)
+        public WeakAction(Action<TResult> @delegate) : base(@delegate)
         {
         }
 
-        public void Invoke(T obj)
+        public void Invoke(TResult obj)
         {
             if (this.IsDelegateOfStaticMethod)
                 this.Delegate.Invoke(obj);

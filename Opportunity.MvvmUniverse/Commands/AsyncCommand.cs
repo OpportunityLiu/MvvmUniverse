@@ -4,30 +4,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public sealed class AsyncCommand : CommandBase
+    public abstract class AsyncCommand : CommandBase, IAsyncCommand
     {
-        public static AsyncCommand Create(AsyncAction execute) => new AsyncCommand(execute, null);
-        public static AsyncCommand Create(AsyncAction execute, Func<bool> canExecute) => new AsyncCommand(execute, canExecute);
-        public static AsyncCommand<T> Create<T>(AsyncAction<T> execute) => new AsyncCommand<T>(execute, null);
-        public static AsyncCommand<T> Create<T>(AsyncAction<T> execute, Predicate<T> canExecute) => new AsyncCommand<T>(execute, canExecute);
+        public static AsyncCommand Create(AsyncAction execute)
+            => new AsyncTaskCommand(execute, null);
+        public static AsyncCommand Create(AsyncAction execute, Func<bool> canExecute)
+            => new AsyncTaskCommand(execute, canExecute);
 
-        internal AsyncCommand(AsyncAction execute, Func<bool> canExecute)
+        public static AsyncCommand Create(Func<IAsyncAction> execute)
+            => new AsyncActionCommand(execute, null);
+        public static AsyncCommand Create(Func<IAsyncAction> execute, Func<bool> canExecute)
+            => new AsyncActionCommand(execute, canExecute);
+
+        public static AsyncCommand<T> Create<T>(AsyncAction<T> execute)
+            => new AsyncTaskCommand<T>(execute, null);
+        public static AsyncCommand<T> Create<T>(AsyncAction<T> execute, Predicate<T> canExecute)
+            => new AsyncTaskCommand<T>(execute, canExecute);
+
+        public static AsyncCommand<T> Create<T>(Func<T, IAsyncAction> execute)
+            => new AsyncActionCommand<T>(execute, null);
+        public static AsyncCommand<T> Create<T>(Func<T, IAsyncAction> execute, Predicate<T> canExecute)
+            => new AsyncActionCommand<T>(execute, canExecute);
+
+        internal AsyncCommand(Func<bool> canExecute)
         {
-            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
         }
 
-        private readonly AsyncAction execute;
         private readonly Func<bool> canExecute;
-        private bool isExecuting = false;
+        protected Func<bool> CanExecuteDelegate => this.canExecute;
 
+        private bool isExecuting = false;
         public bool IsExecuting
         {
             get => this.isExecuting;
-            private set
+            protected set
             {
                 if (Set(ref this.isExecuting, value))
                     OnCanExecuteChanged();
@@ -41,24 +56,6 @@ namespace Opportunity.MvvmUniverse.Commands
             if (this.canExecute == null)
                 return true;
             return this.canExecute.Invoke();
-        }
-
-        protected override async void StartExecution()
-        {
-            this.IsExecuting = true;
-            try
-            {
-                await this.execute.Invoke();
-                OnFinished();
-            }
-            catch (Exception ex)
-            {
-                OnError(ex);
-            }
-            finally
-            {
-                this.IsExecuting = false;
-            }
         }
     }
 }
