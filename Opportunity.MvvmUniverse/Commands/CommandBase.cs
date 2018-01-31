@@ -9,7 +9,9 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public abstract class CommandBase : CommandBaseBase, ICommand
     {
-        bool ICommand.CanExecute(object parameter) => CanExecute();
+        protected CommandBase() { }
+
+        bool System.Windows.Input.ICommand.CanExecute(object parameter) => CanExecute();
 
         public bool CanExecute()
         {
@@ -24,7 +26,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected virtual bool CanExecuteOverride() => true;
 
-        void ICommand.Execute(object parameter) => Execute();
+        void System.Windows.Input.ICommand.Execute(object parameter) => Execute();
 
         /// <summary>
         /// Execute the <see cref="ICommand"/>.

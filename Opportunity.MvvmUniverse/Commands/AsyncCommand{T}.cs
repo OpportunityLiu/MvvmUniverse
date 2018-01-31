@@ -6,25 +6,23 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate Task AsyncCommandExecutor<T>(AsyncCommand<T> command, T parameter);
     public delegate bool AsyncCommandPredicate<T>(AsyncCommand<T> command, T parameter);
 
-    public sealed class AsyncCommand<T> : CommandBase<T>
+    public abstract class AsyncCommand<T> : CommandBase<T>, IAsyncCommand
     {
-        internal AsyncCommand(AsyncCommandExecutor<T> execute, AsyncCommandPredicate<T> canExecute)
+        protected AsyncCommand(AsyncCommandPredicate<T> canExecute)
         {
-            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
         }
 
-        private readonly AsyncCommandExecutor<T> execute;
         private readonly AsyncCommandPredicate<T> canExecute;
-        private bool isExecuting = false;
+        protected AsyncCommandPredicate<T> CanExecuteDelegate => this.canExecute;
 
+        private bool isExecuting = false;
         public bool IsExecuting
         {
             get => this.isExecuting;
-            private set
+            protected set
             {
                 if (Set(ref this.isExecuting, value))
                     OnCanExecuteChanged();
@@ -40,22 +38,24 @@ namespace Opportunity.MvvmUniverse.Commands
             return this.canExecute.Invoke(this, parameter);
         }
 
-        protected override async void StartExecution(T parameter)
+        protected override bool OnStarting(T parameter)
         {
-            this.IsExecuting = true;
-            try
-            {
-                await this.execute.Invoke(this, parameter);
-                OnFinished(parameter);
-            }
-            catch (Exception ex)
-            {
-                OnError(parameter, ex);
-            }
-            finally
-            {
-                this.IsExecuting = false;
-            }
+            var r = base.OnStarting(parameter);
+            if (r)
+                IsExecuting = true;
+            return r;
+        }
+
+        protected override void OnError(T parameter, Exception error)
+        {
+            IsExecuting = false;
+            base.OnError(parameter, error);
+        }
+
+        protected override void OnFinished(T parameter)
+        {
+            IsExecuting = false;
+            base.OnFinished(parameter);
         }
     }
 }

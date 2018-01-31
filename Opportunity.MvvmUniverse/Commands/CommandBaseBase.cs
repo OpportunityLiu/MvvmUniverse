@@ -7,8 +7,10 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public abstract class CommandBaseBase : ObservableObject
+    public abstract class CommandBaseBase : ObservableObject, IControllableCommand
     {
+        internal CommandBaseBase() { }
+
         public event EventHandler CanExecuteChanged;
 
         private bool isEnabled = true;
@@ -29,7 +31,7 @@ namespace Opportunity.MvvmUniverse.Commands
             set => ForceSet(ref this.tag, value);
         }
 
-        protected virtual void ThrowUnhandledError(Exception error)
+        internal void ThrowUnhandledError(Exception error)
         {
             if (error == null)
                 return;

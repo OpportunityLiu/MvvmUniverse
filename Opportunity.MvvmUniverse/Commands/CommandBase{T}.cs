@@ -7,9 +7,11 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public abstract class CommandBase<T> : CommandBaseBase, ICommand
+    public abstract class CommandBase<T> : CommandBaseBase, ICommand<T>
     {
-        bool ICommand.CanExecute(object parameter)
+        protected CommandBase() { }
+
+        bool System.Windows.Input.ICommand.CanExecute(object parameter)
         {
             try
             {
@@ -31,7 +33,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected virtual bool CanExecuteOverride(T parameter) => true;
 
-        void ICommand.Execute(object parameter) => Execute((T)parameter);
+        void System.Windows.Input.ICommand.Execute(object parameter) => Execute((T)parameter);
 
         /// <summary>
         /// Execute the <see cref="ICommand"/>.

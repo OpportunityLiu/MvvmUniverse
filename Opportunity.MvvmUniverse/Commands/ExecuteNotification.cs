@@ -7,8 +7,8 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate void CommandExecutingEventHandler(CommandBase sender, CommandExecutingEventArgs e);
-    public delegate void CommandExecutingEventHandler<T>(CommandBase<T> sender, CommandExecutingEventArgs<T> e);
+    public delegate void CommandExecutingEventHandler(ICommand sender, CommandExecutingEventArgs e);
+    public delegate void CommandExecutingEventHandler<T>(ICommand<T> sender, CommandExecutingEventArgs<T> e);
 
     public class CommandExecutingEventArgs : EventArgs
     {
@@ -29,8 +29,8 @@ namespace Opportunity.MvvmUniverse.Commands
         public T Parameter { get; private set; }
     }
 
-    public delegate void CommandExecutedEventHandler(CommandBase sender, CommandExecutedEventArgs e);
-    public delegate void CommandExecutedEventHandler<T>(CommandBase<T> sender, CommandExecutedEventArgs<T> e);
+    public delegate void CommandExecutedEventHandler(ICommand sender, CommandExecutedEventArgs e);
+    public delegate void CommandExecutedEventHandler<T>(ICommand<T> sender, CommandExecutedEventArgs<T> e);
 
     public class CommandExecutedEventArgs : EventArgs
     {
@@ -53,5 +53,17 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         public T Parameter { get; private set; }
+    }
+
+    public delegate void CommandExecutingProgressEventHandler<TProgress>(IProgressedCommand<TProgress> sender, CommandExecutingProgressEventArgs<TProgress> e);
+
+    public class CommandExecutingProgressEventArgs<TProgress> : EventArgs
+    {
+        public CommandExecutingProgressEventArgs(TProgress progress)
+        {
+            this.Progress = progress;
+        }
+
+        public TProgress Progress { get; }
     }
 }
