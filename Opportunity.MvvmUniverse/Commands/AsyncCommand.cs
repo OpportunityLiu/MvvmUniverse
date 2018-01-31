@@ -11,6 +11,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
     public abstract class AsyncCommand : CommandBase, IAsyncCommand
     {
+        #region Factory methods
         public static AsyncCommand Create(AsyncTaskExecutor execute)
             => new AsyncTaskCommand(execute, null);
         public static AsyncCommand Create(AsyncTaskExecutor execute, AsyncPredicate canExecute)
@@ -30,14 +31,14 @@ namespace Opportunity.MvvmUniverse.Commands
             => new AsyncActionCommand<T>(execute, null);
         public static AsyncCommand<T> Create<T>(AsyncActionExecutor<T> execute, AsyncPredicate<T> canExecute)
             => new AsyncActionCommand<T>(execute, canExecute);
+        #endregion Factory methods
 
         protected AsyncCommand(AsyncPredicate canExecute)
         {
-            this.canExecute = canExecute;
+            this.CanExecuteDelegate = canExecute;
         }
 
-        private readonly AsyncPredicate canExecute;
-        protected AsyncPredicate CanExecuteDelegate => this.canExecute;
+        protected AsyncPredicate CanExecuteDelegate { get; }
 
         private bool isExecuting = false;
         public bool IsExecuting
@@ -54,9 +55,9 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (this.IsExecuting)
                 return false;
-            if (this.canExecute == null)
+            if (this.CanExecuteDelegate == null)
                 return true;
-            return this.canExecute.Invoke(this);
+            return this.CanExecuteDelegate.Invoke(this);
         }
 
         protected override bool OnStarting()

@@ -10,28 +10,25 @@ namespace Opportunity.MvvmUniverse.Commands
     {
         protected internal Command(Executor<T> execute, Predicate<T> canExecute)
         {
-            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            this.canExecute = canExecute;
+            this.ExecuteDelegate = execute ?? throw new ArgumentNullException(nameof(execute));
+            this.CanExecuteDelegate = canExecute;
         }
 
-        private readonly Executor<T> execute;
-        protected Executor<T> ExecuteDelegate => this.execute;
-
-        private readonly Predicate<T> canExecute;
-        protected Predicate<T> CanExecuteDelegate => this.canExecute;
+        protected Executor<T> ExecuteDelegate { get; }
+        protected Predicate<T> CanExecuteDelegate { get; }
 
         protected override bool CanExecuteOverride(T parameter)
         {
-            if (this.canExecute == null)
+            if (this.CanExecuteDelegate == null)
                 return true;
-            return this.canExecute.Invoke(this, parameter);
+            return this.CanExecuteDelegate.Invoke(this, parameter);
         }
 
         protected override void StartExecution(T parameter)
         {
             try
             {
-                this.execute.Invoke(this, parameter);
+                this.ExecuteDelegate.Invoke(this, parameter);
                 OnFinished(new ExecutedEventArgs<T>(parameter));
             }
             catch (Exception ex)

@@ -12,11 +12,10 @@ namespace Opportunity.MvvmUniverse.Commands
     {
         protected AsyncCommand(AsyncPredicate<T> canExecute)
         {
-            this.canExecute = canExecute;
+            this.CanExecuteDelegate = canExecute;
         }
 
-        private readonly AsyncPredicate<T> canExecute;
-        protected AsyncPredicate<T> CanExecuteDelegate => this.canExecute;
+        protected AsyncPredicate<T> CanExecuteDelegate { get; }
 
         private bool isExecuting = false;
         public bool IsExecuting
@@ -33,9 +32,9 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (this.IsExecuting)
                 return false;
-            if (this.canExecute == null)
+            if (this.CanExecuteDelegate == null)
                 return true;
-            return this.canExecute.Invoke(this, parameter);
+            return this.CanExecuteDelegate.Invoke(this, parameter);
         }
 
         protected override bool OnStarting(T parameter)

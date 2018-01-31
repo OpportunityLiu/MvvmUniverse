@@ -7,11 +7,9 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public abstract class CommandBaseBase : ObservableObject, IControllable
+    public abstract class ObservableCommandBase : ObservableObject, IControllable
     {
-        internal CommandBaseBase() { }
-
-        public event EventHandler CanExecuteChanged;
+        internal ObservableCommandBase() { }
 
         private bool isEnabled = true;
         public bool IsEnabled
@@ -25,6 +23,9 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         private object tag;
+        /// <summary>
+        /// A tag associated with this object.
+        /// </summary>
         public object Tag
         {
             get => this.tag;
@@ -44,6 +45,11 @@ namespace Opportunity.MvvmUniverse.Commands
             });
         }
 
+        public event EventHandler CanExecuteChanged;
+
+        /// <summary>
+        /// Raise <see cref="CanExecuteChanged"/> event.
+        /// </summary>
         public virtual void OnCanExecuteChanged()
         {
             var temp = CanExecuteChanged;

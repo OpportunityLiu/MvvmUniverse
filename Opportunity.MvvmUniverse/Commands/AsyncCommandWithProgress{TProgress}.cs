@@ -12,11 +12,10 @@ namespace Opportunity.MvvmUniverse.Commands
     {
         protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncPredicate canExecute) : base(canExecute)
         {
-            this.progressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
+            this.ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
         }
 
-        private readonly ProgressMapper<TProgress> progressMapper;
-        protected ProgressMapper<TProgress> ProgressMapper => this.progressMapper;
+        public ProgressMapper<TProgress> ProgressMapper { get; }
 
         private TProgress progress;
         public TProgress Progress
@@ -25,7 +24,7 @@ namespace Opportunity.MvvmUniverse.Commands
             private set => ForceSet(nameof(NormalizedProgress), ref this.progress, value);
         }
 
-        public double NormalizedProgress => this.progressMapper(Progress);
+        public double NormalizedProgress => this.ProgressMapper(Progress);
 
         protected override void OnFinished(ExecutedEventArgs e)
         {
@@ -33,6 +32,11 @@ namespace Opportunity.MvvmUniverse.Commands
             this.Progress = default;
         }
 
+        /// <summary>
+        /// Set value of <see cref="Progress"/> and <see cref="NormalizedProgress"/>,
+        /// and raise <see cref="ProgressChanged"/>.
+        /// </summary>
+        /// <param name="e">Event args</param>
         protected virtual void OnProgress(ProgressChangedEventArgs<TProgress> e)
         {
             this.Progress = e.Progress;
@@ -42,6 +46,9 @@ namespace Opportunity.MvvmUniverse.Commands
             DispatcherHelper.BeginInvoke(() => p.Invoke(this, e));
         }
 
+        /// <summary>
+        /// Will be raised when <see cref="Progress"/> changed during execution.
+        /// </summary>
         public event ProgressChangedEventHandler<TProgress> ProgressChanged;
     }
 }

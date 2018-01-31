@@ -10,11 +10,10 @@ namespace Opportunity.MvvmUniverse.Commands
     {
         protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncPredicate<T> canExecute) : base(canExecute)
         {
-            this.progressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
+            this.ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
         }
 
-        private readonly ProgressMapper<TProgress> progressMapper;
-        protected ProgressMapper<TProgress> ProgressMapper => this.progressMapper;
+        protected ProgressMapper<TProgress> ProgressMapper { get; }
 
         private TProgress progress;
         public TProgress Progress
@@ -23,7 +22,7 @@ namespace Opportunity.MvvmUniverse.Commands
             private set => ForceSet(nameof(NormalizedProgress), ref this.progress, value);
         }
 
-        public double NormalizedProgress => this.progressMapper(Progress);
+        public double NormalizedProgress => this.ProgressMapper(Progress);
 
         protected override void OnFinished(ExecutedEventArgs<T> e)
         {
