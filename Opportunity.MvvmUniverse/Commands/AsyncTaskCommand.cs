@@ -6,28 +6,28 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate Task AsyncTaskCommandExecutor(AsyncCommand command);
+    public delegate Task AsyncTaskExecutor(AsyncCommand command);
 
     internal sealed class AsyncTaskCommand : AsyncCommand
     {
-        internal AsyncTaskCommand(AsyncTaskCommandExecutor execute, AsyncCommandPredicate canExecute)
+        internal AsyncTaskCommand(AsyncTaskExecutor execute, AsyncPredicate canExecute)
             : base(canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
         }
 
-        private readonly AsyncTaskCommandExecutor execute;
+        private readonly AsyncTaskExecutor execute;
 
         protected override async void StartExecution()
         {
             try
             {
                 await this.execute.Invoke(this);
-                OnFinished();
+                OnFinished(ExecutedEventArgs.Succeed);
             }
             catch (Exception ex)
             {
-                OnError(ex);
+                OnFinished(new ExecutedEventArgs(ex));
             }
         }
     }

@@ -58,31 +58,24 @@ namespace Opportunity.MvvmUniverse.Commands
             var executing = this.Executing;
             if (executing == null)
                 return true;
-            var eventarg = new CommandExecutingEventArgs<T>(parameter);
+            var eventarg = new ExecutingEventArgs<T>(parameter);
             executing.Invoke(this, eventarg);
             return !eventarg.Cancelled;
         }
 
-        protected virtual void OnFinished(T parameter)
-        {
-            var executed = Executed;
-            if (executed == null)
-                return;
-            DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new CommandExecutedEventArgs<T>(parameter, null)));
-        }
-
-        protected virtual void OnError(T parameter, Exception error)
+        protected virtual void OnFinished(ExecutedEventArgs<T> e)
         {
             var executed = Executed;
             if (executed == null)
             {
-                ThrowUnhandledError(error);
+                if (e.Exception != null)
+                    ThrowUnhandledError(e.Exception);
                 return;
             }
-            DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new CommandExecutedEventArgs<T>(parameter, error)));
+            DispatcherHelper.BeginInvoke(() => executed.Invoke(this, e));
         }
 
-        public event CommandExecutingEventHandler<T> Executing;
-        public event CommandExecutedEventHandler<T> Executed;
+        public event ExecutingEventHandler<T> Executing;
+        public event ExecutedEventHandler<T> Executed;
     }
 }

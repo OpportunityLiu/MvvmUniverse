@@ -3,22 +3,22 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate void CommandExecutor<T>(Command<T> command, T parameter);
-    public delegate bool CommandPredicate<T>(Command<T> command, T parameter);
+    public delegate void Executor<T>(Command<T> command, T parameter);
+    public delegate bool Predicate<T>(Command<T> command, T parameter);
 
     public class Command<T> : CommandBase<T>
     {
-        protected internal Command(CommandExecutor<T> execute, CommandPredicate<T> canExecute)
+        protected internal Command(Executor<T> execute, Predicate<T> canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
         }
 
-        private readonly CommandExecutor<T> execute;
-        protected CommandExecutor<T> ExecuteDelegate => this.execute;
+        private readonly Executor<T> execute;
+        protected Executor<T> ExecuteDelegate => this.execute;
 
-        private readonly CommandPredicate<T> canExecute;
-        protected CommandPredicate<T> CanExecuteDelegate => this.canExecute;
+        private readonly Predicate<T> canExecute;
+        protected Predicate<T> CanExecuteDelegate => this.canExecute;
 
         protected override bool CanExecuteOverride(T parameter)
         {
@@ -32,11 +32,11 @@ namespace Opportunity.MvvmUniverse.Commands
             try
             {
                 this.execute.Invoke(this, parameter);
-                OnFinished(parameter);
+                OnFinished(new ExecutedEventArgs<T>(parameter));
             }
             catch (Exception ex)
             {
-                OnError(parameter, ex);
+                OnFinished(new ExecutedEventArgs<T>(parameter, ex));
             }
         }
     }

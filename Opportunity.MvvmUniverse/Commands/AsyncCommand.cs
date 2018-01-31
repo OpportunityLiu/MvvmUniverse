@@ -7,37 +7,37 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate bool AsyncCommandPredicate(AsyncCommand command);
+    public delegate bool AsyncPredicate(AsyncCommand command);
 
     public abstract class AsyncCommand : CommandBase, IAsyncCommand
     {
-        public static AsyncCommand Create(AsyncTaskCommandExecutor execute)
+        public static AsyncCommand Create(AsyncTaskExecutor execute)
             => new AsyncTaskCommand(execute, null);
-        public static AsyncCommand Create(AsyncTaskCommandExecutor execute, AsyncCommandPredicate canExecute)
+        public static AsyncCommand Create(AsyncTaskExecutor execute, AsyncPredicate canExecute)
             => new AsyncTaskCommand(execute, canExecute);
 
-        public static AsyncCommand Create(AsyncActionCommandExecutor execute)
+        public static AsyncCommand Create(AsyncActionExecutor execute)
             => new AsyncActionCommand(execute, null);
-        public static AsyncCommand Create(AsyncActionCommandExecutor execute, AsyncCommandPredicate canExecute)
+        public static AsyncCommand Create(AsyncActionExecutor execute, AsyncPredicate canExecute)
             => new AsyncActionCommand(execute, canExecute);
 
-        public static AsyncCommand<T> Create<T>(AsyncTaskCommandExecutor<T> execute)
+        public static AsyncCommand<T> Create<T>(AsyncTaskExecutor<T> execute)
             => new AsyncTaskCommand<T>(execute, null);
-        public static AsyncCommand<T> Create<T>(AsyncTaskCommandExecutor<T> execute, AsyncCommandPredicate<T> canExecute)
+        public static AsyncCommand<T> Create<T>(AsyncTaskExecutor<T> execute, AsyncPredicate<T> canExecute)
             => new AsyncTaskCommand<T>(execute, canExecute);
 
-        public static AsyncCommand<T> Create<T>(AsyncActionCommandExecutor<T> execute)
+        public static AsyncCommand<T> Create<T>(AsyncActionExecutor<T> execute)
             => new AsyncActionCommand<T>(execute, null);
-        public static AsyncCommand<T> Create<T>(AsyncActionCommandExecutor<T> execute, AsyncCommandPredicate<T> canExecute)
+        public static AsyncCommand<T> Create<T>(AsyncActionExecutor<T> execute, AsyncPredicate<T> canExecute)
             => new AsyncActionCommand<T>(execute, canExecute);
 
-        protected AsyncCommand(AsyncCommandPredicate canExecute)
+        protected AsyncCommand(AsyncPredicate canExecute)
         {
             this.canExecute = canExecute;
         }
 
-        private readonly AsyncCommandPredicate canExecute;
-        protected AsyncCommandPredicate CanExecuteDelegate => this.canExecute;
+        private readonly AsyncPredicate canExecute;
+        protected AsyncPredicate CanExecuteDelegate => this.canExecute;
 
         private bool isExecuting = false;
         public bool IsExecuting
@@ -67,16 +67,10 @@ namespace Opportunity.MvvmUniverse.Commands
             return r;
         }
 
-        protected override void OnError(Exception error)
+        protected override void OnFinished(ExecutedEventArgs e)
         {
             IsExecuting = false;
-            base.OnError(error);
-        }
-
-        protected override void OnFinished()
-        {
-            IsExecuting = false;
-            base.OnFinished();
+            base.OnFinished(e);
         }
     }
 }

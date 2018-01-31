@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public abstract class CommandBaseBase : ObservableObject, IControllableCommand
+    public abstract class CommandBaseBase : ObservableObject, IControllable
     {
         internal CommandBaseBase() { }
 
@@ -31,7 +31,7 @@ namespace Opportunity.MvvmUniverse.Commands
             set => ForceSet(ref this.tag, value);
         }
 
-        internal void ThrowUnhandledError(Exception error)
+        internal static void ThrowUnhandledError(Exception error)
         {
             if (error == null)
                 return;

@@ -7,33 +7,34 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate IAsyncActionWithProgress<TProgress> AsyncActionCommandWithProgressExecutor<TProgress>(AsyncCommandWithProgress<TProgress> command);
+    public delegate IAsyncActionWithProgress<TProgress> AsyncActionWithProgressExecutor<TProgress>(AsyncCommandWithProgress<TProgress> command);
 
     internal sealed class AsyncActionCommandWithProgress<TProgress> : AsyncCommandWithProgress<TProgress>
     {
         public AsyncActionCommandWithProgress(
-            AsyncActionCommandWithProgressExecutor<TProgress> execute,
+            AsyncActionWithProgressExecutor<TProgress> execute,
             ProgressMapper<TProgress> progressMapper,
-            AsyncCommandPredicate canExecute)
+            AsyncPredicate canExecute)
             : base(progressMapper, canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
         }
 
-        private readonly AsyncActionCommandWithProgressExecutor<TProgress> execute;
+        private readonly AsyncActionWithProgressExecutor<TProgress> execute;
 
         protected override async void StartExecution()
         {
             try
             {
                 var p = this.execute.Invoke(this);
-                p.Progress = (sender, pg) => this.Progress = pg;
+                var e = ProgressChangedEventArgsFactory.Create(default(TProgress));
+                p.Progress = (sender, pg) => { e.Progress = pg; OnProgress(e.EventArgs); };
                 await p;
-                OnFinished();
+                OnFinished(ExecutedEventArgs.Succeed);
             }
             catch (Exception ex)
             {
-                OnError(ex);
+                OnFinished(new ExecutedEventArgs(ex));
             }
         }
     }

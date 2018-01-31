@@ -7,28 +7,28 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate IAsyncAction AsyncActionCommandExecutor(AsyncCommand command);
+    public delegate IAsyncAction AsyncActionExecutor(AsyncCommand command);
 
     internal sealed class AsyncActionCommand : AsyncCommand
     {
-        public AsyncActionCommand(AsyncActionCommandExecutor execute, AsyncCommandPredicate canExecute)
+        public AsyncActionCommand(AsyncActionExecutor execute, AsyncPredicate canExecute)
             : base(canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
         }
 
-        private readonly AsyncActionCommandExecutor execute;
+        private readonly AsyncActionExecutor execute;
 
         protected override async void StartExecution()
         {
             try
             {
                 await this.execute.Invoke(this);
-                OnFinished();
+                OnFinished(ExecutedEventArgs.Succeed);
             }
             catch (Exception ex)
             {
-                OnError(ex);
+                OnFinished(new ExecutedEventArgs(ex));
             }
         }
     }

@@ -3,27 +3,27 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate void CommandExecutor(Command command);
-    public delegate bool CommandPredicate(Command command);
+    public delegate void Executor(Command command);
+    public delegate bool Predicate(Command command);
 
     public class Command : CommandBase
     {
-        public static Command Create(CommandExecutor execute) => new Command(execute, null);
-        public static Command Create(CommandExecutor execute, CommandPredicate canExecute) => new Command(execute, canExecute);
-        public static Command<T> Create<T>(CommandExecutor<T> execute) => new Command<T>(execute, null);
-        public static Command<T> Create<T>(CommandExecutor<T> execute, CommandPredicate<T> canExecute) => new Command<T>(execute, canExecute);
+        public static Command Create(Executor execute) => new Command(execute, null);
+        public static Command Create(Executor execute, Predicate canExecute) => new Command(execute, canExecute);
+        public static Command<T> Create<T>(Executor<T> execute) => new Command<T>(execute, null);
+        public static Command<T> Create<T>(Executor<T> execute, Predicate<T> canExecute) => new Command<T>(execute, canExecute);
 
-        protected internal Command(CommandExecutor execute, CommandPredicate canExecute)
+        protected internal Command(Executor execute, Predicate canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
         }
 
-        private readonly CommandExecutor execute;
-        protected CommandExecutor ExecuteDelegate => this.execute;
+        private readonly Executor execute;
+        protected Executor ExecuteDelegate => this.execute;
 
-        private readonly CommandPredicate canExecute;
-        protected CommandPredicate CanExecuteDelegate => this.canExecute;
+        private readonly Predicate canExecute;
+        protected Predicate CanExecuteDelegate => this.canExecute;
 
         protected override bool CanExecuteOverride()
         {
@@ -37,11 +37,11 @@ namespace Opportunity.MvvmUniverse.Commands
             try
             {
                 this.execute.Invoke(this);
-                OnFinished();
+                OnFinished(ExecutedEventArgs.Succeed);
             }
             catch (Exception ex)
             {
-                OnError(ex);
+                OnFinished(new ExecutedEventArgs(ex));
             }
         }
     }

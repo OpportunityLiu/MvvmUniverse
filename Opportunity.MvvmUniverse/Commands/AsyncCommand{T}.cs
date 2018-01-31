@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate bool AsyncCommandPredicate<T>(AsyncCommand<T> command, T parameter);
+    public delegate bool AsyncPredicate<T>(AsyncCommand<T> command, T parameter);
 
     public abstract class AsyncCommand<T> : CommandBase<T>, IAsyncCommand
     {
-        protected AsyncCommand(AsyncCommandPredicate<T> canExecute)
+        protected AsyncCommand(AsyncPredicate<T> canExecute)
         {
             this.canExecute = canExecute;
         }
 
-        private readonly AsyncCommandPredicate<T> canExecute;
-        protected AsyncCommandPredicate<T> CanExecuteDelegate => this.canExecute;
+        private readonly AsyncPredicate<T> canExecute;
+        protected AsyncPredicate<T> CanExecuteDelegate => this.canExecute;
 
         private bool isExecuting = false;
         public bool IsExecuting
@@ -46,16 +46,10 @@ namespace Opportunity.MvvmUniverse.Commands
             return r;
         }
 
-        protected override void OnError(T parameter, Exception error)
+        protected override void OnFinished(ExecutedEventArgs<T> e)
         {
             IsExecuting = false;
-            base.OnError(parameter, error);
-        }
-
-        protected override void OnFinished(T parameter)
-        {
-            IsExecuting = false;
-            base.OnFinished(parameter);
+            base.OnFinished(e);
         }
     }
 }

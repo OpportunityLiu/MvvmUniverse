@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public abstract class AsyncCommandWithProgress<T, TProgress> : AsyncCommand<T>, IProgressedCommand<TProgress>
+    public abstract class AsyncCommandWithProgress<T, TProgress> : AsyncCommand<T>, IAsyncCommandWithProgress<T, TProgress>
     {
-        protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncCommandPredicate<T> canExecute) : base(canExecute)
+        protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncPredicate<T> canExecute) : base(canExecute)
         {
             this.progressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
         }
@@ -20,21 +20,26 @@ namespace Opportunity.MvvmUniverse.Commands
         public TProgress Progress
         {
             get => this.progress;
-            set => ForceSet(nameof(NormalizedProgress), ref this.progress, value);
+            private set => ForceSet(nameof(NormalizedProgress), ref this.progress, value);
         }
 
         public double NormalizedProgress => this.progressMapper(Progress);
 
-        protected override void OnError(T parameter, Exception error)
+        protected override void OnFinished(ExecutedEventArgs<T> e)
         {
-            base.OnError(parameter, error);
+            base.OnFinished(e);
             this.Progress = default;
         }
 
-        protected override void OnFinished(T parameter)
+        protected virtual void OnProgress(ProgressChangedEventArgs<T, TProgress> e)
         {
-            base.OnFinished(parameter);
-            this.Progress = default;
+            this.Progress = e.Progress;
+            var p = this.ProgressChanged;
+            if (p == null)
+                return;
+            DispatcherHelper.BeginInvoke(() => p.Invoke(this, e));
         }
+
+        public event ProgressChangedEventHandler<T, TProgress> ProgressChanged;
     }
 }

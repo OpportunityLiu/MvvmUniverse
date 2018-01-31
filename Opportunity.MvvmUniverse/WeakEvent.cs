@@ -27,12 +27,12 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace SmartWeakEvent
+namespace Opportunity.MvvmUniverse
 {
     /// <summary>
     /// A class for managing a weak event.
     /// </summary>
-    public sealed class SmartWeakEvent<T> where T : class
+    public sealed class WeakEvent<T> where T : class
     {
         struct EventEntry
         {
@@ -55,7 +55,7 @@ namespace SmartWeakEvent
 
         readonly List<EventEntry> eventEntries = new List<EventEntry>();
 
-        static SmartWeakEvent()
+        static WeakEvent()
         {
             if (!typeof(T).GetTypeInfo().IsSubclassOf(typeof(Delegate)))
                 throw new ArgumentException("T must be a delegate type");
