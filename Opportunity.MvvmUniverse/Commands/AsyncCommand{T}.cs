@@ -1,5 +1,4 @@
-﻿using Opportunity.MvvmUniverse.Delegates;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,16 +6,19 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    public delegate Task AsyncCommandExecutor<T>(AsyncCommand<T> command, T parameter);
+    public delegate bool AsyncCommandPredicate<T>(AsyncCommand<T> command, T parameter);
+
     public sealed class AsyncCommand<T> : CommandBase<T>
     {
-        internal AsyncCommand(AsyncAction<T> execute, Predicate<T> canExecute)
+        internal AsyncCommand(AsyncCommandExecutor<T> execute, AsyncCommandPredicate<T> canExecute)
         {
             this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
             this.canExecute = canExecute;
         }
 
-        private readonly AsyncAction<T> execute;
-        private readonly Predicate<T> canExecute;
+        private readonly AsyncCommandExecutor<T> execute;
+        private readonly AsyncCommandPredicate<T> canExecute;
         private bool isExecuting = false;
 
         public bool IsExecuting
@@ -35,7 +37,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 return false;
             if (this.canExecute == null)
                 return true;
-            return this.canExecute.Invoke(parameter);
+            return this.canExecute.Invoke(this, parameter);
         }
 
         protected override async void StartExecution(T parameter)
@@ -43,7 +45,7 @@ namespace Opportunity.MvvmUniverse.Commands
             this.IsExecuting = true;
             try
             {
-                await this.execute.Invoke(parameter);
+                await this.execute.Invoke(this, parameter);
                 OnFinished(parameter);
             }
             catch (Exception ex)

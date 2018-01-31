@@ -21,7 +21,6 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.AreEqual(EqualityComparer<string>.Default, dic4.Comparer);
             var dic5 = new ObservableDictionary<string, int>(StringComparer.CurrentCulture);
             Assert.AreEqual(StringComparer.CurrentCulture, dic5.Comparer);
-            Assert.ThrowsException<ArgumentNullException>(() => new ObservableDictionary<string, int>((IEqualityComparer<string>)null));
             var dic6 = new ObservableDictionary<string, int>((IDictionary<string, int>)null);
             Assert.AreEqual(0, dic6.Count);
             var dic7 = new ObservableDictionary<string, int>(new Dictionary<string, int> { [""] = 1 });
@@ -34,7 +33,7 @@ namespace Opportunity.MvvmUniverse.Test
         {
             var dic = new ObservableDictionary<int, int>
             {
-                { 0, 0 }
+                { 0, 0 },
             };
             Assert.AreEqual(0, dic[0]);
             Assert.ThrowsException<ArgumentException>(() => dic.Add(0, 1));
@@ -64,7 +63,7 @@ namespace Opportunity.MvvmUniverse.Test
                 { 2, 2 },
                 { 3, 3 },
                 { 4, 4 },
-                { 5, 5 }
+                { 5, 5 },
             };
             Assert.AreEqual(6, dic.Count);
             Assert.AreEqual(true, dic.Remove(0));
@@ -92,7 +91,7 @@ namespace Opportunity.MvvmUniverse.Test
                 { 2, 2 },
                 { 3, 3 },
                 { 4, 4 },
-                { 5, 5 }
+                { 5, 5 },
             };
             dic.Move(0, 1);
             Assert.AreEqual(1, dic.ItemAt(0).Key);

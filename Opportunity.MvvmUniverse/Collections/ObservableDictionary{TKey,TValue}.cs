@@ -27,14 +27,13 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public IEqualityComparer<TKey> Comparer => KeySet.Comparer;
 
-        public ObservableDictionary() : this(null, EqualityComparer<TKey>.Default) { }
+        public ObservableDictionary() : this(null, null) { }
         public ObservableDictionary(IEqualityComparer<TKey> comparer) : this(null, comparer) { }
-        public ObservableDictionary(IDictionary<TKey, TValue> dictionary) : this(dictionary, EqualityComparer<TKey>.Default) { }
+        public ObservableDictionary(IDictionary<TKey, TValue> dictionary) : this(dictionary, null) { }
 
         public ObservableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
         {
-            if (comparer == null)
-                throw new ArgumentNullException(nameof(comparer));
+            comparer = comparer ?? EqualityComparer<TKey>.Default;
             this.KeySet = new Dictionary<TKey, int>(comparer);
             if (dictionary != null)
             {
@@ -77,6 +76,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         protected virtual void InsertItem(int index, TKey key, TValue value)
         {
+            check();
             if (index < 0 || index > KeySet.Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
             KeySet.Add(key, index);
@@ -100,6 +100,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         protected virtual void RemoveItem(TKey key)
         {
+            check();
             var removedIndex = KeySet[key];
             KeySet.Remove(key);
             KeyItems.RemoveAt(removedIndex);
@@ -123,6 +124,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         protected virtual void SetItem(TKey key, TValue value)
         {
+            check();
             var index = KeySet[key];
             var oldValue = ValueItems[index];
             ValueItems[index] = value;
@@ -137,6 +139,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         protected virtual void MoveItem(TKey key, int newIndex)
         {
+            check();
             if (newIndex < 0 || newIndex >= this.Count)
                 throw new ArgumentOutOfRangeException(nameof(newIndex));
             var oldIndex = KeySet[key];
@@ -164,6 +167,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         protected virtual void ClearItems()
         {
+            check();
             this.keyItems?.Clear();
             this.valueItems?.Clear();
             KeySet.Clear();
@@ -258,8 +262,12 @@ namespace Opportunity.MvvmUniverse.Collections
 
         private ObservableDictionaryView<TKey, TValue> readOnlyView;
         public ObservableDictionaryView<TKey, TValue> AsReadOnly()
-            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ()
-                => new ObservableDictionaryView<TKey, TValue>(this));
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory ?? (() => new ObservableDictionaryView<TKey, TValue>(this)));
+
+        /// <summary>
+        /// This delegate will be called when <see cref="AsReadOnly()"/> first called on this instance.
+        /// </summary>
+        protected virtual Func<ObservableDictionaryView<TKey, TValue>> ReadOnlyViewFactory => () => new ObservableDictionaryView<TKey, TValue>(this);
 
         public int Count => KeySet.Count;
 

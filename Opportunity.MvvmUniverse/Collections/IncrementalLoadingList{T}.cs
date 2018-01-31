@@ -31,25 +31,27 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 return PollingAsyncWrapper.Wrap(this.loading);
             }
-            return this.loading = Run(async token =>
+            if (!this.HasMoreItems)
+                return AsyncWrapper.CreateCompleted(new LoadMoreItemsResult());
+            var task = Run(async token =>
             {
-                if (!this.HasMoreItems)
-                    return new LoadMoreItemsResult();
-                var lp = LoadMoreItemsImplementAsync((int)count);
-                var lc = 0;
-                token.Register(lp.Cancel);
                 try
                 {
+                    var lp = LoadMoreItemsImplementAsync((int)count);
+                    token.Register(lp.Cancel);
                     var re = await lp;
-                    lc = this.AddRange(re);
+                    var lc = this.AddRange(re);
+                    return new LoadMoreItemsResult { Count = (uint)lc };
                 }
                 catch (Exception ex)
                 {
                     if (!await tryHandle(ex))
                         throw;
+                    return default;
                 }
-                return new LoadMoreItemsResult() { Count = (uint)lc };
             });
+            this.loading = task;
+            return task;
         }
 
         public event LoadMoreItemsExceptionEventHadler<T> LoadMoreItemsException;

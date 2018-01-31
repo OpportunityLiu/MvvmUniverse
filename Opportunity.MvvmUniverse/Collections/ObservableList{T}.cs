@@ -31,7 +31,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if ((items ?? throw new ArgumentNullException(nameof(items))).Count <= 0)
                 return;
-            if (ReferenceEquals(items, this))
+            if (isSameRef(items))
                 items = items.ToList();
             Items.InsertRange(index, items);
             OnPropertyChanged(nameof(Count));
@@ -71,7 +71,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 throw new ArgumentOutOfRangeException(nameof(index));
             if (items.Count <= 0)
                 return;
-            if (ReferenceEquals(items, this))
+            if (isSameRef(items))
                 items = items.ToList();
             if (items.Count == 1)
             {
@@ -206,85 +206,6 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public void Clear() => ClearItems();
 
-        /// <summary>
-        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
-        /// </summary>
-        /// <param name="newList">The target content</param>
-        /// <returns>The minimum editing distance of the edit</returns>
-        /// <remarks>
-        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
-        /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList) => Update(newList, default(IEqualityComparer<T>), null);
-        /// <summary>
-        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
-        /// </summary>
-        /// <param name="newList">The target content</param>
-        /// <param name="comparer">The comparer to compare items in two lists</param>
-        /// <returns>The minimum editing distance of the edit</returns>
-        /// <remarks>
-        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
-        /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IComparer<T> comparer) => Update(newList, comparer, null);
-        /// <summary>
-        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
-        /// </summary>
-        /// <param name="newList">The target content</param>
-        /// <param name="comparer">The comparer to compare items in two lists</param>
-        /// <returns>The minimum editing distance of the edit</returns>
-        /// <remarks>
-        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
-        /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IEqualityComparer<T> comparer) => Update(newList, comparer, null);
-        /// <summary>
-        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
-        /// </summary>
-        /// <param name="newList">The target content</param>
-        /// <param name="comparison">The comparison to compare items in two lists</param>
-        /// <returns>The minimum editing distance of the edit</returns>
-        /// <remarks>
-        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
-        /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, Comparison<T> comparison) => Update(newList, Comparer<T>.Create(comparison), null);
-        /// <summary>
-        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
-        /// </summary>
-        /// <param name="newList">The target content</param>
-        /// <param name="comparison">The comparison to compare items in two lists</param>
-        /// <param name="itemUpdater">The delegate to move data from elements in <paramref name="newList"/> to elements in this <see cref="ObservableList{T}"/></param>
-        /// <returns>The minimum editing distance of the edit</returns>
-        /// <remarks>
-        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
-        /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, Comparison<T> comparison, ItemUpdater<T> itemUpdater) => Update(newList, Comparer<T>.Create(comparison), itemUpdater);
-        /// <summary>
-        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
-        /// </summary>
-        /// <param name="newList">The target content</param>
-        /// <param name="comparer">The comparer to compare items in two lists</param>
-        /// <param name="itemUpdater">The delegate to move data from elements in <paramref name="newList"/> to elements in this <see cref="ObservableList{T}"/></param>
-        /// <returns>The minimum editing distance of the edit</returns>
-        /// <remarks>
-        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
-        /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IComparer<T> comparer, ItemUpdater<T> itemUpdater) => Update(newList, EqualityComparerAdapter.Create(comparer), itemUpdater);
-        /// <summary>
-        /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
-        /// </summary>
-        /// <param name="newList">The target content</param>
-        /// <param name="comparer">The comparer to compare items in two lists</param>
-        /// <param name="itemUpdater">The delegate to move data from elements in <paramref name="newList"/> to elements in this <see cref="ObservableList{T}"/></param>
-        /// <returns>The minimum editing distance of the edit</returns>
-        /// <remarks>
-        /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
-        /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IEqualityComparer<T> comparer, ItemUpdater<T> itemUpdater)
-        {
-            if (newList == null)
-                throw new ArgumentNullException(nameof(newList));
-            comparer = comparer ?? EqualityComparer<T>.Default;
-            return new Updater(this, newList, comparer, itemUpdater).Update();
-        }
-
         public void ForEach(Action<T> action) => Items.ForEach(action);
         public void ForEach(Action<int, T> action)
         {
@@ -305,9 +226,13 @@ namespace Opportunity.MvvmUniverse.Collections
         void ICollection.CopyTo(Array array, int index) => ((ICollection)Items).CopyTo(array, index);
 
         private ObservableListView<T> readOnlyView;
-
         public ObservableListView<T> AsReadOnly()
-            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, () => new ObservableListView<T>(this));
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory ?? (() => new ObservableListView<T>(this)));
+
+        /// <summary>
+        /// This delegate will be called when <see cref="AsReadOnly()"/> first called on this instance.
+        /// </summary>
+        protected virtual Func<ObservableListView<T>> ReadOnlyViewFactory => () => new ObservableListView<T>(this);
 
         public int IndexOf(T item) => Items.IndexOf(item);
         int IList.IndexOf(object value) => ((IList)Items).IndexOf(value);
@@ -315,6 +240,15 @@ namespace Opportunity.MvvmUniverse.Collections
         public List<T>.Enumerator GetEnumerator() => Items.GetEnumerator();
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => Items.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Items.GetEnumerator();
+
+        private bool isSameRef(object collection)
+        {
+            if (collection == null)
+                return false;
+            return ReferenceEquals(collection, this)
+                || ReferenceEquals(collection, this.Items)
+                || ReferenceEquals(collection, this.readOnlyView);
+        }
 
         private sealed class Box : IReadOnlyList<T>, IList
         {

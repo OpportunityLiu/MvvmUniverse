@@ -8,7 +8,7 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
     {
         public static T CastValue<T>(object value)
         {
-            if (value is null && Opportunity.Helpers.TypeTraits.Of<T>().CanBeNull)
+            if (value is null && default(T) == null)
                 return default;
             if (value is T v)
                 return v;
@@ -17,7 +17,7 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 
         public static KeyValuePair<TKey, TValue> CastKVP<TKey, TValue>(object value)
         {
-            if (value == null)
+            if (value is null)
                 throw new ArgumentNullException(nameof(value));
             if (value is KeyValuePair<TKey, TValue> v)
                 return v;
@@ -26,7 +26,7 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 
         public static TKey CastKey<TKey>(object key)
         {
-            if (key == null)
+            if (key is null)
                 throw new ArgumentNullException(nameof(key));
             if (key is TKey v)
                 return v;
@@ -40,12 +40,12 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 
         public static void ThrowForReadOnlyCollection(object parent)
         {
-            throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
+            throw new InvalidOperationException($"This collection is a read only view of \"{parent}\".");
         }
 
         public static T ThrowForReadOnlyCollection<T>(object parent, T value = default)
         {
-            throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
+            throw new InvalidOperationException($"This collection is a read only view of \"{parent}\".");
         }
     }
 }

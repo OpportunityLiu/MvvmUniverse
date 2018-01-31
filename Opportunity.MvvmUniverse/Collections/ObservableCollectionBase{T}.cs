@@ -11,14 +11,14 @@ namespace Opportunity.MvvmUniverse.Collections
     // Make it strong typed to add type check and decrease boxing
     public abstract class ObservableCollectionBase<T> : ObservableObject, System.Collections.Specialized.INotifyCollectionChanged
     {
-        private sealed class ListWarpper : IList
+        private sealed class ListWarpper : IList, IReadOnlyList<T>, ICollection, IReadOnlyCollection<T>
         {
             public static IList WarpIfNeeded(IReadOnlyList<T> listObj) => (listObj as IList) ?? new ListWarpper(listObj);
 
             private readonly IReadOnlyList<T> list;
             public ListWarpper(IReadOnlyList<T> toWarp) => this.list = toWarp;
 
-            public object this[int index]
+            object IList.this[int index]
             {
                 get => this.list[index];
                 set => throw new NotSupportedException("This is a read only list");
@@ -41,6 +41,8 @@ namespace Opportunity.MvvmUniverse.Collections
                     return this.syncRoot;
                 }
             }
+
+            public T this[int index] => this.list[index];
 
             public int Add(object value) => throw new NotSupportedException("This is a read only list");
 
@@ -68,7 +70,8 @@ namespace Opportunity.MvvmUniverse.Collections
                 throw new ArgumentException("Unsupported array", nameof(array));
             }
 
-            public IEnumerator GetEnumerator() => this.list.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)this.list).GetEnumerator();
+            public IEnumerator<T> GetEnumerator() => this.list.GetEnumerator();
 
             public int IndexOf(object value)
             {
@@ -85,9 +88,7 @@ namespace Opportunity.MvvmUniverse.Collections
             }
 
             public void Insert(int index, object value) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
-
             public void Remove(object value) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
-
             public void RemoveAt(int index) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
         }
 
