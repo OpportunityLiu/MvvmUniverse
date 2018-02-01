@@ -52,10 +52,11 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         public virtual void OnCanExecuteChanged()
         {
-            var temp = CanExecuteChanged;
+            var temp = this.CanExecuteChanged;
             if (temp == null)
                 return;
             DispatcherHelper.BeginInvoke(() => temp(this, EventArgs.Empty));
         }
+
     }
 }

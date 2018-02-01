@@ -17,6 +17,11 @@ namespace Opportunity.MvvmUniverse.Commands
         protected Executor<T> ExecuteDelegate { get; }
         protected Predicate<T> CanExecuteDelegate { get; }
 
+        /// <summary>
+        /// Check with <see cref="CanExecuteDelegate"/>.
+        /// </summary>
+        /// <param name="parameter">Parameter of execution</param>
+        /// <returns>Whether the command can execute or not</returns>
         protected override bool CanExecuteOverride(T parameter)
         {
             if (this.CanExecuteDelegate == null)

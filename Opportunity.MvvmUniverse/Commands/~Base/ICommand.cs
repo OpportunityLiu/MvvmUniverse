@@ -1,15 +1,5 @@
 ﻿namespace Opportunity.MvvmUniverse.Commands
 {
-    public interface IControllable
-    {
-        /// <summary>
-        /// A tag associated with this object.
-        /// </summary>
-        object Tag { get; set; }
-
-        bool IsEnabled { get; set; }
-    }
-
     public interface ICommand : System.Windows.Input.ICommand
     {
         /// <summary>
@@ -58,33 +48,5 @@
         /// Will be raised after execution.
         /// </summary>
         event ExecutedEventHandler<T> Executed;
-    }
-
-    public interface IAsyncCommand : System.Windows.Input.ICommand
-    {
-        bool IsExecuting { get; }
-    }
-
-    public interface ICommandWithProgress<TProgress> : IAsyncCommand
-    {
-        TProgress Progress { get; }
-        double NormalizedProgress { get; }
-    }
-
-    public interface IAsyncCommandWithProgress<TProgress> : ICommand, ICommandWithProgress<TProgress>
-    {
-        /// <summary>
-        /// Will be raised when <see cref="ICommandWithProgress{TProgress}.Progress"/> changed during execution.
-        /// </summary>
-        event ProgressChangedEventHandler<TProgress> ProgressChanged;
-    }
-
-    public interface IAsyncCommandWithProgress<T, TProgress> : ICommand<T>, ICommandWithProgress<TProgress>
-    {
-
-        /// <summary>
-        /// Will be raised when <see cref="ICommandWithProgress{TProgress}.Progress"/> changed during execution.
-        /// </summary>
-        event ProgressChangedEventHandler<T, TProgress> ProgressChanged;
     }
 }

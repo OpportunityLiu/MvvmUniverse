@@ -28,6 +28,11 @@ namespace Opportunity.MvvmUniverse.Commands
             }
         }
 
+        /// <summary>
+        /// Check with <see cref="IsExecuting"/> and <see cref="CanExecuteDelegate"/>.
+        /// </summary>
+        /// <param name="parameter">Parameter of execution</param>
+        /// <returns>Whether the command can execute or not</returns>
         protected override bool CanExecuteOverride(T parameter)
         {
             if (this.IsExecuting)
@@ -37,6 +42,12 @@ namespace Opportunity.MvvmUniverse.Commands
             return this.CanExecuteDelegate.Invoke(this, parameter);
         }
 
+        /// <summary>
+        /// Raise <see cref="Executing"/> event.
+        /// If not be cancelled, <see cref="IsExecuting"/> will be set to <c>true</c>.
+        /// </summary>
+        /// <param name="parameter">Parameter of execution</param>
+        /// <returns>True if executing not cancelled</returns>
         protected override bool OnStarting(T parameter)
         {
             var r = base.OnStarting(parameter);
@@ -45,6 +56,10 @@ namespace Opportunity.MvvmUniverse.Commands
             return r;
         }
 
+        /// <summary>
+        /// Raise <see cref="Executed"/> event and set <see cref="IsExecuting"/> to <c>false</c>.
+        /// </summary>
+        /// <param name="e">Event args</param>
         protected override void OnFinished(ExecutedEventArgs<T> e)
         {
             IsExecuting = false;

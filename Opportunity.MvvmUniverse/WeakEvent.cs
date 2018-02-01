@@ -32,9 +32,14 @@ namespace Opportunity.MvvmUniverse
     /// <summary>
     /// A class for managing a weak event.
     /// </summary>
-    public sealed class WeakEvent<T> where T : class
+    /// <typeparam name="TDelegate">Delegate type of event</typeparam>
+    /// <typeparam name="TSender">Type of sender</typeparam>
+    /// <typeparam name="TEventArgs">Type of event args</typeparam>
+    public sealed class WeakEvent<TDelegate, TSender, TEventArgs>
+        where TDelegate : class
+        where TEventArgs : EventArgs
     {
-        struct EventEntry
+        private struct EventEntry
         {
             public readonly object TargetMethodOrDelegate;
             public readonly WeakReference TargetReference;
@@ -53,26 +58,42 @@ namespace Opportunity.MvvmUniverse
             }
         }
 
-        readonly List<EventEntry> eventEntries = new List<EventEntry>();
+        private readonly List<EventEntry> eventEntries = new List<EventEntry>();
 
         static WeakEvent()
         {
-            if (!typeof(T).GetTypeInfo().IsSubclassOf(typeof(Delegate)))
-                throw new ArgumentException("T must be a delegate type");
-            var invoke = typeof(T).GetMethod("Invoke");
+            if (!typeof(TDelegate).GetTypeInfo().IsSubclassOf(typeof(Delegate)))
+                throw new ArgumentException("TDelegate must be a delegate type", nameof(TDelegate));
+
+            var invoke = typeof(TDelegate).GetMethod("Invoke");
+            if (invoke == null)
+                throw new ArgumentException("TDelegate must have \"Invoke\" method", nameof(TDelegate));
+
             if (invoke.ReturnType != typeof(void))
-                throw new ArgumentException("The delegate return type must be void.");
+                throw new ArgumentException("The delegate return type must be void.", nameof(TDelegate));
+
+            var parameters = invoke.GetParameters();
+            if (parameters.Length != 2)
+                throw new ArgumentException("TDelegate must be a delegate type taking 2 parameters", nameof(TDelegate));
+
+            var senderParameter = parameters[0];
+            if (senderParameter.ParameterType != typeof(TSender))
+                throw new ArithmeticException("TSender doesn't match the type of TDelegate.");
+
+            var argsParameter = parameters[1];
+            if (argsParameter.ParameterType != typeof(TEventArgs))
+                throw new ArithmeticException("TEventArgs doesn't match the type of TDelegate.");
         }
 
-        public void Add(T eh)
+        public void Add(TDelegate eventHandler)
         {
-            if (eh == null)
+            if (eventHandler == null)
                 return;
 
-            var d = (Delegate)(object)eh;
+            var d = (Delegate)(object)eventHandler;
             var l = d.GetInvocationList();
             if (this.eventEntries.Count + l.Length > this.eventEntries.Capacity)
-                RemoveDeadEntries();
+                removeDeadEntries();
             foreach (var item in l)
             {
                 add(item);
@@ -92,17 +113,17 @@ namespace Opportunity.MvvmUniverse
                 this.eventEntries.Add(new EventEntry(method, target));
         }
 
-        void RemoveDeadEntries()
+        private void removeDeadEntries()
         {
             this.eventEntries.RemoveAll(ee => ee.TargetReference != null && !ee.TargetReference.IsAlive);
         }
 
-        public void Remove(T eh)
+        public void Remove(TDelegate eventHandler)
         {
-            if (eh == null)
+            if (eventHandler == null)
                 return;
 
-            var d = (Delegate)(object)eh;
+            var d = (Delegate)(object)eventHandler;
             foreach (var item in d.GetInvocationList())
             {
                 remove(item);
@@ -138,17 +159,21 @@ namespace Opportunity.MvvmUniverse
             }
         }
 
-        public void Raise(object sender, EventArgs e)
+        public void Raise(TSender sender, TEventArgs e)
         {
+            if (this.eventEntries.Count == 0)
+                return;
             var needsCleanup = false;
-            var parameters = new[] { sender, e };
-            foreach (var item in this.eventEntries.ToArray())
+            object[] parameters = null;
+            foreach (var item in this.eventEntries.ToList())
             {
                 if (item.TargetReference != null)
                 {
                     var target = item.TargetReference.Target;
                     if (target != null)
                     {
+                        if (parameters == null)
+                            parameters = new object[] { sender, e };
                         ((MethodInfo)item.TargetMethodOrDelegate).Invoke(target, parameters);
                     }
                     else
@@ -158,11 +183,13 @@ namespace Opportunity.MvvmUniverse
                 }
                 else
                 {
+                    if (parameters == null)
+                        parameters = new object[] { sender, e };
                     ((Delegate)item.TargetMethodOrDelegate).DynamicInvoke(null, parameters);
                 }
             }
             if (needsCleanup)
-                RemoveDeadEntries();
+                removeDeadEntries();
         }
     }
 }
