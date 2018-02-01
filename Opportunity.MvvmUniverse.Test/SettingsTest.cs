@@ -21,6 +21,7 @@ namespace Opportunity.MvvmUniverse.Test
             };
             var c2 = new TestSettingCollection();
             c.MyProperty2 = StringComparison.CurrentCulture;
+            c.MyProperty4 = "";
             Assert.AreEqual(c.MyProperty, c2.MyProperty);
             Assert.AreEqual(c.MyProperty2, c2.MyProperty2);
             c2.MyProperty = 1213;
@@ -46,7 +47,7 @@ namespace Opportunity.MvvmUniverse.Test
 
             // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
             public static readonly SettingProperty<int> MyPropertyProperty =
-                new SettingProperty<int>("MyProperty", typeof(TestSettingCollection), 0, MtpropCB);
+                 SettingProperty.Create("MyProperty", 0, MtpropCB);
 
 
             public static void MtpropCB(SettingCollection sender, SettingPropertyChangedEventArgs<int> e)
@@ -64,13 +65,33 @@ namespace Opportunity.MvvmUniverse.Test
 
             // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
             public static readonly SettingProperty<StringComparison> MyProperty2Property =
-                new SettingProperty<StringComparison>("MyProperty2", typeof(TestSettingCollection), 0, MtpropCB2);
+                SettingProperty.Create<StringComparison>("MyProperty2", 0, MtpropCB2);
 
 
             public static void MtpropCB2(SettingCollection sender, SettingPropertyChangedEventArgs<StringComparison> e)
             {
 
             }
+
+            public string MyProperty3
+            {
+                get => GetFromContainer(MyProperty3Property);
+                set => SetToContainer(MyProperty3Property, value);
+            }
+
+            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
+            public static readonly SettingProperty<string> MyProperty3Property =
+                SettingProperty.Create<string>("MyProperty3", null);
+
+            public string MyProperty4
+            {
+                get => GetFromContainer(MyProperty4Property);
+                set => SetToContainer(MyProperty4Property, value);
+            }
+
+            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
+            public static readonly SettingProperty<string> MyProperty4Property =
+                SettingProperty.Create<string>("MyProperty4", "");
         }
     }
 }
