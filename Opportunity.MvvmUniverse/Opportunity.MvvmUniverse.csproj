@@ -165,6 +165,13 @@
     <Compile Include="Commands\~Base\CommandBase{T}.cs" />
     <Compile Include="Commands\~Sync\Command{T}.cs" />
     <Compile Include="PropertyChangedEventArgsSource.cs" />
+    <Compile Include="Settings\Serializers\EmptySerializer.cs" />
+    <Compile Include="Settings\Serializers\DateTimeSerializer.cs" />
+    <Compile Include="Settings\Serializers\EnumSerializer.cs" />
+    <Compile Include="Settings\Serializers\SByteSerializer.cs" />
+    <Compile Include="Settings\Serializer{T}.cs" />
+    <Compile Include="Settings\SettingCollection.DebugProxy.cs" />
+    <Compile Include="Settings\Serializers\UriSerializer.cs" />
     <Compile Include="WeakEvent.cs" />
     <Compile Include="DispatcherHelper.cs" />
     <Compile Include="ObservableObject.cs" />

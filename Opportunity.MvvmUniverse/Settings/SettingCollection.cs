@@ -2,153 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using Windows.Storage;
 
 namespace Opportunity.MvvmUniverse.Settings
 {
     [DebuggerTypeProxy(typeof(DebugProxy))]
-    public class SettingCollection : ObservableObject
+    public partial class SettingCollection : ObservableObject
     {
-        private class DebugProxy
-        {
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            private readonly SettingCollection parent;
-
-            public DebugProxy(SettingCollection c)
-            {
-                this.parent = c;
-            }
-
-            internal abstract class Member
-            {
-                public abstract string GetName();
-            }
-
-            [DebuggerDisplay("{value(),nq}", Name = "{Defination.Name,nq}", Type = "{type(),nq}")]
-            internal sealed class NoStoreMember<T> : Member
-            {
-                public NoStoreMember(SettingProperty def)
-                {
-                    Defination = def;
-                }
-
-                public T Value => default;
-
-                private string value()
-                {
-                    var def = Defination.GetDefault();
-                    if (def == null || def.ToString() == "")
-                        return "(Unset)";
-                    if (def is string v)
-                        return "\"" + v + "\" (Unset)";
-                    return def + " (Unset)";
-                }
-
-                [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-                public SettingProperty Defination { get; internal set; }
-
-                private string type()
-                {
-                    return Defination.PropertyType.ToString();
-                }
-
-                public override string GetName() => Defination.Name;
-            }
-
-            [DebuggerDisplay("{Value}", Name = "{Defination.Name,nq}", Type = "{type(),nq}")]
-            internal sealed class DefMember<T> : Member
-            {
-                public DefMember(object value, SettingProperty def)
-                {
-                    Defination = def;
-                    Value = (T)value;
-                }
-
-                public T Value { get; internal set; }
-
-                [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-                public SettingProperty Defination { get; internal set; }
-
-                private string type()
-                {
-                    var valueType = Value?.GetType() ?? Defination.PropertyType;
-                    if (valueType == Defination.PropertyType)
-                        return Defination.PropertyType.ToString();
-                    else
-                        return $"{Defination.PropertyType} {{{valueType}}})";
-                }
-
-                public override string GetName() => Defination.Name;
-            }
-
-            [DebuggerDisplay("{Value}", Name = "{Name,nq}", Type = "{type(),nq}")]
-            internal sealed class NoDefMember : Member
-            {
-                [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-                public string Name { get; internal set; }
-                public object Value { get; internal set; }
-
-                private string type()
-                {
-                    if (Value == null)
-                        return "System.Object";
-                    return Value.GetType().ToString();
-                }
-
-                public NoDefMember(string name, object value)
-                {
-                    Name = name;
-                    Value = value;
-                }
-
-                public override string GetName() => Name;
-            }
-
-            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-            internal Member[] Items => build();
-
-            private IEnumerable<SettingProperty> getSettingProperties()
-            {
-                return from field in this.parent.GetType().GetRuntimeFields()
-                       where field.IsStatic && typeof(SettingProperty).IsAssignableFrom(field.FieldType)
-                       select (SettingProperty)field.GetValue(null);
-            }
-
-            private Member[] build()
-            {
-                var values = this.parent.Container.Values.ToList();
-                var defs = getSettingProperties().ToList();
-                var list = new List<Member>(values.Count);
-                for (var i = 0; i < values.Count; i++)
-                {
-                    var value = values[i];
-                    var defI = defs.FindIndex(d => d.Name == value.Key);
-                    if (defI >= 0)
-                    {
-                        var def = defs[defI];
-                        defs.RemoveAt(defI);
-                        var v = this.parent.GetFromContainer(def);
-                        var type = typeof(DefMember<>).MakeGenericType(def.PropertyType);
-                        list.Add((Member)Activator.CreateInstance(type, v, def));
-                    }
-                    else
-                    {
-                        list.Add(new NoDefMember(value.Key, value.Value));
-                    }
-                }
-                foreach (var item in defs)
-                {
-                    var type = typeof(NoStoreMember<>).MakeGenericType(item.PropertyType);
-                    list.Add((Member)Activator.CreateInstance(type, item));
-                }
-                list.Sort((m1, m2) => string.Compare(m1.GetName(), m2.GetName()));
-                return list.ToArray();
-            }
-        }
-
         static SettingCollection()
         {
             ApplicationData.Current.DataChanged += applicationDataChanged;
@@ -215,7 +76,7 @@ namespace Opportunity.MvvmUniverse.Settings
             {
                 if (this.Container.Values.TryGetValue(property.Name, out var v))
                 {
-                    return (T)deserializeValue(property, v);
+                    return property.FromStorage(v);
                 }
             }
             catch { }
@@ -226,17 +87,16 @@ namespace Opportunity.MvvmUniverse.Settings
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
+            var p = (ISettingProperty)property;
             try
             {
-                if (this.Container.Values.TryGetValue(property.Name, out var v))
+                if (this.Container.Values.TryGetValue(p.Name, out var v))
                 {
-                    var r = deserializeValue(property, v);
-                    if (property.TestValue(r))
-                        return r;
+                    return p.FromStorage(v);
                 }
             }
             catch { }
-            return property.GetDefault();
+            return p.DefaultValue;
         }
 
         protected bool SetToContainer<T>(SettingProperty<T> property, T value)
@@ -256,10 +116,11 @@ namespace Opportunity.MvvmUniverse.Settings
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
-            if (!property.TestValue(value))
+            var p = (ISettingProperty)property;
+            if (!p.IsValueValid(value))
                 throw new ArgumentException("Type of value doesn't match property.PropertyType.");
             var old = GetFromContainer(property);
-            if (this.Container.Values.ContainsKey(property.Name) && property.Equals(old, value))
+            if (this.Container.Values.ContainsKey(p.Name) && p.Equals(old, value))
             {
                 return false;
             }
@@ -279,7 +140,8 @@ namespace Opportunity.MvvmUniverse.Settings
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
-            if (!property.TestValue(value))
+            var p = (ISettingProperty)property;
+            if (!p.IsValueValid(value))
                 throw new ArgumentException("Type of value doesn't match property.PropertyType.");
             var old = GetFromContainer(property);
             setToContainerCore(property, old, value);
@@ -287,31 +149,17 @@ namespace Opportunity.MvvmUniverse.Settings
 
         private void setToContainerCore<T>(SettingProperty<T> property, T old, T value)
         {
-            this.Container.Values[property.Name] = serializeValue(property, value);
+            this.Container.Values[property.Name] = property.ToStorage(value);
             OnPropertyChanged(property.Name);
             property.RaisePropertyChanged(this, old, value);
         }
 
         private void setToContainerCore(SettingProperty property, object old, object value)
         {
-            this.Container.Values[property.Name] = serializeValue(property, value);
-            OnPropertyChanged(property.Name);
-            property.RaisePropertyChanged(this, old, value);
-        }
-
-        private static object serializeValue(SettingProperty property, object value)
-        {
-            if (value is Enum e)
-                return e.ToUInt64();
-            else
-                return value;
-        }
-
-        private object deserializeValue(SettingProperty property, object value)
-        {
-            if (property.GetTypeDefault() is Enum)
-                return Enum.ToObject(property.PropertyType, value);
-            return value;
+            var p = (ISettingProperty)property;
+            this.Container.Values[p.Name] = p.ToStorage(value);
+            OnPropertyChanged(p.Name);
+            p.RaisePropertyChanged(this, old, value);
         }
     }
 }
