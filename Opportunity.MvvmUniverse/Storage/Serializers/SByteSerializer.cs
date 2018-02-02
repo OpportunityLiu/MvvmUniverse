@@ -1,4 +1,4 @@
-﻿namespace Opportunity.MvvmUniverse.Settings.Serializers
+﻿namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
     public sealed class SByteSerializer : ISerializer<sbyte>
     {

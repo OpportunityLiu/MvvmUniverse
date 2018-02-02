@@ -5,41 +5,41 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Windows.Storage;
 
-namespace Opportunity.MvvmUniverse.Settings
+namespace Opportunity.MvvmUniverse.Storage
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [DebuggerTypeProxy(typeof(DebugProxy))]
-    public partial class SettingCollection : ObservableObject
+    public abstract partial class StorageObject : ObservableObject
     {
-        static SettingCollection()
-        {
-            ApplicationData.Current.DataChanged += applicationDataChanged;
-        }
+        #region Static Factroy Methods
 
-        private static void applicationDataChanged(ApplicationData sender, object args)
-        {
-            roamingCollcetions.RemoveAll(c => !c.TryGetTarget(out var ignore));
-            foreach (var item in roamingCollcetions)
-            {
-                if (item.TryGetTarget(out var target))
-                {
-                    target.RoamingDataChanged();
-                }
-            }
-        }
+        public static LocalStorageObject CreateLocal(ApplicationDataContainer container)
+            => new LocalStorageObject(container);
+        public static LocalStorageObject CreateLocal(string containerName)
+            => new LocalStorageObject(ApplicationData.Current.LocalSettings, containerName);
+        public static LocalStorageObject CreateLocal(ApplicationDataContainer parent, string containerName)
+            => new LocalStorageObject(parent, containerName);
+        public static LocalStorageObject CreateLocal(LocalStorageObject parent, string containerName)
+            => new LocalStorageObject(parent, containerName);
 
-        protected virtual void RoamingDataChanged()
-        {
-            OnPropertyChanged((string)null);
-        }
+        public static RoamingStorageObject CreateRoaming(ApplicationDataContainer container)
+            => new RoamingStorageObject(container);
+        public static RoamingStorageObject CreateRoaming(string containerName)
+            => new RoamingStorageObject(ApplicationData.Current.RoamingSettings, containerName);
+        public static RoamingStorageObject CreateRoaming(ApplicationDataContainer parent, string containerName)
+            => new RoamingStorageObject(parent, containerName);
+        public static RoamingStorageObject CreateRoaming(RoamingStorageObject parent, string containerName)
+            => new RoamingStorageObject(parent, containerName);
 
-        private static readonly List<WeakReference<SettingCollection>> roamingCollcetions
-            = new List<WeakReference<SettingCollection>>();
+        #endregion Static Factroy Methods
 
-        public SettingCollection(ApplicationDataContainer container)
+        #region Constructors
+
+        internal StorageObject(ApplicationDataContainer container)
         {
             this.Container = container;
-            if (container.Locality == ApplicationDataLocality.Roaming)
-                roamingCollcetions.Add(new WeakReference<SettingCollection>(this));
         }
 
         private static ApplicationDataContainer create(ApplicationDataContainer parent, string containerName)
@@ -51,10 +51,10 @@ namespace Opportunity.MvvmUniverse.Settings
             return parent.CreateContainer(containerName, ApplicationDataCreateDisposition.Always);
         }
 
-        public SettingCollection(ApplicationDataContainer parent, string containerName)
+        internal StorageObject(ApplicationDataContainer parent, string containerName)
             : this(create(parent, containerName)) { }
 
-        private static ApplicationDataContainer create(SettingCollection parent, string containerName)
+        private static ApplicationDataContainer create(StorageObject parent, string containerName)
         {
             if (parent == null)
                 throw new ArgumentNullException(nameof(parent));
@@ -63,12 +63,14 @@ namespace Opportunity.MvvmUniverse.Settings
             return create(parent.Container, containerName);
         }
 
-        public SettingCollection(SettingCollection parent, string containerName)
+        internal StorageObject(StorageObject parent, string containerName)
             : this(create(parent, containerName)) { }
+
+        #endregion Constructors
 
         protected ApplicationDataContainer Container { get; }
 
-        protected T GetFromContainer<T>(SettingProperty<T> property)
+        protected T GetFromContainer<T>(StorageProperty<T> property)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
@@ -83,11 +85,11 @@ namespace Opportunity.MvvmUniverse.Settings
             return property.DefaultValue;
         }
 
-        protected object GetFromContainer(SettingProperty property)
+        protected object GetFromContainer(StorageProperty property)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
-            var p = (ISettingProperty)property;
+            var p = (IStorageProperty)property;
             try
             {
                 if (this.Container.Values.TryGetValue(p.Name, out var v))
@@ -99,7 +101,7 @@ namespace Opportunity.MvvmUniverse.Settings
             return p.DefaultValue;
         }
 
-        protected bool SetToContainer<T>(SettingProperty<T> property, T value)
+        protected bool SetToContainer<T>(StorageProperty<T> property, T value)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
@@ -112,11 +114,11 @@ namespace Opportunity.MvvmUniverse.Settings
             return true;
         }
 
-        protected bool SetToContainer(SettingProperty property, object value)
+        protected bool SetToContainer(StorageProperty property, object value)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
-            var p = (ISettingProperty)property;
+            var p = (IStorageProperty)property;
             if (!p.IsValueValid(value))
                 throw new ArgumentException("Type of value doesn't match property.PropertyType.");
             var old = GetFromContainer(property);
@@ -128,7 +130,7 @@ namespace Opportunity.MvvmUniverse.Settings
             return true;
         }
 
-        protected void ForceSetToContainer<T>(SettingProperty<T> property, T value)
+        protected void ForceSetToContainer<T>(StorageProperty<T> property, T value)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
@@ -136,27 +138,27 @@ namespace Opportunity.MvvmUniverse.Settings
             setToContainerCore(property, old, value);
         }
 
-        protected void ForceSetToContainer(SettingProperty property, object value)
+        protected void ForceSetToContainer(StorageProperty property, object value)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
-            var p = (ISettingProperty)property;
+            var p = (IStorageProperty)property;
             if (!p.IsValueValid(value))
                 throw new ArgumentException("Type of value doesn't match property.PropertyType.");
             var old = GetFromContainer(property);
             setToContainerCore(property, old, value);
         }
 
-        private void setToContainerCore<T>(SettingProperty<T> property, T old, T value)
+        private void setToContainerCore<T>(StorageProperty<T> property, T old, T value)
         {
             this.Container.Values[property.Name] = property.ToStorage(value);
             OnPropertyChanged(property.Name);
             property.RaisePropertyChanged(this, old, value);
         }
 
-        private void setToContainerCore(SettingProperty property, object old, object value)
+        private void setToContainerCore(StorageProperty property, object old, object value)
         {
-            var p = (ISettingProperty)property;
+            var p = (IStorageProperty)property;
             this.Container.Values[p.Name] = p.ToStorage(value);
             OnPropertyChanged(p.Name);
             p.RaisePropertyChanged(this, old, value);

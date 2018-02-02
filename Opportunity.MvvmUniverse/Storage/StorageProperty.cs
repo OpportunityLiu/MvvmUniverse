@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Diagnostics;
 
-namespace Opportunity.MvvmUniverse.Settings
+namespace Opportunity.MvvmUniverse.Storage
 {
-    public abstract class SettingProperty
+    public abstract class StorageProperty
     {
-        internal SettingProperty() { }
+        internal StorageProperty() { }
 
-        public static SettingProperty<T> Create<T>(string propertyName)
-            => new SettingProperty<T>(propertyName);
-        public static SettingProperty<T> Create<T>(string propertyName, T defaultValue)
-            => new SettingProperty<T>(propertyName, defaultValue);
-        public static SettingProperty<T> Create<T>(string propertyName, T defaultValue, SettingPropertyChangedCallback<T> callback) => new SettingProperty<T>(propertyName, defaultValue, callback);
+        public static StorageProperty<T> Create<T>(string propertyName)
+            => new StorageProperty<T>(propertyName);
+        public static StorageProperty<T> Create<T>(string propertyName, T defaultValue)
+            => new StorageProperty<T>(propertyName, defaultValue);
+        public static StorageProperty<T> Create<T>(string propertyName, T defaultValue, StoragePropertyChangedCallback<T> callback) => new StorageProperty<T>(propertyName, defaultValue, callback);
     }
 
-    internal interface ISettingProperty
+    internal interface IStorageProperty
     {
         string Name { get; }
         Type PropertyType { get; }
@@ -28,22 +28,22 @@ namespace Opportunity.MvvmUniverse.Settings
         object DefaultValue { get; }
         object GetTypeDefault();
         bool IsValueValid(object value);
-        void RaisePropertyChanged(SettingCollection sender, object oldValue, object newValue);
+        void RaisePropertyChanged(StorageObject sender, object oldValue, object newValue);
         bool Equals(object value1, object value2);
     }
 
-    public sealed class SettingProperty<T> : SettingProperty, ISettingProperty
+    public sealed class StorageProperty<T> : StorageProperty, IStorageProperty
     {
-        public SettingProperty(string propertyName)
+        public StorageProperty(string propertyName)
             : this(propertyName, default, null) { }
 
-        internal SettingProperty(string propertyName, T def)
+        internal StorageProperty(string propertyName, T def)
             : this(propertyName, def, null) { }
 
-        internal SettingProperty(string propertyName, SettingPropertyChangedCallback<T> callback)
+        internal StorageProperty(string propertyName, StoragePropertyChangedCallback<T> callback)
             : this(propertyName, default, callback) { }
 
-        internal SettingProperty(string propertyName, T def, SettingPropertyChangedCallback<T> callback)
+        internal StorageProperty(string propertyName, T def, StoragePropertyChangedCallback<T> callback)
         {
             if (string.IsNullOrEmpty(propertyName))
                 throw new ArgumentNullException(nameof(propertyName));
@@ -54,7 +54,7 @@ namespace Opportunity.MvvmUniverse.Settings
 
         public T DefaultValue { get; }
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object ISettingProperty.DefaultValue => DefaultValue;
+        object IStorageProperty.DefaultValue => DefaultValue;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private IEqualityComparer<T> equalityComparer = EqualityComparer<T>.Default;
@@ -72,37 +72,42 @@ namespace Opportunity.MvvmUniverse.Settings
             set => this.serializer = value ?? Serializer<T>.Default;
         }
 
-        public SettingPropertyChangedCallback<T> PropertyChangedCallback { get; }
+        public StoragePropertyChangedCallback<T> PropertyChangedCallback { get; }
 
         public string Name { get; }
 
         public Type PropertyType => typeof(T);
-        object ISettingProperty.GetTypeDefault() => default(T);
-        bool ISettingProperty.IsValueValid(object value)
+        object IStorageProperty.GetTypeDefault() => default(T);
+        bool IStorageProperty.IsValueValid(object value)
         {
             if (value is T)
                 return true;
             return (value == null && default(T) == null);
         }
 
-        internal void RaisePropertyChanged(SettingCollection sender, T oldValue, T newValue)
+        internal void RaisePropertyChanged(StorageObject sender, T oldValue, T newValue)
         {
             var cb = PropertyChangedCallback;
             if (cb == null)
                 return;
-            var arg = new SettingPropertyChangedEventArgs<T>(this, oldValue, newValue);
+            var arg = new StoragePropertyChangedEventArgs<T>(this, oldValue, newValue);
             DispatcherHelper.BeginInvoke(() => cb(sender, arg));
         }
-        void ISettingProperty.RaisePropertyChanged(SettingCollection sender, object oldValue, object newValue)
+        void IStorageProperty.RaisePropertyChanged(StorageObject sender, object oldValue, object newValue)
              => RaisePropertyChanged(sender, (T)oldValue, (T)newValue);
 
-        bool ISettingProperty.Equals(object value1, object value2) => this.equalityComparer.Equals((T)value1, (T)value2);
+        bool IStorageProperty.Equals(object value1, object value2) => this.equalityComparer.Equals((T)value1, (T)value2);
         internal bool Equals(T value1, T value2) => this.equalityComparer.Equals(value1, value2);
 
-        object ISettingProperty.ToStorage(object value) => this.serializer.Serialize((T)value);
+        object IStorageProperty.ToStorage(object value) => this.serializer.Serialize((T)value);
         internal object ToStorage(T value) => this.serializer.Serialize(value);
 
-        object ISettingProperty.FromStorage(object value) => this.serializer.Deserialize(value);
-        internal T FromStorage(object value) => this.serializer.Deserialize(value);
+        object IStorageProperty.FromStorage(object value) => FromStorage(value);
+        internal T FromStorage(object value)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            return this.serializer.Deserialize(value);
+        }
     }
 }

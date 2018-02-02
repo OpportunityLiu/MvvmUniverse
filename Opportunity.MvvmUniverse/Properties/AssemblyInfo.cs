@@ -11,12 +11,15 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("Opportunity.MvvmUniverse")]
 [assembly: AssemblyCopyright("Copyright © Opportunity 2017")]
 [assembly: AssemblyTrademark("Opportunity")]
-[assembly: AssemblyVersion(AssemblyInfo.Version)]
-[assembly: AssemblyFileVersion(AssemblyInfo.Version)]
+[assembly: AssemblyVersion(Opportunity.MvvmUniverse.AssemblyInfo.Version)]
+[assembly: AssemblyFileVersion(Opportunity.MvvmUniverse.AssemblyInfo.Version)]
 [assembly: ComVisible(false)]
 [assembly: InternalsVisibleTo("Opportunity.MvvmUniverse.Test")]
 
-internal static class AssemblyInfo
+namespace Opportunity.MvvmUniverse
 {
-    public const string Version = "1.3.0.0";
+    internal static class AssemblyInfo
+    {
+        public const string Version = "1.3.0.0";
+    }
 }

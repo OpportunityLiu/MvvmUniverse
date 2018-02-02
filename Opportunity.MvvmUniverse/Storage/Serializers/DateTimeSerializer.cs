@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Opportunity.MvvmUniverse.Settings.Serializers
+namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
     public sealed class DateTimeSerializer : ISerializer<DateTime>
     {

@@ -4,16 +4,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-namespace Opportunity.MvvmUniverse.Settings
+namespace Opportunity.MvvmUniverse.Storage
 {
-    public partial class SettingCollection
+    public partial class StorageObject
     {
         private class DebugProxy
         {
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            private readonly SettingCollection parent;
+            private readonly StorageObject parent;
 
-            public DebugProxy(SettingCollection c)
+            public DebugProxy(StorageObject c)
             {
                 this.parent = c;
             }
@@ -26,7 +26,7 @@ namespace Opportunity.MvvmUniverse.Settings
             [DebuggerDisplay("{value(),nq}", Name = "{Defination.Name,nq}", Type = "{type(),nq}")]
             internal sealed class NoStoreMember<T> : Member
             {
-                public NoStoreMember(ISettingProperty def)
+                public NoStoreMember(IStorageProperty def)
                 {
                     Defination = def;
                 }
@@ -46,7 +46,7 @@ namespace Opportunity.MvvmUniverse.Settings
                 }
 
                 [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-                public ISettingProperty Defination { get; internal set; }
+                public IStorageProperty Defination { get; internal set; }
 
                 private string type()
                 {
@@ -59,7 +59,7 @@ namespace Opportunity.MvvmUniverse.Settings
             [DebuggerDisplay("{Value}", Name = "{Defination.Name,nq}", Type = "{type(),nq}")]
             internal sealed class DefMember<T> : Member
             {
-                public DefMember(object storage, object value, ISettingProperty def)
+                public DefMember(object storage, object value, IStorageProperty def)
                 {
                     Defination = def;
                     Value = (T)value;
@@ -71,7 +71,7 @@ namespace Opportunity.MvvmUniverse.Settings
                 public object Storage { get; }
 
                 [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-                public ISettingProperty Defination { get; internal set; }
+                public IStorageProperty Defination { get; internal set; }
 
                 private string type()
                 {
@@ -111,11 +111,11 @@ namespace Opportunity.MvvmUniverse.Settings
             [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
             internal Member[] Items => build();
 
-            private IEnumerable<ISettingProperty> getSettingProperties()
+            private IEnumerable<IStorageProperty> getSettingProperties()
             {
                 return from field in this.parent.GetType().GetRuntimeFields()
-                       where field.IsStatic && typeof(SettingProperty).IsAssignableFrom(field.FieldType)
-                       select (ISettingProperty)field.GetValue(null);
+                       where field.IsStatic && typeof(StorageProperty).IsAssignableFrom(field.FieldType)
+                       select (IStorageProperty)field.GetValue(null);
             }
 
             private Member[] build()
@@ -131,7 +131,7 @@ namespace Opportunity.MvvmUniverse.Settings
                     {
                         var def = defs[defI];
                         defs.RemoveAt(defI);
-                        var v = this.parent.GetFromContainer((SettingProperty)def);
+                        var v = this.parent.GetFromContainer((StorageProperty)def);
                         var type = typeof(DefMember<>).MakeGenericType(def.PropertyType);
                         list.Add((Member)Activator.CreateInstance(type, value.Value, v, def));
                     }
