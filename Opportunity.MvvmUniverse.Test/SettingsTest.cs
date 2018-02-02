@@ -143,42 +143,56 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void SerializerTypes()
         {
-            TypeCollection.Test(StringComparison.CurrentCulture);
+            Test(new[] { StringComparison.CurrentCulture, (StringComparison)123 });
 
-            TypeCollection.Test(default(Uri));
-            TypeCollection.Test(new Uri("http://example.com"));
-            TypeCollection.Test(new Uri("http://example.com"), new Uri("http://example.com"));
-            TypeCollection.Test(new Uri("/saf.saf?as=1232&sdf=23", UriKind.Relative));
-            TypeCollection.Test(new Uri("/saf.saf?as=1232&sdf=23", UriKind.Relative), new Uri("/saf.saf?as=1232&sdf=23", UriKind.Relative));
-            TypeCollection.Test(new Uri("", UriKind.Relative));
-            TypeCollection.Test(new Uri("", UriKind.Relative), new Uri(new string(' ', 0), UriKind.Relative));
-            TypeCollection.Test(new Uri("http://example.com:8824/safsa/saf/asf.sdf?dsf=24&saf=4"));
-            TypeCollection.Test(new Uri("http://example.com:8824/safsa/saf/asf.sdf?dsf=24&saf=4"), new Uri("http://example.com:8824/safsa/saf/asf.sdf?dsf=24&saf=4"));
+            Test(new[]
+            {
+                default,
+                new Uri("http://example.com"),
+                new Uri("/saf.saf?as=1232&sdf=23", UriKind.Relative),
+                new Uri("", UriKind.Relative),
+                new Uri("http://example.com:8824/safsa/saf/asf.sdf?dsf=24&saf=4"),
+            }, new[]
+            {
+                default,
+                new Uri("http://example.com"),
+                new Uri("/saf.saf?as=1232&sdf=23", UriKind.Relative),
+                new Uri(new string(' ', 0), UriKind.Relative),
+                new Uri("http://example.com:8824/safsa/saf/asf.sdf?dsf=24&saf=4"),
+            });
 
-            TypeCollection.Test(0);
-            TypeCollection.Test(127);
-            TypeCollection.Test(-128);
-            TypeCollection.Test(1);
-            TypeCollection.Test(-1);
+            Test(new sbyte[] { 0, 127, -128, 1, -1 });
 
-            TypeCollection.Test(DateTime.Now);
-            TypeCollection.Test(new DateTime(12435, DateTimeKind.Local));
-            TypeCollection.Test(new DateTime(12435, DateTimeKind.Unspecified));
-            TypeCollection.Test(new DateTime(12435, DateTimeKind.Utc));
+            Test(new[] { DateTime.Now, new DateTime(12435, DateTimeKind.Local), new DateTime(12435, DateTimeKind.Unspecified), new DateTime(12435, DateTimeKind.Utc) });
 
-            TypeCollection.Test(new IntPtr(12));
-            TypeCollection.Test(new UIntPtr(21));
+            Test(new[] { new IntPtr(12), IntPtr.Zero });
+            Test(new[] { new UIntPtr(12), UIntPtr.Zero });
         }
 
         [UITestMethod]
         public void SerializerUITypes()
         {
-            TypeCollection.Test(default(Color));
-            TypeCollection.Test(Color.FromArgb(1, 2, 3, 4));
-            TypeCollection.Test(Colors.AliceBlue);
-            TypeCollection.Test(Colors.Transparent);
+            Test(new[]
+            {
+                default,
+                Color.FromArgb(1, 2, 3, 4),
+                Colors.AliceBlue,
+                Colors.Transparent,
+            });
 
-            int brushComp(SolidColorBrush b1, SolidColorBrush b2)
+            Test(new[]
+            {
+                default,
+                new SolidColorBrush(Color.FromArgb(1, 2, 3, 4)),
+                new SolidColorBrush(Colors.AliceBlue),
+                new SolidColorBrush(Colors.Transparent),
+                new SolidColorBrush(Color.FromArgb(1, 2, 3, 4)) { Opacity = 0 },
+                new SolidColorBrush(Colors.AliceBlue) { Opacity = 0 },
+                new SolidColorBrush(Colors.Transparent) { Opacity = 0 },
+                new SolidColorBrush(Color.FromArgb(1, 2, 3, 4)) { Opacity = 0.424321 },
+                new SolidColorBrush(Colors.AliceBlue) { Opacity = 0.42135 },
+                new SolidColorBrush(Colors.Transparent) { Opacity = 0.423153 },
+            }, comparer: (b1, b2) =>
             {
                 if (b1 == null && b2 == null)
                     return 0;
@@ -189,18 +203,7 @@ namespace Opportunity.MvvmUniverse.Test
                 if (b1.Color != b2.Color)
                     return Comparer<Color>.Default.Compare(b1.Color, b2.Color);
                 return Comparer<double>.Default.Compare(b1.Opacity, b2.Opacity);
-            }
-
-            TypeCollection.Test<SolidColorBrush>(brushComp);
-            TypeCollection.Test(new SolidColorBrush(Color.FromArgb(1, 2, 3, 4)), brushComp);
-            TypeCollection.Test(new SolidColorBrush(Colors.AliceBlue), brushComp);
-            TypeCollection.Test(new SolidColorBrush(Colors.Transparent), brushComp);
-            TypeCollection.Test(new SolidColorBrush(Color.FromArgb(1, 2, 3, 4)) { Opacity = 0 }, brushComp);
-            TypeCollection.Test(new SolidColorBrush(Colors.AliceBlue) { Opacity = 0 }, brushComp);
-            TypeCollection.Test(new SolidColorBrush(Colors.Transparent) { Opacity = 0 }, brushComp);
-            TypeCollection.Test(new SolidColorBrush(Color.FromArgb(1, 2, 3, 4)) { Opacity = 0.424321 }, brushComp);
-            TypeCollection.Test(new SolidColorBrush(Colors.AliceBlue) { Opacity = 0.42135 }, brushComp);
-            TypeCollection.Test(new SolidColorBrush(Colors.Transparent) { Opacity = 0.423153 }, brushComp);
+            });
         }
 
         void Test<T>(T[] values, T[] valuesCopy = null, Comparison<T> comparer = null)
@@ -255,6 +258,9 @@ namespace Opportunity.MvvmUniverse.Test
                 }
                 else
                 {
+                    var pro = c.Property;
+                    if (ReferenceEquals(pro, v))
+                        return;
                     var p = c.Property.ToList();
                     var q = v.ToList();
                     Assert.AreEqual(q.Count, p.Count);

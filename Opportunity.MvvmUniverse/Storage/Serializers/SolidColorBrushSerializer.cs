@@ -30,7 +30,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
         public object Serialize(SolidColorBrush value)
         {
             if (value == null)
-                return null;
+                return NULL_HINT;
             var color = value.Color;
             var op = value.Opacity;
             if (op < 0) op = 0;
