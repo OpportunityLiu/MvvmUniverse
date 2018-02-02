@@ -46,7 +46,7 @@ namespace Opportunity.MvvmUniverse.Test
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
-            Opportunity.MvvmUniverse.DispatcherHelper.Initialize();
+            DispatcherHelper.Initialize();
 
             await DispatcherHelper.YieldIdle();
             Frame rootFrame = Window.Current.Content as Frame;
@@ -68,7 +68,7 @@ namespace Opportunity.MvvmUniverse.Test
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
             }
-            
+
             Microsoft.VisualStudio.TestPlatform.TestExecutor.UnitTestClient.CreateDefaultUI();
 
             // Ensure the current window is active
