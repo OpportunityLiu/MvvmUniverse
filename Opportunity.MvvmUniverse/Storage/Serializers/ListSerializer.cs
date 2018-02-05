@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
     public sealed class ListSerializer<TList, TElement> : CollectionSerializerBase<TElement>, ISerializer<TList>
-        where TList : IList<TElement>, new()
+        where TList : IList<TElement>
     {
         public ListSerializer()
         {
@@ -54,7 +54,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             }
             var length = ReadCount(ref storage);
             if (value == null)
-                value = new TList();
+                value = Activator.CreateInstance<TList>();
             for (var j = value.Count - 1; j >= length; j--)
             {
                 value.RemoveAt(j);

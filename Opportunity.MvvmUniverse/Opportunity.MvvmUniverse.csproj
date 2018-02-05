@@ -93,6 +93,7 @@
     <Compile Include="PropertyChangedEventArgsSource.cs" />
     <Compile Include="Storage\RoamingStoragePropertyManager.cs" />
     <Compile Include="Storage\Serializers\CollectionSerializerBase.cs" />
+    <Compile Include="Storage\Serializers\KeyValuePairSerializer.cs" />
     <Compile Include="Storage\Serializers\ListSerializer.cs" />
     <Compile Include="Storage\Serializers\CollectionSerializer.cs" />
     <Compile Include="Storage\Serializers\NullableSerializer.cs" />

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
     public sealed class CollectionSerializer<TCollection, TElement> : CollectionSerializerBase<TElement>, ISerializer<TCollection>
-        where TCollection : ICollection<TElement>, new()
+        where TCollection : ICollection<TElement>
     {
         public CollectionSerializer() { }
 
@@ -48,7 +48,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             }
             var length = ReadCount(ref storage);
             if (value == null)
-                value = new TCollection();
+                value = Activator.CreateInstance<TCollection>();
             else
                 value.Clear();
             for (var i = 0; i < length; i++)

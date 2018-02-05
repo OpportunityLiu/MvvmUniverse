@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Diagnostics;
 using Windows.Storage;
+using System.Threading;
 
 namespace Opportunity.MvvmUniverse.Storage
 {
@@ -17,21 +18,21 @@ namespace Opportunity.MvvmUniverse.Storage
             string path,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(ApplicationDataLocality.Local, path, default, null, equalityComparer, serializer);
+            => new StorageProperty<T>(ApplicationDataLocality.Local, path, default, null, null, equalityComparer, serializer);
 
         public static StorageProperty<T> CreateLocal<T>(
             string path,
             StoragePropertyChangedCallback<T> callback,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(ApplicationDataLocality.Local, path, default, callback, equalityComparer, serializer);
+            => new StorageProperty<T>(ApplicationDataLocality.Local, path, default, null, callback, equalityComparer, serializer);
 
         public static StorageProperty<T> CreateLocal<T>(
             string path,
             T defaultValue,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(ApplicationDataLocality.Local, path, defaultValue, null, equalityComparer, serializer);
+            => new StorageProperty<T>(ApplicationDataLocality.Local, path, defaultValue, null, null, equalityComparer, serializer);
 
         public static StorageProperty<T> CreateLocal<T>(
             string path,
@@ -39,27 +40,42 @@ namespace Opportunity.MvvmUniverse.Storage
             StoragePropertyChangedCallback<T> callback,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(ApplicationDataLocality.Local, path, defaultValue, callback, equalityComparer, serializer);
+            => new StorageProperty<T>(ApplicationDataLocality.Local, path, defaultValue, null, callback, equalityComparer, serializer);
+
+        public static StorageProperty<T> CreateLocal<T>(
+            string path,
+            Func<T> defaultValueCreator,
+            IEqualityComparer<T> equalityComparer = null,
+            ISerializer<T> serializer = null)
+            => new StorageProperty<T>(ApplicationDataLocality.Local, path, default, defaultValueCreator ?? throw new ArgumentNullException(nameof(defaultValueCreator)), null, equalityComparer, serializer);
+
+        public static StorageProperty<T> CreateLocal<T>(
+            string path,
+            Func<T> defaultValueCreator,
+            StoragePropertyChangedCallback<T> callback,
+            IEqualityComparer<T> equalityComparer = null,
+            ISerializer<T> serializer = null)
+            => new StorageProperty<T>(ApplicationDataLocality.Local, path, default, defaultValueCreator ?? throw new ArgumentNullException(nameof(defaultValueCreator)), callback, equalityComparer, serializer);
 
         public static StorageProperty<T> CreateRoaming<T>(
             string path,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, default, null, equalityComparer, serializer);
+            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, default, null, null, equalityComparer, serializer);
 
         public static StorageProperty<T> CreateRoaming<T>(
             string path,
             StoragePropertyChangedCallback<T> callback,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, default, callback, equalityComparer, serializer);
+            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, default, null, callback, equalityComparer, serializer);
 
         public static StorageProperty<T> CreateRoaming<T>(
             string path,
             T defaultValue,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, defaultValue, null, equalityComparer, serializer);
+            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, defaultValue, null, null, equalityComparer, serializer);
 
         public static StorageProperty<T> CreateRoaming<T>(
             string path,
@@ -67,7 +83,22 @@ namespace Opportunity.MvvmUniverse.Storage
             StoragePropertyChangedCallback<T> callback,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, defaultValue, callback, equalityComparer, serializer);
+            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, defaultValue, null, callback, equalityComparer, serializer);
+
+        public static StorageProperty<T> CreateRoaming<T>(
+            string path,
+            Func<T> defaultValueCreator,
+            IEqualityComparer<T> equalityComparer = null,
+            ISerializer<T> serializer = null)
+            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, default, defaultValueCreator ?? throw new ArgumentNullException(nameof(defaultValueCreator)), null, equalityComparer, serializer);
+
+        public static StorageProperty<T> CreateRoaming<T>(
+            string path,
+            Func<T> defaultValueCreator,
+            StoragePropertyChangedCallback<T> callback,
+            IEqualityComparer<T> equalityComparer = null,
+            ISerializer<T> serializer = null)
+            => new StorageProperty<T>(ApplicationDataLocality.Roaming, path, default, defaultValueCreator ?? throw new ArgumentNullException(nameof(defaultValueCreator)), callback, equalityComparer, serializer);
 
         public static StorageProperty<T> Create<T>(
             ApplicationDataLocality locality, string path,
@@ -75,7 +106,19 @@ namespace Opportunity.MvvmUniverse.Storage
             StoragePropertyChangedCallback<T> callback,
             IEqualityComparer<T> equalityComparer = null,
             ISerializer<T> serializer = null)
-            => new StorageProperty<T>(locality, path, defaultValue, callback, equalityComparer, serializer);
+            => new StorageProperty<T>(locality, path, defaultValue, null, callback, equalityComparer, serializer);
+
+        public static StorageProperty<T> Create<T>(
+            ApplicationDataLocality locality, string path,
+            Func<T> defaultValueCreator,
+            StoragePropertyChangedCallback<T> callback,
+            IEqualityComparer<T> equalityComparer = null,
+            ISerializer<T> serializer = null)
+            => new StorageProperty<T>(locality, path, default, defaultValueCreator ?? throw new ArgumentNullException(nameof(defaultValueCreator)), callback, equalityComparer, serializer);
+
+        internal static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
+        internal static readonly ApplicationDataContainer RoamingSettings = ApplicationData.Current.RoamingSettings;
+        internal static readonly char[] PathSep = "\\/".ToCharArray();
     }
 
     internal interface IStorageProperty
@@ -89,10 +132,11 @@ namespace Opportunity.MvvmUniverse.Storage
         internal StorageProperty(
             ApplicationDataLocality locality,
             string path,
-            T def = default,
-            StoragePropertyChangedCallback<T> callback = null,
-            IEqualityComparer<T> equalityComparer = null,
-            ISerializer<T> serializer = null)
+            T def,
+            Func<T> defaultValueCreator,
+            StoragePropertyChangedCallback<T> callback,
+            IEqualityComparer<T> equalityComparer,
+            ISerializer<T> serializer)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));
@@ -100,15 +144,15 @@ namespace Opportunity.MvvmUniverse.Storage
             switch (locality)
             {
             case ApplicationDataLocality.Local:
-                con = ApplicationData.Current.LocalSettings;
+                con = LocalSettings;
                 break;
             case ApplicationDataLocality.Roaming:
-                con = ApplicationData.Current.RoamingSettings;
+                con = RoamingSettings;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(locality), "Must be Roaming or Local");
             }
-            var sec = path.Split(new[] { '\\', '/' }, options: StringSplitOptions.RemoveEmptyEntries);
+            var sec = path.Split(PathSep, StringSplitOptions.RemoveEmptyEntries);
             if (sec.Length == 0)
                 throw new ArgumentException("Not a valid path", nameof(path));
             this.name = sec[sec.Length - 1];
@@ -125,11 +169,11 @@ namespace Opportunity.MvvmUniverse.Storage
             {
                 throw new ArgumentNullException($"Failed to generate default serializer by Serializer<{typeof(T)}>.Default, must specify by parameter.", ex);
             }
-            this.DefaultValue = def;
+            this.defaultValue = def;
+            this.defaultValueCreator = defaultValueCreator;
             this.EqualityComparer = equalityComparer ?? EqualityComparer<T>.Default;
             if (!populateCore(true))
             {
-                this.cache = def;
                 Flush();
             }
             this.PropertyChangedCallback = callback;
@@ -141,14 +185,19 @@ namespace Opportunity.MvvmUniverse.Storage
         public IEqualityComparer<T> EqualityComparer { get; }
         public ISerializer<T> Serializer { get; }
 
-        public T DefaultValue { get; }
+        private readonly Func<T> defaultValueCreator;
+        private readonly T defaultValue;
 
-        private byte[] Data
+        internal byte[] Data
         {
             get
             {
                 this.container.Values.TryGetValue(this.name, out var storage);
-                return storage as byte[];
+                if (!(storage is byte[] s) || s.Length == 0)
+                {
+                    return null;
+                }
+                return s;
             }
             set
             {
@@ -160,13 +209,38 @@ namespace Opportunity.MvvmUniverse.Storage
         }
 
         private T cache;
+        private ref T Cache
+        {
+            get
+            {
+                if (this.cache == null)
+                {
+                    var c = this.defaultValueCreator;
+                    if (c == null)
+                    {
+                        this.cache = this.defaultValue;
+                    }
+                    else
+                    {
+                        lock (c)
+                        {
+                            if (this.cache == null)
+                                this.cache = c();
+                        }
+                    }
+                }
+                return ref this.cache;
+            }
+        }
+
         public T Value
         {
-            get => this.cache;
+            get => this.Cache;
             set
             {
-                var old = this.cache;
-                this.cache = value;
+                ref var field = ref this.Cache;
+                var old = field;
+                field = value;
                 Flush();
                 raiseChanged(old, value);
             }
@@ -174,7 +248,7 @@ namespace Opportunity.MvvmUniverse.Storage
 
         private void raiseChanged(T oldValue, T newValue)
         {
-            if (!ReferenceEquals(oldValue, newValue))
+            if (typeof(T).IsValueType || !ReferenceEquals(oldValue, newValue))
                 OnPropertyChanged(nameof(Value));
             PropertyChangedCallback?.Invoke(this, new StoragePropertyChangedEventArgs<T>(oldValue, newValue));
         }
@@ -188,7 +262,7 @@ namespace Opportunity.MvvmUniverse.Storage
                     return false;
                 storage = Array.Empty<byte>();
             }
-            this.Serializer.Deserialize(storage, ref this.cache);
+            this.Serializer.Deserialize(storage, ref this.Cache);
             return true;
         }
 
@@ -197,9 +271,10 @@ namespace Opportunity.MvvmUniverse.Storage
         /// </summary>
         public void Populate()
         {
-            var old = this.cache;
+            ref var field = ref this.Cache;
+            var old = field;
             populateCore(false);
-            raiseChanged(old, this.cache);
+            raiseChanged(old, field);
         }
 
         /// <summary>
@@ -207,15 +282,16 @@ namespace Opportunity.MvvmUniverse.Storage
         /// </summary>
         public void Flush()
         {
+            ref var field = ref this.Cache;
             var ser = this.Serializer;
-            var size = ser.CaculateSize(in this.cache);
+            var size = ser.CaculateSize(in field);
             if (size == 0)
             {
-                this.container.Values[this.name] = null;
+                Data = null;
                 return;
             }
             var bytes = new byte[size];
-            ser.Serialize(in this.cache, bytes);
+            ser.Serialize(in field, bytes);
             Data = bytes;
         }
 

@@ -30,6 +30,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 return (int)ms.Length + offset;
             }
         }
+
         public void Serialize(in T value, Span<byte> storage)
         {
             if (value == null)
@@ -41,6 +42,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 new Span<byte>(ms.GetBuffer()).Slice(0, storage.Length - offset).CopyTo(storage.Slice(offset));
             }
         }
+
         public void Deserialize(ReadOnlySpan<byte> storage, ref T value)
         {
             if (storage.IsEmpty)

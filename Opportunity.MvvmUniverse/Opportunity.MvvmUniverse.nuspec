@@ -4,14 +4,14 @@
     <id>$id$</id>
     <version>$version$</version>
     <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
+    <authors>Opportunity</authors>
+    <owners>Opportunity</owners>
     <licenseUrl>https://github.com/OpportunityLiu/MvvmUniverse/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/OpportunityLiu/MvvmUniverse</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
-    <releaseNotes>First version of the package.</releaseNotes>
-    <copyright>Copyright 2017</copyright>
-    <tags>UWP mvvm obervable</tags>
+    <description>An Mvvm lib for UWP apps.</description>
+    <releaseNotes>Add support for ApplicationData.</releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags>UWP mvvm observable</tags>
   </metadata>
 </package>

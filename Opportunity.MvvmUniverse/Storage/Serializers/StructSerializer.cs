@@ -14,7 +14,13 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
         }
 
         private static readonly int size = Unsafe.SizeOf<T>();
+
         public int CaculateSize(in T value) => size;
+
+        public void Serialize(in T value, Span<byte> storage)
+        {
+            storage.NonPortableCast<byte, T>()[0] = value;
+        }
 
         public void Deserialize(ReadOnlySpan<byte> storage, ref T value)
         {
@@ -24,11 +30,6 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 return;
             }
             value = storage.NonPortableCast<byte, T>()[0];
-        }
-
-        public void Serialize(in T value, Span<byte> storage)
-        {
-            storage.NonPortableCast<byte, T>()[0] = value;
         }
     }
 }

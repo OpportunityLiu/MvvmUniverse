@@ -14,6 +14,16 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             return r.Length * sizeof(char) + offset;
         }
 
+        public void Serialize(in Uri value, Span<byte> storage)
+        {
+            if (value == null)
+                return;
+            if (!value.IsAbsoluteUri)
+                storage[0] = 0x01;
+            var chars = storage.Slice(offset).NonPortableCast<byte, char>();
+            value.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped).AsSpan().CopyTo(chars);
+        }
+
         public void Deserialize(ReadOnlySpan<byte> storage, ref Uri value)
         {
             if (storage.IsEmpty)
@@ -27,16 +37,6 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 value = new Uri(data, UriKind.Absolute);
             else
                 value = new Uri(data, UriKind.Relative);
-        }
-
-        public void Serialize(in Uri value, Span<byte> storage)
-        {
-            if (value == null)
-                return;
-            if (!value.IsAbsoluteUri)
-                storage[0] = 0x01;
-            var chars = storage.Slice(offset).NonPortableCast<byte, char>();
-            value.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped).AsSpan().CopyTo(chars);
         }
     }
 }

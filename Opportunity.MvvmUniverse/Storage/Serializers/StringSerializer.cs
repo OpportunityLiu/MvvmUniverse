@@ -6,10 +6,6 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
-    /// <summary>
-    /// Use this serializer to avoid null string.
-    /// Serialize <c>null</c> to <c>"null"</c> and <c>"null"</c> to <c>"null_"</c> and so on.
-    /// </summary>
     public sealed class StringSerializer : ISerializer<string>
     {
         public StringSerializer() { }
@@ -32,6 +28,22 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             return this.encoding.GetByteCount(value) + offset;
         }
 
+        public void Serialize(in string value, Span<byte> storage)
+        {
+            if (value == null)
+                return;
+            if (this.encoding == null)
+            {
+                storage.Slice(0, offset).Clear();
+                var chars = storage.Slice(offset).NonPortableCast<byte, char>();
+                value.AsSpan().CopyTo(chars);
+                return;
+            }
+            storage.NonPortableCast<byte, int>()[0] = this.encoding.CodePage;
+            var bytes = this.encoding.GetBytes(value);
+            bytes.AsSpan().CopyTo(storage.Slice(offset));
+        }
+
         public void Deserialize(ReadOnlySpan<byte> storage, ref string value)
         {
             if (storage.IsEmpty)
@@ -48,22 +60,6 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             }
             var encoding = Encoding.GetEncoding(codePage);
             value = encoding.GetString(str.ToArray());
-        }
-
-        public void Serialize(in string value, Span<byte> storage)
-        {
-            if (value == null)
-                return;
-            if (this.encoding == null)
-            {
-                storage.Slice(0, offset).Clear();
-                var chars = storage.Slice(offset).NonPortableCast<byte, char>();
-                value.AsSpan().CopyTo(chars);
-                return;
-            }
-            storage.NonPortableCast<byte, int>()[0] = this.encoding.CodePage;
-            var bytes = this.encoding.GetBytes(value);
-            bytes.AsSpan().CopyTo(storage.Slice(offset));
         }
     }
 }
