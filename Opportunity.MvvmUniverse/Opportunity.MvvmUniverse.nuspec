@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package>
+<package 
+  xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Opportunity.MvvmUniverse</id>
     <version>2.0.0</version>
