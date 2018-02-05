@@ -7,16 +7,22 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
-    public sealed class CollectionSerializer<TCollection, TElement> : CollectionSerializerBase<TElement>, ISerializer<TCollection>
-        where TCollection : ICollection<TElement>, new()
+    public sealed class ListSerializer<TList, TElement> : CollectionSerializerBase<TElement>, ISerializer<TList>
+        where TList : IList<TElement>, new()
     {
-        public CollectionSerializer() { }
+        public ListSerializer()
+        {
+        }
 
-        public CollectionSerializer(ISerializer<TElement> elementSerializer) : base(elementSerializer) { }
+        public ListSerializer(ISerializer<TElement> elementSerializer) : base(elementSerializer)
+        {
+        }
 
-        public CollectionSerializer(ISerializer<TElement> elementSerializer, int alignment) : base(elementSerializer, alignment) { }
+        public ListSerializer(ISerializer<TElement> elementSerializer, int alignment) : base(elementSerializer, alignment)
+        {
+        }
 
-        public int CaculateSize(in TCollection value)
+        public int CaculateSize(in TList value)
         {
             if (value == null)
                 return 0;
@@ -28,7 +34,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             return count;
         }
 
-        public void Serialize(in TCollection value, Span<byte> storage)
+        public void Serialize(in TList value, Span<byte> storage)
         {
             if (value == null)
                 return;
@@ -39,7 +45,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             }
         }
 
-        public void Deserialize(ReadOnlySpan<byte> storage, ref TCollection value)
+        public void Deserialize(ReadOnlySpan<byte> storage, ref TList value)
         {
             if (storage.IsEmpty)
             {
@@ -48,10 +54,20 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             }
             var length = ReadCount(ref storage);
             if (value == null)
-                value = new TCollection();
-            else
-                value.Clear();
-            for (var i = 0; i < length; i++)
+                value = new TList();
+            for (var j = value.Count - 1; j >= length; j--)
+            {
+                value.RemoveAt(j);
+            }
+            var i = 0;
+            foreach (var item in value)
+            {
+                var data = item;
+                ReadElement(ref storage, ref data);
+                value[i] = data;
+                i++;
+            }
+            for (; i < length; i++)
             {
                 var data = default(TElement);
                 ReadElement(ref storage, ref data);

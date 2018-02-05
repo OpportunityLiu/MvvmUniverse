@@ -12,38 +12,32 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
     /// </summary>
     public sealed class StringSerializer : ISerializer<string>
     {
-        public string Deserialize(object value)
-        {
-            if (!(value is string s))
-                return null;
-            if (s == "null")
-                return null;
-            if (s.StartsWith("null"))
-            {
-                for (var i = 4; i < s.Length; i++)
-                {
-                    if (s[i] != '_')
-                        return s;
-                }
-                return s.Substring(0, s.Length - 1);
-            }
-            return s;
-        }
+        private const int offset = sizeof(char);
 
-        public object Serialize(string value)
+        public int CaculateSize(in string value)
         {
             if (value == null)
-                return "null";
-            if (value.StartsWith("null"))
+                return 0;
+            return value.Length * sizeof(char) + offset;
+        }
+
+        public void Deserialize(ReadOnlySpan<byte> storage, ref string value)
+        {
+            if (storage.IsEmpty)
             {
-                for (var i = 4; i < value.Length; i++)
-                {
-                    if (value[i] != '_')
-                        return value;
-                }
-                return value + "_";
+                value = null;
+                return;
             }
-            return value;
+            value = new string(storage.Slice(offset).NonPortableCast<byte, char>().ToArray());
+        }
+
+        public void Serialize(in string value, Span<byte> storage)
+        {
+            if (value == null)
+                return;
+            storage.Slice(0, offset).Clear();
+            var chars = storage.Slice(1).NonPortableCast<byte, char>();
+            value.AsSpan().CopyTo(chars);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
 using Opportunity.MvvmUniverse.Storage;
+using Opportunity.MvvmUniverse.Storage.Serializers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,95 +19,44 @@ namespace Opportunity.MvvmUniverse.Test
     public class StorageTest
     {
         [TestMethod]
-        public void MultiInstance()
+        public void CollectionBase()
         {
-            var c = new TestCollection
-            {
-                MyProperty = 12
-            };
-            var c2 = new TestCollection();
-            c.MyProperty2 = StringComparison.CurrentCulture;
-            c.MyProperty4 = "";
-            Assert.AreEqual(c.MyProperty, c2.MyProperty);
-            Assert.AreEqual(c.MyProperty2, c2.MyProperty2);
-            c2.MyProperty = 1213;
-            c.MyProperty2 = StringComparison.OrdinalIgnoreCase;
-            Assert.AreEqual(c.MyProperty, c2.MyProperty);
-            Assert.AreEqual(c.MyProperty2, c2.MyProperty2);
-        }
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollectionSerializer<List<int>, int>(null, 0));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollectionSerializer<List<int>, int>(null, -1));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollectionSerializer<List<int>, int>(null, 3));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollectionSerializer<List<int>, int>(null, 66));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollectionSerializer<List<int>, int>(null, 113));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollectionSerializer<List<int>, int>(null, 127));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollectionSerializer<List<int>, int>(null, 0b11000000));
 
-        class TestCollection : RoamingStorageObject
-        {
-            public TestCollection() : base(ApplicationData.Current.RoamingSettings, "haha")
-            {
+            var ser1 = new CollectionSerializer<List<int>, int>(null, 1);
+            var ser2 = new CollectionSerializer<List<int>, int>(null, 2);
+            var ser4 = new CollectionSerializer<List<int>, int>(null, 4);
+            var ser8 = new CollectionSerializer<List<int>, int>(null, 8);
+            var ser16 = new CollectionSerializer<List<int>, int>(null, 16);
+            var ser1024 = new CollectionSerializer<List<int>, int>(null, 1024);
 
-            }
+            Assert.AreEqual(1, ser1.Alignment);
+            Assert.AreEqual(2, ser2.Alignment);
+            Assert.AreEqual(4, ser4.Alignment);
+            Assert.AreEqual(8, ser8.Alignment);
+            Assert.AreEqual(16, ser16.Alignment);
+            Assert.AreEqual(1024, ser1024.Alignment);
 
+            Assert.AreEqual(0, ser1.AlignedSize(0));
+            Assert.AreEqual(1, ser1.AlignedSize(1));
+            Assert.AreEqual(2, ser1.AlignedSize(2));
+            Assert.AreEqual(17, ser1.AlignedSize(17));
 
+            Assert.AreEqual(0, ser2.AlignedSize(0));
+            Assert.AreEqual(2, ser2.AlignedSize(1));
+            Assert.AreEqual(2, ser2.AlignedSize(2));
+            Assert.AreEqual(18, ser2.AlignedSize(17));
 
-            public int MyProperty
-            {
-                get => GetFromContainer(MyPropertyProperty);
-                set => SetToContainer(MyPropertyProperty, value);
-            }
-
-            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
-            public static readonly StorageProperty<int> MyPropertyProperty =
-                 StorageProperty.Create("MyProperty", 0, MtpropCB);
-
-
-            public static void MtpropCB(StorageObject sender, StoragePropertyChangedEventArgs<int> e)
-            {
-
-            }
-
-
-
-            public StringComparison MyProperty2
-            {
-                get => GetFromContainer(MyProperty2Property);
-                set => SetToContainer(MyProperty2Property, value);
-            }
-
-            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
-            public static readonly StorageProperty<StringComparison> MyProperty2Property =
-                StorageProperty.Create<StringComparison>("MyProperty2", 0, MtpropCB2);
-
-
-            public static void MtpropCB2(StorageObject sender, StoragePropertyChangedEventArgs<StringComparison> e)
-            {
-
-            }
-
-            public string MyProperty3
-            {
-                get => GetFromContainer(MyProperty3Property);
-                set => SetToContainer(MyProperty3Property, value);
-            }
-
-            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
-            public static readonly StorageProperty<string> MyProperty3Property =
-                StorageProperty.Create<string>("MyProperty3", null);
-
-            public string MyProperty4
-            {
-                get => GetFromContainer(MyProperty4Property);
-                set => SetToContainer(MyProperty4Property, value);
-            }
-
-            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
-            public static readonly StorageProperty<string> MyProperty4Property =
-                StorageProperty.Create<string>("MyProperty4", "");
-
-            public DateTimeOffset DateTimeP
-            {
-                get => GetFromContainer(DateTimePP);
-                set => SetToContainer(DateTimePP, value);
-            }
-
-            // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
-            public static readonly StorageProperty<DateTimeOffset> DateTimePP =
-                StorageProperty.Create<DateTimeOffset>(nameof(DateTimeP));
+            Assert.AreEqual(0, ser4.AlignedSize(0));
+            Assert.AreEqual(4, ser4.AlignedSize(1));
+            Assert.AreEqual(4, ser4.AlignedSize(2));
+            Assert.AreEqual(20, ser4.AlignedSize(17));
         }
 
         [TestMethod]
@@ -128,7 +78,7 @@ namespace Opportunity.MvvmUniverse.Test
             Tester.Test(new[] { -34165357546336475L });
 
             Tester.Test(new[] { '\0', 'h', char.MaxValue });
-            Tester.Test(new string[] { "", "null", "null_", "null_string", "null___", " " });
+            Tester.Test(new string[] { "", "null", "null_", "null_string", "null___", " ", "123\0\0123", "\0" });
 
             Tester.Test(new[] { Guid.NewGuid(), default, Guid.Empty, Guid.NewGuid() });
 
@@ -141,7 +91,37 @@ namespace Opportunity.MvvmUniverse.Test
         }
 
         [TestMethod]
-        public void SerializerTypes()
+        public void NullableTypes()
+        {
+            Tester.Test(new[] { true, false, default(bool?) });
+            Tester.Test(new byte?[] { 32, 34, 255, default });
+
+            Tester.Test(new[] { -12.214f, float.MinValue, float.PositiveInfinity, float.NaN, float.NegativeInfinity, default(float?) });
+            Tester.Test(new[] { 2143.214, double.MinValue, double.PositiveInfinity, double.NaN, double.NegativeInfinity, default(double?) });
+
+            Tester.Test(new ushort?[] { 2132, default });
+            Tester.Test(new short?[] { -3125, default });
+
+            Tester.Test(new[] { 32153416U, uint.MaxValue, 0U, default(uint?) });
+            Tester.Test(new[] { -123463256, int.MaxValue, int.MinValue, default(int?) });
+
+            Tester.Test(new[] { 314564745221763UL, default(ulong?) });
+            Tester.Test(new[] { -34165357546336475L, default(long?) });
+
+            Tester.Test(new[] { '\0', 'h', char.MaxValue, default(char?) });
+
+            Tester.Test(new[] { Guid.NewGuid(), default(Guid), Guid.Empty, Guid.NewGuid(), default(Guid?) });
+
+            Tester.Test(new[] { DateTimeOffset.Now, default(DateTimeOffset), default(DateTimeOffset?) });
+            Tester.Test(new[] { TimeSpan.FromSeconds(12.5132435464524), default(TimeSpan), default(TimeSpan?) });
+
+            Tester.Test(new[] { new Point(123, 123), default(Point?) });
+            Tester.Test(new[] { new Rect(12, 23, 34, 56), default(Rect?) });
+            Tester.Test(new[] { new Size(12, 24), default(Size?) });
+        }
+
+        [TestMethod]
+        public void BasicTypes()
         {
             Tester.Test(new[] { StringComparison.CurrentCulture, (StringComparison)123 });
 
@@ -170,7 +150,7 @@ namespace Opportunity.MvvmUniverse.Test
         }
 
         [UITestMethod]
-        public void SerializerUITypes()
+        public void UITypes()
         {
             Tester.Test(new[]
             {
@@ -206,6 +186,12 @@ namespace Opportunity.MvvmUniverse.Test
             });
         }
 
+        [TestMethod]
+        public void Collection()
+        {
+            Tester.Test(new[] { new[] { 1, 2, 3 }, new[] { 4, 5 }, new int[0] });
+            Tester.Test(new[] { new[] { "1", "22", "333" }, new[] { "4444", "55555" }, new string[0] });
+        }
         static class Tester
         {
             public static void Test<T>(T[] values, T[] valuesCopy = null, Comparison<T> comparer = null)
@@ -214,53 +200,59 @@ namespace Opportunity.MvvmUniverse.Test
                 {
                     for (var i = 0; i < values.Length; i++)
                     {
-                        Tester.TestSingle(values[i], valuesCopy[i], comparer);
+                        TestSingle(values[i], valuesCopy[i], comparer);
                     }
                 }
                 else
                 {
                     foreach (var item in values)
                     {
-                        Tester.TestSingle(item, comparer);
+                        TestSingle(item, comparer);
                     }
                 }
-                Tester.TestCollction(values, comparer);
-                Tester.TestCollction(new List<T>(values), comparer);
-                Tester.TestCollction(new Collections.ObservableList<T>(values), comparer);
+                TestCollction(values, comparer);
+                TestCollction(new List<T>(values), comparer);
+                TestCollction(new LinkedList<T>(values), comparer);
+                TestCollction(new Collections.ObservableList<T>(values), comparer);
 
                 values = values.Concat(Enumerable.Repeat<T>(default, 5)).ToArray();
-                Tester.TestCollction(values, comparer);
-                Tester.TestCollction(new List<T>(values), comparer);
-                Tester.TestCollction(new Collections.ObservableList<T>(values), comparer);
+                TestCollction(values, comparer);
+                TestCollction(new List<T>(values), comparer);
+                TestCollction(new LinkedList<T>(values), comparer);
+                TestCollction(new Collections.ObservableList<T>(values), comparer);
 
                 values = new T[5];
-                Tester.TestCollction(values, comparer);
-                Tester.TestCollction(new List<T>(values), comparer);
-                Tester.TestCollction(new Collections.ObservableList<T>(values), comparer);
+                TestCollction(values, comparer);
+                TestCollction(new List<T>(values), comparer);
+                TestCollction(new LinkedList<T>(values), comparer);
+                TestCollction(new Collections.ObservableList<T>(values), comparer);
 
                 values = new T[0];
-                Tester.TestCollction(values, comparer);
-                Tester.TestCollction(new List<T>(values), comparer);
-                Tester.TestCollction(new Collections.ObservableList<T>(values), comparer);
+                TestCollction(values, comparer);
+                TestCollction(new List<T>(values), comparer);
+                TestCollction(new LinkedList<T>(values), comparer);
+                TestCollction(new Collections.ObservableList<T>(values), comparer);
 
-                Tester.TestCollction(default(T[]), comparer);
-                Tester.TestCollction(default(List<T>), comparer);
-                Tester.TestCollction(default(Collections.ObservableList<T>), comparer);
+                TestCollction(default(T[]), comparer);
+                TestCollction(default(List<T>), comparer);
+                TestCollction(default(LinkedList<T>), comparer);
+                TestCollction(default(Collections.ObservableList<T>), comparer);
             }
             public static void TestCollction<T, TEle>(T v, Comparison<TEle> comparer = null)
                 where T : ICollection<TEle>, ICollection
             {
                 var c = new TypeCollection<T> { Property = v };
+                c.SettingCop.Populate();
                 if (comparer == null)
                 {
-                    CollectionAssert.AreEqual(v, c.Property);
+                    CollectionAssert.AreEqual(v, c.PropertyCop);
                 }
                 else
                 {
-                    var pro = c.Property;
+                    var pro = c.PropertyCop;
                     if (ReferenceEquals(pro, v))
                         return;
-                    var p = c.Property.ToList();
+                    var p = c.PropertyCop.ToList();
                     var q = v.ToList();
                     Assert.AreEqual(q.Count, p.Count);
                     for (var i = 0; i < p.Count; i++)
@@ -276,55 +268,72 @@ namespace Opportunity.MvvmUniverse.Test
                 var v1 = new T();
                 var v2 = new T();
                 var c = new TypeCollection<T> { Property = v1 };
+                c.SettingCop.Populate();
                 if (comparer == null)
                 {
-                    Assert.AreEqual(v1, c.Property);
-                    Assert.AreEqual(v2, c.Property);
+                    Assert.AreEqual(v1, c.PropertyCop);
+                    Assert.AreEqual(v2, c.PropertyCop);
                 }
                 else
                 {
-                    Assert.IsTrue(comparer(v1, c.Property) == 0);
-                    Assert.IsTrue(comparer(v2, c.Property) == 0);
+                    Assert.IsTrue(comparer(v1, c.PropertyCop) == 0);
+                    Assert.IsTrue(comparer(v2, c.PropertyCop) == 0);
                 }
             }
 
             public static void TestSingle<T>(T v, Comparison<T> comparer = null)
             {
                 var c = new TypeCollection<T> { Property = v };
+                c.SettingCop.Populate();
                 if (comparer == null)
                 {
-                    Assert.AreEqual(v, c.Property);
+                    Assert.AreEqual(v, c.PropertyCop);
                 }
                 else
                 {
-                    Assert.IsTrue(comparer(v, c.Property) == 0);
+                    Assert.IsTrue(comparer(v, c.PropertyCop) == 0);
                 }
             }
 
             public static void TestSingle<T>(T v1, T v2, Comparison<T> comparer = null)
             {
                 var c = new TypeCollection<T> { Property = v1 };
+                c.SettingCop.Populate();
                 if (comparer == null)
                 {
-                    Assert.AreEqual(v1, c.Property);
-                    Assert.AreEqual(v2, c.Property);
+                    Assert.AreEqual(v1, c.PropertyCop);
+                    Assert.AreEqual(v2, c.PropertyCop);
                 }
                 else
                 {
-                    Assert.IsTrue(comparer(v1, c.Property) == 0);
-                    Assert.IsTrue(comparer(v2, c.Property) == 0);
+                    Assert.IsTrue(comparer(v1, c.PropertyCop) == 0);
+                    Assert.IsTrue(comparer(v2, c.PropertyCop) == 0);
                 }
             }
         }
 
-        class TypeCollection<T> : LocalStorageObject
+        class TypeCollection<T>
         {
             private static Random random = new Random();
             public TypeCollection()
-                : base(ApplicationData.Current.LocalSettings, $"TypeCollection-{typeof(T)}-{random.Next()}") { }
+            {
+                var name = $"{typeof(T)}-{random.Next()}";
+                this.Setting = StorageProperty.CreateLocal<T>(name);
+                this.SettingCop = StorageProperty.CreateLocal<T>(name);
+            }
 
-            public T Property { get => GetFromContainer(Setting); set => SetToContainer(Setting, value); }
-            static readonly StorageProperty<T> Setting = StorageProperty.Create<T>(nameof(Property));
+            public T Property
+            {
+                get => this.Setting.Value;
+                set => this.Setting.Value = value;
+            }
+            public readonly StorageProperty<T> Setting;
+            public T PropertyCop
+            {
+                get => this.SettingCop.Value;
+                set => this.SettingCop.Value = value;
+            }
+            public readonly StorageProperty<T> SettingCop;
         }
     }
 }
