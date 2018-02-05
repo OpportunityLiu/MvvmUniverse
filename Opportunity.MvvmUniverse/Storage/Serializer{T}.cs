@@ -76,7 +76,7 @@ namespace Opportunity.MvvmUniverse.Storage
                 if (ele != null)
                     return (ISerializer<T>)Activator.CreateInstance(typeof(CollectionSerializer<,>).MakeGenericType(typeof(T), ele));
             }
-            throw new InvalidOperationException($"Default Serializer of unsupported type {typeof(T)} creating.");
+            return new XmlSerializer<T>();
         }
 
         public abstract int CaculateSize(in T value);

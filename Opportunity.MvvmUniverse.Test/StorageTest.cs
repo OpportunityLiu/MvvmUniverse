@@ -191,7 +191,23 @@ namespace Opportunity.MvvmUniverse.Test
         {
             Tester.Test(new[] { new[] { 1, 2, 3 }, new[] { 4, 5 }, new int[0] }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
             Tester.Test(new[] { new[] { "1", "22", "333" }, new[] { "4444", "55555" }, new string[0] }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
+            Tester.Test(new[] { new List<int> { 1, 2, 3 }, new List<int> { 4, 5 }, new List<int>() }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
+            Tester.Test(new[] { new List<string> { "1", "22", "333" }, new List<string> { "4444", "55555" }, new List<string>() }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
+            Tester.Test(new[] { new Dictionary<int, string> { [1] = "1", [2] = "22", [3] = "333" }, new Dictionary<int, string>() }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
         }
+
+        [TestMethod]
+        public void XMLSerializer()
+        {
+            var ps = StorageProperty.CreateLocal("xml", serializer: new StringSerializer(Encoding.UTF8));
+            ps.Value = null;
+            var p = StorageProperty.CreateLocal("xml", serializer: new XmlSerializer<Point>());
+            var p2 = StorageProperty.CreateLocal("xml", serializer: new XmlSerializer<Point>());
+            p.Value = new Point(1, 2);
+            p2.Populate();
+            Assert.AreEqual(new Point(1, 2), p2.Value);
+        }
+
         static class Tester
         {
             public static void Test<T>(T[] values, T[] valuesCopy = null, Comparison<T> comparer = null)

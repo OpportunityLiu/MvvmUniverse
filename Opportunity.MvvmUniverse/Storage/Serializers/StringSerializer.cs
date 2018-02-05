@@ -12,13 +12,24 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
     /// </summary>
     public sealed class StringSerializer : ISerializer<string>
     {
-        private const int offset = sizeof(char);
+        public StringSerializer() { }
+        public StringSerializer(Encoding encoding)
+        {
+            this.encoding = encoding;
+        }
+
+        private const int offset = sizeof(int);
+
+        private readonly Encoding encoding;
+        public Encoding Encoding => this.encoding;
 
         public int CaculateSize(in string value)
         {
             if (value == null)
                 return 0;
-            return value.Length * sizeof(char) + offset;
+            if (this.encoding == null)
+                return value.Length * sizeof(char) + offset;
+            return this.encoding.GetByteCount(value) + offset;
         }
 
         public void Deserialize(ReadOnlySpan<byte> storage, ref string value)
@@ -28,16 +39,31 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 value = null;
                 return;
             }
-            value = new string(storage.Slice(offset).NonPortableCast<byte, char>().ToArray());
+            var codePage = storage.NonPortableCast<byte, int>()[0];
+            var str = storage.Slice(offset);
+            if (codePage == 0)
+            {
+                value = new string(str.NonPortableCast<byte, char>().ToArray());
+                return;
+            }
+            var encoding = Encoding.GetEncoding(codePage);
+            value = encoding.GetString(str.ToArray());
         }
 
         public void Serialize(in string value, Span<byte> storage)
         {
             if (value == null)
                 return;
-            storage.Slice(0, offset).Clear();
-            var chars = storage.Slice(offset).NonPortableCast<byte, char>();
-            value.AsSpan().CopyTo(chars);
+            if (this.encoding == null)
+            {
+                storage.Slice(0, offset).Clear();
+                var chars = storage.Slice(offset).NonPortableCast<byte, char>();
+                value.AsSpan().CopyTo(chars);
+                return;
+            }
+            storage.NonPortableCast<byte, int>()[0] = this.encoding.CodePage;
+            var bytes = this.encoding.GetBytes(value);
+            bytes.AsSpan().CopyTo(storage.Slice(offset));
         }
     }
 }

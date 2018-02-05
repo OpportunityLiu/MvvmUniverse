@@ -101,6 +101,7 @@
     <Compile Include="Storage\Serializers\StringSerializer.cs" />
     <Compile Include="Storage\Serializers\SZArraySerializer.cs" />
     <Compile Include="Storage\Serializers\UriSerializer.cs" />
+    <Compile Include="Storage\Serializers\XmlSerializer.cs" />
     <Compile Include="Storage\Serializer{T}.cs" />
     <Compile Include="Storage\StorageProperty.cs" />
     <Compile Include="Storage\StoragePropertyChangedEventArgs.cs" />
