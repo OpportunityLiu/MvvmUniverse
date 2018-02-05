@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<package >
+<package xmlns="https://raw.githubusercontent.com/NuGet/NuGet.Client/release-4.6.0-rtm/src/NuGet.Core/NuGet.Packaging/compiler/resources/nuspec.xsd">
   <metadata>
-    <id>$id$</id>
-    <version>$version$</version>
-    <title>$title$</title>
+    <id>Opportunity.MvvmUniverse</id>
+    <version>2.0.0</version>
+    <title>Opportunity.MvvmUniverse</title>
     <authors>Opportunity</authors>
     <owners>Opportunity</owners>
     <licenseUrl>https://github.com/OpportunityLiu/MvvmUniverse/blob/master/LICENSE</licenseUrl>
@@ -14,4 +14,12 @@
     <copyright>Copyright 2018</copyright>
     <tags>UWP mvvm observable</tags>
   </metadata>
+  <dependencies>
+    <group targetFramework="UAP10.0.16299">
+      <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.0.6" exclude="Build,Analyzers" />
+      <dependency id="Opportunity.Helpers.Universal" version="1.1.5" exclude="Build,Analyzers"  />
+      <dependency id="System.Memory" version="4.4.0-preview1-25305-02" exclude="Build,Analyzers" />
+      <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.4.0" exclude="Build,Analyzers"  />
+    </group>
+  </dependencies>
 </package>
