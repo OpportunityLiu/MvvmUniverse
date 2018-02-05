@@ -14,13 +14,13 @@
     <releaseNotes>Add support for ApplicationData.</releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>UWP mvvm observable</tags>
+    <dependencies>
+      <group targetFramework="UAP10.0.16299">
+        <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.0.6" exclude="Build,Analyzers" />
+        <dependency id="Opportunity.Helpers.Universal" version="1.1.5" exclude="Build,Analyzers" />
+        <dependency id="System.Memory" version="4.4.0-preview1-25305-02" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.4.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
   </metadata>
-  <dependencies>
-    <group targetFramework="UAP10.0.16299">
-      <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.0.6" exclude="Build,Analyzers" />
-      <dependency id="Opportunity.Helpers.Universal" version="1.1.5" exclude="Build,Analyzers" />
-      <dependency id="System.Memory" version="4.4.0-preview1-25305-02" exclude="Build,Analyzers" />
-      <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.4.0" exclude="Build,Analyzers" />
-    </group>
-  </dependencies>
 </package>
