@@ -189,8 +189,8 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void Collection()
         {
-            Tester.Test(new[] { new[] { 1, 2, 3 }, new[] { 4, 5 }, new int[0] });
-            Tester.Test(new[] { new[] { "1", "22", "333" }, new[] { "4444", "55555" }, new string[0] });
+            Tester.Test(new[] { new[] { 1, 2, 3 }, new[] { 4, 5 }, new int[0] }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
+            Tester.Test(new[] { new[] { "1", "22", "333" }, new[] { "4444", "55555" }, new string[0] }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
         }
         static class Tester
         {

@@ -36,7 +36,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             if (value == null)
                 return;
             storage.Slice(0, offset).Clear();
-            var chars = storage.Slice(1).NonPortableCast<byte, char>();
+            var chars = storage.Slice(offset).NonPortableCast<byte, char>();
             value.AsSpan().CopyTo(chars);
         }
     }
