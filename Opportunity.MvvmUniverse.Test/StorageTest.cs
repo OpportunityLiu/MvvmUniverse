@@ -15,10 +15,10 @@ using Windows.UI.Xaml.Media;
 namespace Opportunity.MvvmUniverse.Test
 {
     [TestClass]
-    public class SettingsTest
+    public class StorageTest
     {
         [TestMethod]
-        public void Settings()
+        public void MultiInstance()
         {
             var c = new TestCollection
             {
@@ -112,40 +112,40 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void WinRTTypes()
         {
-            Test(new[] { true, false });
-            Test(new byte[] { 32, 34, 255 });
+            Tester.Test(new[] { true, false });
+            Tester.Test(new byte[] { 32, 34, 255 });
 
-            Test(new[] { -12.214f, float.MinValue, float.PositiveInfinity, float.NaN, float.NegativeInfinity });
-            Test(new[] { 2143.214, double.MinValue, double.PositiveInfinity, double.NaN, double.NegativeInfinity });
+            Tester.Test(new[] { -12.214f, float.MinValue, float.PositiveInfinity, float.NaN, float.NegativeInfinity });
+            Tester.Test(new[] { 2143.214, double.MinValue, double.PositiveInfinity, double.NaN, double.NegativeInfinity });
 
-            Test(new ushort[] { 2132 });
-            Test(new short[] { -3125 });
+            Tester.Test(new ushort[] { 2132 });
+            Tester.Test(new short[] { -3125 });
 
-            Test(new[] { 32153416U, uint.MaxValue, 0U });
-            Test(new[] { -123463256, int.MaxValue, int.MinValue });
+            Tester.Test(new[] { 32153416U, uint.MaxValue, 0U });
+            Tester.Test(new[] { -123463256, int.MaxValue, int.MinValue });
 
-            Test(new[] { 314564745221763UL });
-            Test(new[] { -34165357546336475L });
+            Tester.Test(new[] { 314564745221763UL });
+            Tester.Test(new[] { -34165357546336475L });
 
-            Test(new[] { '\0', 'h', char.MaxValue });
-            Test(new string[] { "", "null", "null_", "null_string", "null___" });
+            Tester.Test(new[] { '\0', 'h', char.MaxValue });
+            Tester.Test(new string[] { "", "null", "null_", "null_string", "null___", " " });
 
-            Test(new[] { Guid.NewGuid() });
+            Tester.Test(new[] { Guid.NewGuid(), default, Guid.Empty, Guid.NewGuid() });
 
-            Test(new[] { DateTimeOffset.Now, default });
-            Test(new[] { TimeSpan.FromSeconds(12.5132435464524), default });
+            Tester.Test(new[] { DateTimeOffset.Now, default });
+            Tester.Test(new[] { TimeSpan.FromSeconds(12.5132435464524), default });
 
-            Test(new[] { new Point(123, 123) });
-            Test(new[] { new Rect(12, 23, 34, 56) });
-            Test(new[] { new Size(12, 24) });
+            Tester.Test(new[] { new Point(123, 123) });
+            Tester.Test(new[] { new Rect(12, 23, 34, 56) });
+            Tester.Test(new[] { new Size(12, 24) });
         }
 
         [TestMethod]
         public void SerializerTypes()
         {
-            Test(new[] { StringComparison.CurrentCulture, (StringComparison)123 });
+            Tester.Test(new[] { StringComparison.CurrentCulture, (StringComparison)123 });
 
-            Test(new[]
+            Tester.Test(new[]
             {
                 default,
                 new Uri("http://example.com"),
@@ -161,18 +161,18 @@ namespace Opportunity.MvvmUniverse.Test
                 new Uri("http://example.com:8824/safsa/saf/asf.sdf?dsf=24&saf=4"),
             });
 
-            Test(new sbyte[] { 0, 127, -128, 1, -1 });
+            Tester.Test(new sbyte[] { 0, 127, -128, 1, -1 });
 
-            Test(new[] { DateTime.Now, new DateTime(12435, DateTimeKind.Local), new DateTime(12435, DateTimeKind.Unspecified), new DateTime(12435, DateTimeKind.Utc) });
+            Tester.Test(new[] { DateTime.Now, new DateTime(12435, DateTimeKind.Local), new DateTime(12435, DateTimeKind.Unspecified), new DateTime(12435, DateTimeKind.Utc) });
 
-            Test(new[] { new IntPtr(12), IntPtr.Zero });
-            Test(new[] { new UIntPtr(12), UIntPtr.Zero });
+            Tester.Test(new[] { new IntPtr(12), IntPtr.Zero });
+            Tester.Test(new[] { new UIntPtr(12), UIntPtr.Zero });
         }
 
         [UITestMethod]
         public void SerializerUITypes()
         {
-            Test(new[]
+            Tester.Test(new[]
             {
                 default,
                 Color.FromArgb(1, 2, 3, 4),
@@ -180,7 +180,7 @@ namespace Opportunity.MvvmUniverse.Test
                 Colors.Transparent,
             });
 
-            Test(new[]
+            Tester.Test(new[]
             {
                 default,
                 new SolidColorBrush(Color.FromArgb(1, 2, 3, 4)),
@@ -206,48 +206,47 @@ namespace Opportunity.MvvmUniverse.Test
             });
         }
 
-        void Test<T>(T[] values, T[] valuesCopy = null, Comparison<T> comparer = null)
+        static class Tester
         {
-            if (valuesCopy != null)
+            public static void Test<T>(T[] values, T[] valuesCopy = null, Comparison<T> comparer = null)
             {
-                for (var i = 0; i < values.Length; i++)
+                if (valuesCopy != null)
                 {
-                    TypeCollection.Test(values[i], valuesCopy[i], comparer);
+                    for (var i = 0; i < values.Length; i++)
+                    {
+                        Tester.TestSingle(values[i], valuesCopy[i], comparer);
+                    }
                 }
-            }
-            else
-            {
-                foreach (var item in values)
+                else
                 {
-                    TypeCollection.Test(item, comparer);
+                    foreach (var item in values)
+                    {
+                        Tester.TestSingle(item, comparer);
+                    }
                 }
+                Tester.TestCollction(values, comparer);
+                Tester.TestCollction(new List<T>(values), comparer);
+                Tester.TestCollction(new Collections.ObservableList<T>(values), comparer);
+
+                values = values.Concat(Enumerable.Repeat<T>(default, 5)).ToArray();
+                Tester.TestCollction(values, comparer);
+                Tester.TestCollction(new List<T>(values), comparer);
+                Tester.TestCollction(new Collections.ObservableList<T>(values), comparer);
+
+                values = new T[5];
+                Tester.TestCollction(values, comparer);
+                Tester.TestCollction(new List<T>(values), comparer);
+                Tester.TestCollction(new Collections.ObservableList<T>(values), comparer);
+
+                values = new T[0];
+                Tester.TestCollction(values, comparer);
+                Tester.TestCollction(new List<T>(values), comparer);
+                Tester.TestCollction(new Collections.ObservableList<T>(values), comparer);
+
+                Tester.TestCollction(default(T[]), comparer);
+                Tester.TestCollction(default(List<T>), comparer);
+                Tester.TestCollction(default(Collections.ObservableList<T>), comparer);
             }
-            TypeCollection.TestCollction(values, comparer);
-            TypeCollection.TestCollction(new List<T>(values), comparer);
-            TypeCollection.TestCollction(new Collections.ObservableList<T>(values), comparer);
-
-            values = values.Concat(Enumerable.Repeat<T>(default, 5)).ToArray();
-            TypeCollection.TestCollction(values, comparer);
-            TypeCollection.TestCollction(new List<T>(values), comparer);
-            TypeCollection.TestCollction(new Collections.ObservableList<T>(values), comparer);
-
-            values = new T[5];
-            TypeCollection.TestCollction(values, comparer);
-            TypeCollection.TestCollction(new List<T>(values), comparer);
-            TypeCollection.TestCollction(new Collections.ObservableList<T>(values), comparer);
-
-            values = new T[0];
-            TypeCollection.TestCollction(values, comparer);
-            TypeCollection.TestCollction(new List<T>(values), comparer);
-            TypeCollection.TestCollction(new Collections.ObservableList<T>(values), comparer);
-
-            TypeCollection.TestCollction(default(T[]), comparer);
-            TypeCollection.TestCollction(default(List<T>), comparer);
-            TypeCollection.TestCollction(default(Collections.ObservableList<T>), comparer);
-        }
-
-        static class TypeCollection
-        {
             public static void TestCollction<T, TEle>(T v, Comparison<TEle> comparer = null)
                 where T : ICollection<TEle>, ICollection
             {
@@ -271,7 +270,7 @@ namespace Opportunity.MvvmUniverse.Test
                 }
             }
 
-            public static void Test<T>(Comparison<T> comparer = null)
+            public static void TestDefault<T>(Comparison<T> comparer = null)
                 where T : new()
             {
                 var v1 = new T();
@@ -289,7 +288,7 @@ namespace Opportunity.MvvmUniverse.Test
                 }
             }
 
-            public static void Test<T>(T v, Comparison<T> comparer = null)
+            public static void TestSingle<T>(T v, Comparison<T> comparer = null)
             {
                 var c = new TypeCollection<T> { Property = v };
                 if (comparer == null)
@@ -302,7 +301,7 @@ namespace Opportunity.MvvmUniverse.Test
                 }
             }
 
-            public static void Test<T>(T v1, T v2, Comparison<T> comparer = null)
+            public static void TestSingle<T>(T v1, T v2, Comparison<T> comparer = null)
             {
                 var c = new TypeCollection<T> { Property = v1 };
                 if (comparer == null)
