@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
@@ -35,16 +36,16 @@ namespace Opportunity.MvvmUniverse.Commands
             return this.CanExecuteDelegate.Invoke(this);
         }
 
-        protected override void StartExecution()
+        protected override Task StartExecutionAsync()
         {
             try
             {
                 this.ExecuteDelegate.Invoke(this);
-                OnFinished(ExecutedEventArgs.Succeed);
+                return Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                OnFinished(new ExecutedEventArgs(ex));
+                return Task.FromException(ex);
             }
         }
     }

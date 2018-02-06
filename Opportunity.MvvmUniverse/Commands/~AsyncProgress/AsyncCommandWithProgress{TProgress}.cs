@@ -26,9 +26,9 @@ namespace Opportunity.MvvmUniverse.Commands
 
         public double NormalizedProgress => this.ProgressMapper(Progress);
 
-        protected override void OnFinished(ExecutedEventArgs e)
+        protected override void OnFinished(Task execution)
         {
-            base.OnFinished(e);
+            base.OnFinished(execution);
             this.Progress = default;
         }
 

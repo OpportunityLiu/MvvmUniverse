@@ -3,7 +3,7 @@
   xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Opportunity.MvvmUniverse</id>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <title>Opportunity.MvvmUniverse</title>
     <authors>Opportunity</authors>
     <owners>Opportunity</owners>
@@ -15,7 +15,8 @@
     <copyright>Opportunity 2018</copyright>
     <tags>UWP mvvm observable</tags>
     <dependencies>
-      <group targetFramework="UAP10.0.15138">
+      <group/>
+      <group targetFramework="uap10.0.15138">
         <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.0.6" />
         <dependency id="System.Memory" version="4.4.0-preview1-25305-02" />
         <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.4.0" />

@@ -49,15 +49,18 @@ namespace Opportunity.MvvmUniverse.Commands
             if (!OnStarting())
                 return false;
 
-            StartExecution();
+            var t = StartExecutionAsync() ?? Task.CompletedTask;
+            if (t.IsCompleted)
+                OnFinished(t);
+            else
+                t.ContinueWith(OnFinished);
             return true;
         }
 
         /// <summary>
         /// Start execution.
-        /// Should call <see cref="OnFinished(ExecutedEventArgs)"/> after execution.
         /// </summary>
-        protected abstract void StartExecution();
+        protected abstract Task StartExecutionAsync();
 
         /// <summary>
         /// Raise <see cref="Executing"/> event.
@@ -76,17 +79,24 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Raise <see cref="Executed"/> event.
         /// </summary>
-        /// <param name="e">Event args</param>
-        protected virtual void OnFinished(ExecutedEventArgs e)
+        /// <param name="execution">result of <see cref="StartExecutionAsync()"/></param>
+        protected virtual void OnFinished(Task execution)
         {
             var executed = Executed;
             if (executed == null)
             {
-                if (e.Exception != null)
-                    ThrowUnhandledError(e.Exception);
+                if (execution.IsCanceled)
+                    ThrowUnhandledError(new TaskCanceledException(execution));
+                else if (execution.IsFaulted)
+                    ThrowUnhandledError(execution.Exception);
                 return;
             }
-            DispatcherHelper.BeginInvoke(() => executed.Invoke(this, e));
+            if (execution.IsCanceled)
+                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new ExecutedEventArgs(new TaskCanceledException(execution))));
+            else if (execution.IsFaulted)
+                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new ExecutedEventArgs(execution.Exception.InnerException)));
+            else
+                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, ExecutedEventArgs.Succeed));
         }
 
         /// <summary>

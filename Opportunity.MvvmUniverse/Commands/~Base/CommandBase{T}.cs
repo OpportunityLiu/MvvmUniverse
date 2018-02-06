@@ -59,16 +59,20 @@ namespace Opportunity.MvvmUniverse.Commands
             if (!OnStarting(parameter))
                 return false;
 
-            StartExecution(parameter);
+            var t = StartExecutionAsync(parameter) ?? Task.CompletedTask;
+            if (t.IsCompleted)
+                OnFinished(t, parameter);
+            else
+                t.ContinueWith((execution, param) => OnFinished(execution, (T)param), parameter);
             return true;
         }
 
+
         /// <summary>
         /// Start execution with given <paramref name="parameter"/>.
-        /// Should call <see cref="OnFinished(ExecutedEventArgs{T})"/> after execution.
         /// </summary>
         /// <param name="parameter">parameter of execution</param>
-        protected abstract void StartExecution(T parameter);
+        protected abstract Task StartExecutionAsync(T parameter);
 
         /// <summary>
         /// Raise <see cref="Executing"/> event.
@@ -89,17 +93,24 @@ namespace Opportunity.MvvmUniverse.Commands
         /// Raise <see cref="Executed"/> event.
         /// </summary>
         /// <param name="parameter">Parameter of <see cref="Execute(T)"/></param>
-        /// <param name="e">Event args</param>
-        protected virtual void OnFinished(ExecutedEventArgs<T> e)
+        /// <param name="execution">result of <see cref="StartExecutionAsync(T)"/></param>
+        protected virtual void OnFinished(Task execution, T paramenter)
         {
             var executed = Executed;
             if (executed == null)
             {
-                if (e.Exception != null)
-                    ThrowUnhandledError(e.Exception);
+                if (execution.IsCanceled)
+                    ThrowUnhandledError(new TaskCanceledException(execution));
+                else if (execution.IsFaulted)
+                    ThrowUnhandledError(execution.Exception);
                 return;
             }
-            DispatcherHelper.BeginInvoke(() => executed.Invoke(this, e));
+            if (execution.IsCanceled)
+                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new ExecutedEventArgs<T>(paramenter, new TaskCanceledException(execution))));
+            else if (execution.IsFaulted)
+                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new ExecutedEventArgs<T>(paramenter, execution.Exception.InnerException)));
+            else
+                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new ExecutedEventArgs<T>(paramenter)));
         }
 
         /// <summary>

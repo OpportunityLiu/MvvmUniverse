@@ -22,20 +22,12 @@ namespace Opportunity.MvvmUniverse.Commands
 
         private readonly AsyncActionWithProgressExecutor<TProgress> execute;
 
-        protected override async void StartExecution()
+        protected override Task StartExecutionAsync()
         {
-            try
-            {
-                var p = this.execute.Invoke(this);
-                var e = ProgressChangedEventArgsFactory.Create(default(TProgress));
-                p.Progress = (sender, pg) => { e.Progress = pg; OnProgress(e.EventArgs); };
-                await p;
-                OnFinished(ExecutedEventArgs.Succeed);
-            }
-            catch (Exception ex)
-            {
-                OnFinished(new ExecutedEventArgs(ex));
-            }
+            var p = this.execute.Invoke(this);
+            var e = ProgressChangedEventArgs<TProgress>.Create(default);
+            p.Progress = (sender, pg) => { e.Progress = pg; OnProgress(e.EventArgs); };
+            return p.AsTask();
         }
     }
 }

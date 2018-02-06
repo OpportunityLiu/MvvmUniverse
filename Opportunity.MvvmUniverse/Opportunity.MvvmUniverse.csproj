@@ -76,10 +76,9 @@
     <Compile Include="Commands\~Async\AsyncTaskCommand{T}.cs" />
     <Compile Include="Commands\~Base\CommandBase.cs" />
     <Compile Include="Commands\~Base\CommandBase{T}.cs" />
-    <Compile Include="Commands\~Base\IAsyncCommand.cs" />
-    <Compile Include="Commands\~Base\IAsyncCommandWithProgress.cs" />
+    <Compile Include="Commands\~Async\IAsyncCommand.cs" />
+    <Compile Include="Commands\~AsyncProgress\IAsyncCommandWithProgress.cs" />
     <Compile Include="Commands\~Base\ICommand.cs" />
-    <Compile Include="Commands\~Base\ICommandWithProgress{TProgress}.cs" />
     <Compile Include="Commands\~Base\IControllable.cs" />
     <Compile Include="Commands\~Base\ObservableCommandBase.cs" />
     <Compile Include="Commands\~Event\Executed.cs" />

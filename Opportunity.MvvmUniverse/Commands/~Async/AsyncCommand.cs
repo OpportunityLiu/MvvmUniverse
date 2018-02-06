@@ -80,11 +80,11 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Raise <see cref="Executed"/> event and set <see cref="IsExecuting"/> to <c>false</c>.
         /// </summary>
-        /// <param name="e">Event args</param>
-        protected override void OnFinished(ExecutedEventArgs e)
+        /// <param name="execution">result of <see cref="StartExecutionAsync()"/></param>
+        protected override void OnFinished(Task execution)
         {
             IsExecuting = false;
-            base.OnFinished(e);
+            base.OnFinished(execution);
         }
     }
 }
