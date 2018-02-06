@@ -105,23 +105,19 @@ namespace Opportunity.MvvmUniverse.Storage
             var info = TypeTraits.Of<T>();
             var tType = info.Type;
 
-            if (default(T) != null && !RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-                return (ISerializer<T>)Activator.CreateInstance(typeof(StructSerializer<>).MakeGenericType(typeof(T)));
-            if (info.IsNullable)
-                return (ISerializer<T>)Activator.CreateInstance(typeof(NullableSerializer<>).MakeGenericType(info.NullableUnderlyingType));
+            var tGenericDef = tType.IsGenericType ? tType.GetGenericTypeDefinition() : null;
+            if (tGenericDef == typeof(KeyValuePair<,>))
+            {
+                return (ISerializer<T>)Activator.CreateInstance(typeof(KeyValuePairSerializer<,>).MakeGenericType(tType.GenericTypeArguments));
+            }
+
             if (tType.IsArray && tType.GetArrayRank() == 1 && !tType.Name.Contains("[*]"))
             {
                 var ele = tType.GetElementType();
                 return (ISerializer<T>)Activator.CreateInstance(typeof(SZArraySerializer<>).MakeGenericType(ele));
             }
-
-            var tGenericDef = tType.IsConstructedGenericType ? tType.GetGenericTypeDefinition() : null;
-            if (tGenericDef == typeof(KeyValuePair<,>))
-            {
-                return (ISerializer<T>)Activator.CreateInstance(typeof(KeyValuePairSerializer<,>).MakeGenericType(tType.GenericTypeArguments));
-            }
             var tIsInterface = tType.IsInterface;
-            var tInterfaces = tType.GetInterfaces();
+            var tInterfaces = tType.ImplementedInterfaces.ToArray();
 
             var tGenericDefInterface = new Type[tInterfaces.Length];
             for (var i = 0; i < tGenericDefInterface.Length; i++)
@@ -130,13 +126,18 @@ namespace Opportunity.MvvmUniverse.Storage
                 tGenericDefInterface[i] = inter.IsConstructedGenericType ? inter.GetGenericTypeDefinition() : null;
             }
 
-            var r = tryGet1(typeof(IList<>), tType, tGenericDef, tInterfaces, tGenericDefInterface, typeof(ListSerializer<,>));
+            var r = tryGet1(typeof(IList<>), tType.AsType(), tGenericDef, tInterfaces, tGenericDefInterface, typeof(ListSerializer<,>));
             if (r != null)
                 return r;
 
-            r = tryGet1(typeof(ICollection<>), tType, tGenericDef, tInterfaces, tGenericDefInterface, typeof(CollectionSerializer<,>));
+            r = tryGet1(typeof(ICollection<>), tType.AsType(), tGenericDef, tInterfaces, tGenericDefInterface, typeof(CollectionSerializer<,>));
             if (r != null)
                 return r;
+
+            if (default(T) != null /* && !RuntimeHelpers.IsReferenceOrContainsReferences<T>()*/)
+                return (ISerializer<T>)Activator.CreateInstance(typeof(StructSerializer<>).MakeGenericType(typeof(T)));
+            if (info.IsNullable)
+                return (ISerializer<T>)Activator.CreateInstance(typeof(NullableSerializer<>).MakeGenericType(info.NullableUnderlyingType.AsType()));
 
             return new XmlSerializer<T>();
         }

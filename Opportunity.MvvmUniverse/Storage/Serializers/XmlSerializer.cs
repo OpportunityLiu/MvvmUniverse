@@ -39,7 +39,9 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             using (var ms = new MemoryStream(storage.Length))
             {
                 this.xmlSerializer.Serialize(ms, value);
-                new Span<byte>(ms.GetBuffer()).Slice(0, storage.Length - offset).CopyTo(storage.Slice(offset));
+                if (!ms.TryGetBuffer(out var buf))
+                    throw new InvalidOperationException("Can't get buffer of memory stream.");
+                buf.AsSpan().Slice(0, storage.Length - offset).CopyTo(storage.Slice(offset));
             }
         }
 

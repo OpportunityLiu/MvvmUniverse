@@ -43,7 +43,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             var v = default(TValue);
             KeySerializer.Deserialize(keyStorage, ref k);
             ValueSerializer.Deserialize(valueStorage, ref v);
-            value = KeyValuePair.Create(k, v);
+            value = new KeyValuePair<TKey, TValue>(k, v);
         }
     }
 }

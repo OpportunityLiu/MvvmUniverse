@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opportunity.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Windows.Storage;
@@ -192,7 +193,7 @@ namespace Opportunity.MvvmUniverse.Storage
 
         private void raiseChanged(T oldValue, T newValue)
         {
-            if (typeof(T).IsValueType || !ReferenceEquals(oldValue, newValue))
+            if (TypeTraits.Of<T>().Type.IsValueType || !ReferenceEquals(oldValue, newValue))
                 OnPropertyChanged(nameof(Value));
             PropertyChangedCallback?.Invoke(this, new StoragePropertyChangedEventArgs<T>(oldValue, newValue));
         }

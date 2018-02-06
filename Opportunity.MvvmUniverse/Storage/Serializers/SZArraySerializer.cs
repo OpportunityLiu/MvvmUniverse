@@ -1,4 +1,5 @@
-﻿using Opportunity.MvvmUniverse.Collections;
+﻿using Opportunity.Helpers;
+using Opportunity.MvvmUniverse.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,15 +57,17 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             var length = ReadCount(ref storage);
             if (value?.Length != length)
             {
-                if (!typeof(TElement).IsValueType)
-                    Array.Resize(ref value, length);
-                else
+                if (isElementValueType)
                     value = new TElement[length];
+                else
+                    Array.Resize(ref value, length);
             }
             for (var i = 0; i < value.Length; i++)
             {
                 ReadElement(ref storage, ref value[i]);
             }
         }
+
+        private static readonly bool isElementValueType = TypeTraits.Of<TElement>().Type.IsValueType;
     }
 }

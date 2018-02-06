@@ -7,12 +7,6 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
     public sealed class StructSerializer<T> : ISerializer<T>
         where T : struct
     {
-        static StructSerializer()
-        {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-                throw new InvalidOperationException("Not supported.");
-        }
-
         private static readonly int size = Unsafe.SizeOf<T>();
 
         public int CaculateSize(in T value) => size;
