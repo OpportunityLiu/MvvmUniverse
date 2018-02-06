@@ -106,6 +106,7 @@
     <Compile Include="Storage\Serializer{T}.cs" />
     <Compile Include="Storage\StorageProperty.cs" />
     <Compile Include="Storage\StoragePropertyChangedEventArgs.cs" />
+    <Compile Include="Storage\StorageProperty{T}.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Compile Include="Views\FrameWrapper.cs" />
     <Compile Include="Views\INavigationHandler.cs" />

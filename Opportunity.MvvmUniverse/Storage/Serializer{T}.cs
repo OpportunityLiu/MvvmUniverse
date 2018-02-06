@@ -76,8 +76,19 @@ namespace Opportunity.MvvmUniverse.Storage
             Serializer<string>.Storage.Default = new StringSerializer();
             Serializer<Uri>.Storage.Default = new UriSerializer();
             Serializer<SolidColorBrush>.Storage.Default = new SolidColorBrushSerializer();
-            Serializer<int>.Storage.Default = new StructSerializer<int>();
+
             Serializer<byte>.Storage.Default = new StructSerializer<byte>();
+            Serializer<byte[]>.Storage.Default = new SZArraySerializer<byte>();
+            Serializer<sbyte>.Storage.Default = new StructSerializer<sbyte>();
+            Serializer<ushort>.Storage.Default = new StructSerializer<ushort>();
+            Serializer<short>.Storage.Default = new StructSerializer<short>();
+            Serializer<uint>.Storage.Default = new StructSerializer<uint>();
+            Serializer<int>.Storage.Default = new StructSerializer<int>();
+            Serializer<ulong>.Storage.Default = new StructSerializer<ulong>();
+            Serializer<long>.Storage.Default = new StructSerializer<long>();
+            Serializer<float>.Storage.Default = new StructSerializer<float>();
+            Serializer<double>.Storage.Default = new StructSerializer<double>();
+            Serializer<char>.Storage.Default = new StructSerializer<char>();
         }
     }
 
@@ -155,15 +166,13 @@ namespace Opportunity.MvvmUniverse.Storage
         {
             get
             {
-                if (Storage.Value != null)
-                    return Storage.Value;
+                var value = Storage.Value;
+                if (value != null)
+                    return value;
                 if (Storage.Default == null)
-                {
                     lock (SyncRoot)
-                    {
-                        Storage.Default = createDefault();
-                    }
-                }
+                        if (Storage.Default == null)
+                            Storage.Default = createDefault();
                 return Storage.Default;
             }
             set => Storage.Value = value;

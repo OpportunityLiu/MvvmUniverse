@@ -1,25 +1,25 @@
 <?xml version="1.0"?>
-<package 
+<package
   xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Opportunity.MvvmUniverse</id>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <title>Opportunity.MvvmUniverse</title>
     <authors>Opportunity</authors>
     <owners>Opportunity</owners>
     <licenseUrl>https://github.com/OpportunityLiu/MvvmUniverse/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/OpportunityLiu/MvvmUniverse</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>An Mvvm lib for UWP apps.</description>
     <releaseNotes>Add support for ApplicationData.</releaseNotes>
-    <copyright>Copyright 2018</copyright>
+    <copyright>Opportunity 2018</copyright>
     <tags>UWP mvvm observable</tags>
     <dependencies>
-      <group targetFramework="UAP10.0.16299">
-        <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.0.6" exclude="Build,Analyzers" />
-        <dependency id="Opportunity.Helpers.Universal" version="1.1.5" exclude="Build,Analyzers" />
-        <dependency id="System.Memory" version="4.4.0-preview1-25305-02" exclude="Build,Analyzers" />
-        <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.4.0" exclude="Build,Analyzers" />
+      <group targetFramework="UAP10.0.15138">
+        <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.0.6" />
+        <dependency id="System.Memory" version="4.4.0-preview1-25305-02" />
+        <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.4.0" />
+        <dependency id="Opportunity.Helpers.Universal" version="1.1.5" />
       </group>
     </dependencies>
   </metadata>

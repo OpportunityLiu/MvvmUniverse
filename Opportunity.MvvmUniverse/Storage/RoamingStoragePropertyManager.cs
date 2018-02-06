@@ -16,8 +16,8 @@ namespace Opportunity.MvvmUniverse.Storage
 
         private static void applicationDataChanged(ApplicationData sender, object args)
         {
-            roamingCollcetions.RemoveAll(c => !c.TryGetTarget(out var ignore));
-            foreach (var item in roamingCollcetions)
+            RoamingProperties.RemoveAll(c => !c.TryGetTarget(out var ignore));
+            foreach (var item in RoamingProperties)
             {
                 if (item.TryGetTarget(out var target))
                 {
@@ -26,7 +26,7 @@ namespace Opportunity.MvvmUniverse.Storage
             }
         }
 
-        private static readonly List<WeakReference<IStorageProperty>> roamingCollcetions
+        internal static readonly List<WeakReference<IStorageProperty>> RoamingProperties
             = new List<WeakReference<IStorageProperty>>();
     }
 }
