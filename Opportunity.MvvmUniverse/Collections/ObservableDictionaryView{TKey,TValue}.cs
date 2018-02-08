@@ -17,7 +17,7 @@ namespace Opportunity.MvvmUniverse.Collections
         , IReadOnlyDictionary<TKey, TValue>, IOrderedDictionary
         , IReadOnlyList<KeyValuePair<TKey, TValue>>, IList, ICollection<KeyValuePair<TKey, TValue>>
     {
-        protected ObservableDictionary<TKey, TValue> Dictionary { get; }
+        protected internal ObservableDictionary<TKey, TValue> Dictionary { get; }
 
         public ObservableDictionaryView(ObservableDictionary<TKey, TValue> dictionary)
         {
@@ -118,10 +118,10 @@ namespace Opportunity.MvvmUniverse.Collections
         void IOrderedDictionary.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary);
 
         public ObservableDictionary<TKey, TValue>.DictionaryEnumerator GetEnumerator() => Dictionary.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
-        IDictionaryEnumerator IDictionary.GetEnumerator() => GetEnumerator();
-        IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Dictionary).GetEnumerator();
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => ((IEnumerable<KeyValuePair<TKey, TValue>>)Dictionary).GetEnumerator();
+        IDictionaryEnumerator IDictionary.GetEnumerator() => ((IDictionary)Dictionary).GetEnumerator();
+        IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => ((IOrderedDictionary)Dictionary).GetEnumerator();
 
         public void ForEach(Action<TKey, TValue> action) => Dictionary.ForEach(action);
         public void ForEach(Action<int, TKey, TValue> action) => Dictionary.ForEach(action);

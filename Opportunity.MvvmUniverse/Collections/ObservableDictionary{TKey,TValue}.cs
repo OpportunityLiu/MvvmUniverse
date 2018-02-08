@@ -21,8 +21,17 @@ namespace Opportunity.MvvmUniverse.Collections
     {
         private List<TKey> keyItems;
         private List<TValue> valueItems;
+        /// <summary>
+        /// Ordered keys.
+        /// </summary>
         protected List<TKey> KeyItems => LazyInitializer.EnsureInitialized(ref this.keyItems);
+        /// <summary>
+        /// Ordered values.
+        /// </summary>
         protected List<TValue> ValueItems => LazyInitializer.EnsureInitialized(ref this.valueItems);
+        /// <summary>
+        /// Mapping from key to index.
+        /// </summary>
         protected Dictionary<TKey, int> KeySet { get; }
 
         public IEqualityComparer<TKey> Comparer => KeySet.Comparer;
@@ -74,6 +83,15 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <summary>
+        /// Insert new key-value pair to given <paramref name="index"/> of the dictionary.
+        /// </summary>
+        /// <param name="key">Key to insert</param>
+        /// <param name="value">Value to insert</param>
+        /// <param name="index">position of insertion</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> out of range of the dictionary.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="key"/> found in the dictionay.</exception>
         protected virtual void InsertItem(int index, TKey key, TValue value)
         {
             check();
@@ -98,13 +116,20 @@ namespace Opportunity.MvvmUniverse.Collections
             check();
         }
 
-        protected virtual void RemoveItem(TKey key)
+        /// <summary>
+        /// Remove key-value pair of given <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">Key to remove</param>
+        /// <returns>True if <paramref name="key"/> found and removed, otherwise, false.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        protected virtual bool RemoveItem(TKey key)
         {
             check();
-            var removedIndex = KeySet[key];
+            if (!KeySet.TryGetValue(key, out var removedIndex))
+                return false;
+            var removedValue = ValueItems[removedIndex];
             KeySet.Remove(key);
             KeyItems.RemoveAt(removedIndex);
-            var removedValue = ValueItems[removedIndex];
             ValueItems.RemoveAt(removedIndex);
             updateIndex(removedIndex, KeyItems.Count - removedIndex);
             if (this.keys != null)
@@ -120,8 +145,16 @@ namespace Opportunity.MvvmUniverse.Collections
             OnPropertyChanged(nameof(Count));
             OnCollectionRemove(CreateKVP(key, removedValue), removedIndex);
             check();
+            return true;
         }
 
+        /// <summary>
+        /// Set <paramref name="value"/> of given <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">Key to set</param>
+        /// <param name="value">Value to set</param>
+        /// <exception cref="KeyNotFoundException"><paramref name="key"/> not found in the dictionay.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         protected virtual void SetItem(TKey key, TValue value)
         {
             check();
@@ -137,6 +170,14 @@ namespace Opportunity.MvvmUniverse.Collections
             check();
         }
 
+        /// <summary>
+        /// Move key-value pair with the given <paramref name="key"/> to <paramref name="newIndex"/>.
+        /// </summary>
+        /// <param name="key">Key of key-value pair to move</param>
+        /// <param name="newIndex">new position</param>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="KeyNotFoundException"><paramref name="key"/> not found in the dictionay.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="newIndex"/> out of range of the dictionary.</exception>
         protected virtual void MoveItem(TKey key, int newIndex)
         {
             check();
@@ -165,6 +206,9 @@ namespace Opportunity.MvvmUniverse.Collections
             check();
         }
 
+        /// <summary>
+        /// Clear all key-value pairs in the dictionary.
+        /// </summary>
         protected virtual void ClearItems()
         {
             check();
@@ -327,13 +371,7 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
-        public bool Remove(TKey key)
-        {
-            if (!KeySet.ContainsKey(key))
-                return false;
-            RemoveItem(key);
-            return true;
-        }
+        public bool Remove(TKey key) => RemoveItem(key);
         void IDictionary.Remove(object key) => Remove(CastKey<TKey>(key));
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
         {
@@ -365,11 +403,16 @@ namespace Opportunity.MvvmUniverse.Collections
             return true;
         }
 
-        public DictionaryEnumerator GetEnumerator() => new DictionaryEnumerator(this, 0);
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        IDictionaryEnumerator IOrderedDictionary.GetEnumerator() => new DictionaryEnumerator(this, 0);
-        IDictionaryEnumerator IDictionary.GetEnumerator() => ((IOrderedDictionary)this).GetEnumerator();
+        public DictionaryEnumerator GetEnumerator()
+            => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IEnumeratorKVP);
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+            => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IEnumeratorKVP);
+        IEnumerator IEnumerable.GetEnumerator()
+            => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IEnumeratorKVP);
+        IDictionaryEnumerator IOrderedDictionary.GetEnumerator()
+            => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IDictionaryEnumerator);
+        IDictionaryEnumerator IDictionary.GetEnumerator()
+            => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IDictionaryEnumerator);
 
         public void ForEach(Action<TKey, TValue> action)
         {
@@ -400,11 +443,13 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public struct DictionaryEnumerator : IDictionaryEnumerator, IEnumerator<KeyValuePair<TKey, TValue>>
         {
+            internal enum Type { Unknown = 0, IDictionaryEnumerator, IEnumeratorKVP }
+
             private List<TKey>.Enumerator keyEnumerator;
             private List<TValue>.Enumerator valueEnumerator;
-            private int type;
+            private Type type;
 
-            internal DictionaryEnumerator(ObservableDictionary<TKey, TValue> parent, int type)
+            internal DictionaryEnumerator(ObservableDictionary<TKey, TValue> parent, Type type)
             {
                 this.keyEnumerator = parent.KeyItems.GetEnumerator();
                 this.valueEnumerator = parent.ValueItems.GetEnumerator();
@@ -420,7 +465,18 @@ namespace Opportunity.MvvmUniverse.Collections
             object IDictionaryEnumerator.Value => Value;
 
             public KeyValuePair<TKey, TValue> Current => CreateKVP(Key, Value);
-            object IEnumerator.Current => this.type == 0 ? (object)Current : new DictionaryEntry(Key, Value);
+            object IEnumerator.Current
+            {
+                get
+                {
+                    switch (this.type)
+                    {
+                    case Type.IDictionaryEnumerator: return new DictionaryEntry(Key, Value);
+                    case Type.IEnumeratorKVP: return Current;
+                    default: throw new InvalidOperationException();
+                    }
+                }
+            }
 
             public void Dispose()
             {
@@ -434,6 +490,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 var vr = this.valueEnumerator.MoveNext();
                 if (kr == vr)
                     return kr;
+                this.Dispose();
                 throw new InvalidOperationException("Dictionary has been changed.");
             }
 

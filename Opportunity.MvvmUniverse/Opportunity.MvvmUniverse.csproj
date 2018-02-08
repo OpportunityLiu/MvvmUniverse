@@ -53,6 +53,7 @@
     <Compile Include="Collections\LoadMoreItemsExceptionEventArgs.cs" />
     <Compile Include="Collections\ObservableCollectionBase{T}.cs" />
     <Compile Include="Collections\ObservableDictionaryView{TKey,TValue}.cs" />
+    <Compile Include="Collections\ObservableDictionary{TKey,TValue}.Updater.cs" />
     <Compile Include="Collections\ObservableDictionary{TKey,TValue}.cs" />
     <Compile Include="Collections\ObservableDictionary{TKey,TValue}.ObservableKeyCollection.cs" />
     <Compile Include="Collections\ObservableDictionary{TKey,TValue}.ObservableKeyValueCollectionBase{T}.cs" />

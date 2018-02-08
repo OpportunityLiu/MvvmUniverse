@@ -113,5 +113,32 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => dic.Move(0, 6));
             Assert.ThrowsException<KeyNotFoundException>(() => dic.Move(6, 0));
         }
+
+        [DataRow("123", "asfui", DisplayName = "Irrelevant short to long")]
+        [DataRow("21365489", "asfui", DisplayName = "Irrelevant long to short")]
+        [DataRow("21365", "asfui", DisplayName = "Irrelevant length equles")]
+        [DataRow("", "asfui", DisplayName = "Fill")]
+        [DataRow("123", "", DisplayName = "Empty")]
+        [DataRow("asfasdg", "asfasdg", DisplayName = "Keep")]
+        [DataRow("123", "12345", DisplayName = "Insert back")]
+        [DataRow("123", "00123", DisplayName = "Insert front")]
+        [DataRow("123", "10023", DisplayName = "Insert middle")]
+        [DataRow("123", "0010020030", DisplayName = "Insert")]
+        [DataRow("12345", "123", DisplayName = "Remove back")]
+        [DataRow("00123", "123", DisplayName = "Remove front")]
+        [DataRow("10023", "123", DisplayName = "Remove middle")]
+        [DataRow("0010020030", "123", DisplayName = "Remove")]
+        [DataRow("12345", "12ABC", DisplayName = "Set back")]
+        [DataRow("12345", "12A45", DisplayName = "Set middle")]
+        [DataRow("12345", "BCA45", DisplayName = "Set front")]
+        [DataRow("democrat", "republican", DisplayName = "Common 1")]
+        [DataRow("republican", "democrat", DisplayName = "Common 1 Inv")]
+        [DataRow("kitten", "sitting", DisplayName = "Common 2")]
+        [DataRow("sitting", "kitten", DisplayName = "Common 2 Inv")]
+        [DataTestMethod]
+        public void Update(string source, string target)
+        {
+
+        }
     }
 }

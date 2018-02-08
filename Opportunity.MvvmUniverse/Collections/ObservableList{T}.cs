@@ -247,7 +247,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 return false;
             return ReferenceEquals(collection, this)
                 || ReferenceEquals(collection, this.Items)
-                || ReferenceEquals(collection, this.readOnlyView);
+                || (collection is ObservableListView<T> view && ReferenceEquals(view.List, this));
         }
 
         private sealed class Box : IReadOnlyList<T>, IList

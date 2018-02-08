@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -23,7 +24,7 @@ namespace Opportunity.MvvmUniverse.Collections
             private readonly IComparer<T> comparer;
 
             public bool Equals(T x, T y) => this.comparer.Compare(x, y) == 0;
-            public int GetHashCode(T obj) => obj?.GetHashCode() ?? 0;
+            public int GetHashCode(T obj) => throw new NotSupportedException();
         }
     }
 }
