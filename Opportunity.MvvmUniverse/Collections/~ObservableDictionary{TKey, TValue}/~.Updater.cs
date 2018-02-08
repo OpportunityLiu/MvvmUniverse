@@ -24,19 +24,14 @@ namespace Opportunity.MvvmUniverse.Collections
             private readonly ItemUpdater<TKey> keyUpdater;
             private readonly ItemUpdater<TValue> valueUpdater;
             private readonly int sourceCount, targetCount;
-            private readonly int rowCount, columnCount;
-            private int[] medMat;
-            private int distance;
 
             public Updater(ObservableDictionary<TKey, TValue> source, IReadOnlyDictionary<TKey, TValue> target, ItemUpdater<TKey> keyUpdater, ItemUpdater<TValue> valueUpdater)
             {
                 this.keyUpdater = keyUpdater;
                 this.valueUpdater = valueUpdater;
-                this.comparer = this.source.Comparer;
+                this.comparer = source.Comparer;
                 this.sourceCount = source.Count;
                 this.targetCount = target.Count;
-                this.rowCount = this.sourceCount + 1;
-                this.columnCount = this.targetCount + 1;
                 this.source = source;
                 this.targetKeySet = new HashSet<TKey>(target.Keys, this.comparer);
                 this.targetKey = new TKey[this.targetCount];

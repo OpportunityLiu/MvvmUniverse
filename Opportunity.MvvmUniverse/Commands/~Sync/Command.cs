@@ -36,6 +36,10 @@ namespace Opportunity.MvvmUniverse.Commands
             return this.CanExecuteDelegate.Invoke(this);
         }
 
+        /// <summary>
+        /// Returns <see cref="Task.CompletedTask"/> or <see cref="Task.FromException(Exception)"/>.
+        /// </summary>
+        /// <returns>A completed <see cref="Task"/></returns>
         protected override Task StartExecutionAsync()
         {
             try

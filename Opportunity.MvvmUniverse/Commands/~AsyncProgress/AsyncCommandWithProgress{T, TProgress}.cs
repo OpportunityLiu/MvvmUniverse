@@ -8,31 +8,39 @@ namespace Opportunity.MvvmUniverse.Commands
 {
     public abstract class AsyncCommandWithProgress<T, TProgress> : AsyncCommand<T>, IAsyncCommandWithProgress<T, TProgress>
     {
-        protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncPredicate<T> canExecute) : base(canExecute)
+        protected AsyncCommandWithProgress(ProgressMapper<T, TProgress> progressMapper, AsyncPredicate<T> canExecute)
+            : base(canExecute)
         {
             this.ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
         }
 
-        protected ProgressMapper<TProgress> ProgressMapper { get; }
+        protected ProgressMapper<T, TProgress> ProgressMapper { get; }
 
-        private TProgress progress;
-        public TProgress Progress
+        public TProgress Progress { get; private set; }
+
+        public double NormalizedProgress { get; private set; }
+
+        private void setProgress(T parameter, TProgress progress)
         {
-            get => this.progress;
-            private set => ForceSet(nameof(NormalizedProgress), ref this.progress, value);
+            this.Progress = progress;
+            this.NormalizedProgress = ProgressMapper(this, parameter, progress);
+            OnPropertyChanged(nameof(Progress), nameof(NormalizedProgress));
         }
-
-        public double NormalizedProgress => this.ProgressMapper(Progress);
 
         protected override void OnFinished(Task execution, T paramenter)
         {
             base.OnFinished(execution, paramenter);
-            this.Progress = default;
+            setProgress(paramenter, default);
         }
 
+        /// <summary>
+        /// Set value of <see cref="Progress"/> and <see cref="NormalizedProgress"/>,
+        /// and raise <see cref="ProgressChanged"/>.
+        /// </summary>
+        /// <param name="e">Event args</param>
         protected virtual void OnProgress(ProgressChangedEventArgs<T, TProgress> e)
         {
-            this.Progress = e.Progress;
+            setProgress(e.Parameter, e.Progress);
             var p = this.ProgressChanged;
             if (p == null)
                 return;

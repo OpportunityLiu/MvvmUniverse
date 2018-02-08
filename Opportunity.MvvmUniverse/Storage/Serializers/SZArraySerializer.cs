@@ -12,26 +12,24 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
     public sealed class SZArraySerializer<TElement> : CollectionSerializerBase<TElement>, ISerializer<TElement[]>
     {
-        public SZArraySerializer()
-        {
-        }
+        public SZArraySerializer() { }
 
-        public SZArraySerializer(ISerializer<TElement> elementSerializer) : base(elementSerializer)
-        {
-        }
+        public SZArraySerializer(ISerializer<TElement> elementSerializer)
+            : base(elementSerializer) { }
 
-        public SZArraySerializer(ISerializer<TElement> elementSerializer, int alignment) : base(elementSerializer, alignment)
-        {
-        }
+        public SZArraySerializer(ISerializer<TElement> elementSerializer, int alignment)
+            : base(elementSerializer, alignment) { }
 
         public int CaculateSize(in TElement[] value)
         {
             if (value == null)
                 return 0;
+            if (IsElementFixedSize)
+                return value.Length * AlignedFixedElementSize + PrefixSize;
             var count = PrefixSize;
             for (var i = 0; i < value.Length; i++)
             {
-                count += CaculateElementSize(in value[i]);
+                count += CaculateFlexibleElementSize(in value[i]);
             }
             return count;
         }
@@ -41,9 +39,19 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             if (value == null)
                 return;
             WriteCount(value.Length, ref storage);
-            for (var i = 0; i < value.Length; i++)
+            if (IsElementFixedSize)
             {
-                WriteElement(in value[i], ref storage);
+                for (var i = 0; i < value.Length; i++)
+                {
+                    WriteFixedElement(in value[i], ref storage);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < value.Length; i++)
+                {
+                    WriteFlexibleElement(in value[i], ref storage);
+                }
             }
         }
 
@@ -62,9 +70,19 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 else
                     Array.Resize(ref value, length);
             }
-            for (var i = 0; i < value.Length; i++)
+            if (IsElementFixedSize)
             {
-                ReadElement(ref storage, ref value[i]);
+                for (var i = 0; i < value.Length; i++)
+                {
+                    ReadFixedElement(ref storage, ref value[i]);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < value.Length; i++)
+                {
+                    ReadFlexibleElement(ref storage, ref value[i]);
+                }
             }
         }
 

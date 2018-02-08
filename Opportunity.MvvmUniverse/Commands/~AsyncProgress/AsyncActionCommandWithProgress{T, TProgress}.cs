@@ -13,7 +13,7 @@ namespace Opportunity.MvvmUniverse.Commands
     {
         public AsyncActionCommandWithProgress(
             AsyncActionWithProgressExecutor<T, TProgress> execute,
-            ProgressMapper<TProgress> progressMapper,
+            ProgressMapper<T, TProgress> progressMapper,
             AsyncPredicate<T> canExecute)
             : base(progressMapper, canExecute)
         {

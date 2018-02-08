@@ -28,6 +28,8 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             return this.encoding.GetByteCount(value) + offset;
         }
 
+        public bool IsFixedSize => false;
+
         public void Serialize(in string value, Span<byte> storage)
         {
             if (value == null)

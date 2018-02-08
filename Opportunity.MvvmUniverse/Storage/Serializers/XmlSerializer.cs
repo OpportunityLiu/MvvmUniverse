@@ -31,6 +31,8 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             }
         }
 
+        public bool IsFixedSize => false;
+
         public void Serialize(in T value, Span<byte> storage)
         {
             if (value == null)

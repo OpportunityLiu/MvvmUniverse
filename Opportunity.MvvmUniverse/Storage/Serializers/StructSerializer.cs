@@ -11,6 +11,8 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
 
         public int CaculateSize(in T value) => size;
 
+        public bool IsFixedSize => true;
+
         public void Serialize(in T value, Span<byte> storage)
         {
             storage.NonPortableCast<byte, T>()[0] = value;

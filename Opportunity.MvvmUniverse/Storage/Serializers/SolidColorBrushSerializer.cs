@@ -14,12 +14,17 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
         private static readonly int size = Unsafe.SizeOf<Color>() + sizeof(double);
         private static readonly int colorOffset = Unsafe.SizeOf<double>();
 
-        public int CaculateSize(in SolidColorBrush value) => value == null ? 0 : size;
+        public bool IsFixedSize => true;
+
+        public int CaculateSize(in SolidColorBrush value) => size;
 
         public void Serialize(in SolidColorBrush value, Span<byte> storage)
         {
             if (value == null)
+            {
+                storage.NonPortableCast<byte, double>()[0] = double.NaN;
                 return;
+            }
             storage.NonPortableCast<byte, double>()[0] = value.Opacity;
             storage.Slice(colorOffset).NonPortableCast<byte, Color>()[0] = value.Color;
         }
@@ -31,12 +36,18 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 value = null;
                 return;
             }
+            var opa = storage.NonPortableCast<byte, double>()[0];
+            if (double.IsNaN(opa))
+            {
+                value = null;
+                return;
+            }
             var color = storage.Slice(colorOffset).NonPortableCast<byte, Color>()[0];
             if (value == null)
                 value = new SolidColorBrush(color);
             else
                 value.Color = color;
-            value.Opacity = storage.NonPortableCast<byte, double>()[0];
+            value.Opacity = opa;
         }
     }
 }

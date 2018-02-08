@@ -194,6 +194,7 @@ namespace Opportunity.MvvmUniverse.Test
             Tester.Test(new[] { new List<int> { 1, 2, 3 }, new List<int> { 4, 5 }, new List<int>() }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
             Tester.Test(new[] { new List<string> { "1", "22", "333" }, new List<string> { "4444", "55555" }, new List<string>() }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
             Tester.Test(new[] { new Dictionary<int, string> { [1] = "1", [2] = "22", [3] = "333" }, new Dictionary<int, string>() }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
+            Tester.Test(new[] { new Dictionary<int, char> { [1] = '1', [2] = '2', [3] = '3' }, new Dictionary<int, char>() }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
         }
 
         [TestMethod]

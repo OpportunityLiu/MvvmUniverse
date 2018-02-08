@@ -114,31 +114,73 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.ThrowsException<KeyNotFoundException>(() => dic.Move(6, 0));
         }
 
-        [DataRow("123", "asfui", DisplayName = "Irrelevant short to long")]
-        [DataRow("21365489", "asfui", DisplayName = "Irrelevant long to short")]
-        [DataRow("21365", "asfui", DisplayName = "Irrelevant length equles")]
-        [DataRow("", "asfui", DisplayName = "Fill")]
-        [DataRow("123", "", DisplayName = "Empty")]
-        [DataRow("asfasdg", "asfasdg", DisplayName = "Keep")]
-        [DataRow("123", "12345", DisplayName = "Insert back")]
-        [DataRow("123", "00123", DisplayName = "Insert front")]
-        [DataRow("123", "10023", DisplayName = "Insert middle")]
-        [DataRow("123", "0010020030", DisplayName = "Insert")]
-        [DataRow("12345", "123", DisplayName = "Remove back")]
-        [DataRow("00123", "123", DisplayName = "Remove front")]
-        [DataRow("10023", "123", DisplayName = "Remove middle")]
-        [DataRow("0010020030", "123", DisplayName = "Remove")]
-        [DataRow("12345", "12ABC", DisplayName = "Set back")]
-        [DataRow("12345", "12A45", DisplayName = "Set middle")]
-        [DataRow("12345", "BCA45", DisplayName = "Set front")]
-        [DataRow("democrat", "republican", DisplayName = "Common 1")]
-        [DataRow("republican", "democrat", DisplayName = "Common 1 Inv")]
-        [DataRow("kitten", "sitting", DisplayName = "Common 2")]
-        [DataRow("sitting", "kitten", DisplayName = "Common 2 Inv")]
-        [DataTestMethod]
-        public void Update(string source, string target)
+        [TestMethod]
+        public void Update()
         {
-
+            var dic = new ObservableDictionary<string, string>
+            {
+                ["a"] = "1",
+                ["b"] = "2",
+                ["c"] = "3",
+                ["d"] = "4",
+                ["e"] = "5",
+            };
+            {
+                var shot = new Dictionary<string, string>
+                {
+                    ["a"] = "2",
+                    ["e"] = "52",
+                    ["b"] = "325",
+                    ["d"] = "1",
+                };
+                dic.Update(shot);
+                CollectionAssert.AreEqual(shot, dic);
+            }
+            {
+                var shot = new Dictionary<string, string>
+                {
+                    ["a"] = "2",
+                    ["b"] = "3",
+                    ["c"] = "4",
+                    ["d"] = "1",
+                    ["f"] = "dd1",
+                    ["e"] = "5",
+                };
+                dic.Update(shot);
+                CollectionAssert.AreEqual(shot, dic);
+            }
+            {
+                var shot = new Dictionary<string, string>
+                {
+                    ["f"] = "dd1",
+                    ["e"] = "5",
+                    ["c"] = "4",
+                    ["d"] = "1",
+                    ["a"] = "2",
+                    ["b"] = "3",
+                };
+                dic.Update(shot);
+                CollectionAssert.AreEqual(shot, dic);
+            }
+            {
+                var shot = new Dictionary<string, string>
+                {
+                };
+                dic.Update(shot);
+                CollectionAssert.AreEqual(shot, dic);
+            }
+            {
+                var shot = new Dictionary<string, string>
+                {
+                    ["a"] = "2",
+                    ["b"] = "3",
+                    ["c"] = "4",
+                    ["d"] = "1",
+                    ["e"] = "5",
+                };
+                dic.Update(shot);
+                CollectionAssert.AreEqual(shot, dic);
+            }
         }
     }
 }

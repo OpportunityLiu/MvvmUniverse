@@ -19,6 +19,11 @@ namespace Opportunity.MvvmUniverse.Storage
     public interface ISerializer<T>
     {
         /// <summary>
+        /// Returns <see langword="true"/> if <see cref="CaculateSize(T)"/> will return a same value regardless of the arguement,
+        /// otherwise, <see langword="false"/>.
+        /// </summary>
+        bool IsFixedSize { get; }
+        /// <summary>
         /// Caculate needed storage of <paramref name="value"/>.
         /// </summary>
         /// <param name="value">object to serialize</param>
@@ -51,6 +56,17 @@ namespace Opportunity.MvvmUniverse.Storage
             return new DelegateSerializer<T>(sizeCaculator, serializer, deserializer);
         }
 
+        public static Serializer<T> Create<T>(int size, Action<T, Span<byte>> serializer, Func<ReadOnlySpan<byte>, T, T> deserializer)
+        {
+            if (size <= 0)
+                throw new ArgumentOutOfRangeException(nameof(size));
+            if (serializer == null)
+                throw new ArgumentNullException(nameof(serializer));
+            if (deserializer == null)
+                throw new ArgumentNullException(nameof(deserializer));
+            return new FixedDelegateSerializer<T>(size, serializer, deserializer);
+        }
+
         private sealed class DelegateSerializer<T> : Serializer<T>
         {
             private readonly Func<T, int> caculator;
@@ -64,7 +80,29 @@ namespace Opportunity.MvvmUniverse.Storage
                 this.deserializer = deserializer;
             }
 
+            public override bool IsFixedSize => false;
+
             public override int CaculateSize(in T value) => this.caculator(value);
+            public override void Deserialize(ReadOnlySpan<byte> storage, ref T value) => value = this.deserializer(storage, value);
+            public override void Serialize(in T value, Span<byte> storage) => this.serializer(value, storage);
+        }
+
+        private sealed class FixedDelegateSerializer<T> : Serializer<T>
+        {
+            private readonly int size;
+            private readonly Action<T, Span<byte>> serializer;
+            private readonly Func<ReadOnlySpan<byte>, T, T> deserializer;
+
+            public FixedDelegateSerializer(int size, Action<T, Span<byte>> serializer, Func<ReadOnlySpan<byte>, T, T> deserializer)
+            {
+                this.size = size;
+                this.serializer = serializer;
+                this.deserializer = deserializer;
+            }
+
+            public override bool IsFixedSize => true;
+
+            public override int CaculateSize(in T value) => this.size;
             public override void Deserialize(ReadOnlySpan<byte> storage, ref T value) => value = this.deserializer(storage, value);
             public override void Serialize(in T value, Span<byte> storage) => this.serializer(value, storage);
         }
@@ -179,6 +217,7 @@ namespace Opportunity.MvvmUniverse.Storage
             set => Storage.Value = value;
         }
 
+        public abstract bool IsFixedSize { get; }
         public abstract int CaculateSize(in T value);
         public abstract void Serialize(in T value, Span<byte> storage);
         public abstract void Deserialize(ReadOnlySpan<byte> storage, ref T value);

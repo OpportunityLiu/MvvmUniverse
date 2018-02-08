@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
+    /// <summary>
+    /// If <see cref="IsElementFixedSize"/>: | n | ele1 | ele2 | ... | ele(n-1) |,
+    /// othrewise, | n | ele1size | ele1 | ele2size | ele2 | ... | ele(n-1)size | ele(n-1) |.
+    /// </summary>
+    /// <typeparam name="TElement">Element type</typeparam>
     public abstract class CollectionSerializerBase<TElement>
     {
         protected CollectionSerializerBase()
@@ -37,6 +42,11 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 break;
             }
             this.ElementSerializer = elementSerializer ?? Serializer<TElement>.Default;
+            if (this.ElementSerializer.IsFixedSize)
+            {
+                this.FixedElementSize = this.ElementSerializer.CaculateSize(default);
+                this.AlignedFixedElementSize = AlignedSize(this.FixedElementSize);
+            }
             this.PrefixSize = AlignedSize(sizeof(int));
         }
 
@@ -45,6 +55,15 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
         public int Alignment => 1 << this.alignmentBit;
 
         public ISerializer<TElement> ElementSerializer { get; }
+        protected bool IsElementFixedSize => this.ElementSerializer.IsFixedSize;
+        /// <summary>
+        /// Only valid when <see cref="IsElementFixedSize"/> is <see langword="true"/>.
+        /// </summary>
+        protected int FixedElementSize { get; } = -1;
+        /// <summary>
+        /// Only valid when <see cref="IsElementFixedSize"/> is <see langword="true"/>.
+        /// </summary>
+        protected int AlignedFixedElementSize { get; } = -1;
 
         protected internal int AlignedSize(int size)
         {
@@ -54,19 +73,49 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             return (size | mask) + 1;
         }
 
-        protected int CaculateElementSize(in TElement value) => AlignedSize(this.ElementSerializer.CaculateSize(in value)) + this.PrefixSize;
-        protected void WriteElement(in TElement value, ref Span<byte> storage)
+        /// <summary>
+        /// Only using when <see cref="IsElementFixedSize"/> is <see langword="false"/>.
+        /// </summary>
+        protected int CaculateFlexibleElementSize(in TElement value)
+        {
+            return AlignedSize(this.ElementSerializer.CaculateSize(in value)) + this.PrefixSize;
+        }
+
+        /// <summary>
+        /// Only using when <see cref="IsElementFixedSize"/> is <see langword="false"/>.
+        /// </summary>
+        protected void WriteFlexibleElement(in TElement value, ref Span<byte> storage)
         {
             var size = this.ElementSerializer.CaculateSize(in value);
             WriteCount(size, ref storage);
             this.ElementSerializer.Serialize(value, storage.Slice(0, size));
             storage = storage.Slice(AlignedSize(size));
         }
-        protected void ReadElement(ref ReadOnlySpan<byte> storage, ref TElement value)
+        /// <summary>
+        /// Only using when <see cref="IsElementFixedSize"/> is <see langword="false"/>.
+        /// </summary>
+        protected void ReadFlexibleElement(ref ReadOnlySpan<byte> storage, ref TElement value)
         {
             var size = ReadCount(ref storage);
             this.ElementSerializer.Deserialize(storage.Slice(0, size), ref value);
             storage = storage.Slice(AlignedSize(size));
+        }
+
+        /// <summary>
+        /// Only using when <see cref="IsElementFixedSize"/> is <see langword="true"/>.
+        /// </summary>
+        protected void WriteFixedElement(in TElement value, ref Span<byte> storage)
+        {
+            this.ElementSerializer.Serialize(value, storage.Slice(0, FixedElementSize));
+            storage = storage.Slice(AlignedFixedElementSize);
+        }
+        /// <summary>
+        /// Only using when <see cref="IsElementFixedSize"/> is <see langword="true"/>.
+        /// </summary>
+        protected void ReadFixedElement(ref ReadOnlySpan<byte> storage, ref TElement value)
+        {
+            this.ElementSerializer.Deserialize(storage.Slice(0, FixedElementSize), ref value);
+            storage = storage.Slice(AlignedFixedElementSize);
         }
 
         protected void WriteCount(int value, ref Span<byte> storage)
@@ -80,5 +129,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             storage = storage.Slice(PrefixSize);
             return r;
         }
+
+        public bool IsFixedSize => false;
     }
 }

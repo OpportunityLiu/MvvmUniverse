@@ -6,30 +6,31 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
-    public delegate double ProgressMapper<in TProgress>(TProgress progress);
-
     public abstract class AsyncCommandWithProgress<TProgress> : AsyncCommand, IAsyncCommandWithProgress<TProgress>
     {
-        protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncPredicate canExecute) : base(canExecute)
+        protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncPredicate canExecute)
+            : base(canExecute)
         {
             this.ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
         }
 
-        public ProgressMapper<TProgress> ProgressMapper { get; }
+        protected ProgressMapper<TProgress> ProgressMapper { get; }
 
-        private TProgress progress;
-        public TProgress Progress
+        public TProgress Progress { get; private set; }
+
+        public double NormalizedProgress { get; private set; }
+
+        private void setProgress(TProgress progress)
         {
-            get => this.progress;
-            private set => ForceSet(nameof(NormalizedProgress), ref this.progress, value);
+            this.Progress = progress;
+            this.NormalizedProgress = ProgressMapper(this, progress);
+            OnPropertyChanged(nameof(Progress), nameof(NormalizedProgress));
         }
-
-        public double NormalizedProgress => this.ProgressMapper(Progress);
 
         protected override void OnFinished(Task execution)
         {
             base.OnFinished(execution);
-            this.Progress = default;
+            setProgress(default);
         }
 
         /// <summary>
@@ -39,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <param name="e">Event args</param>
         protected virtual void OnProgress(ProgressChangedEventArgs<TProgress> e)
         {
-            this.Progress = e.Progress;
+            setProgress(e.Progress);
             var p = this.ProgressChanged;
             if (p == null)
                 return;

@@ -14,6 +14,8 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             return r.Length * sizeof(char) + offset;
         }
 
+        public bool IsFixedSize => false;
+
         public void Serialize(in Uri value, Span<byte> storage)
         {
             if (value == null)
