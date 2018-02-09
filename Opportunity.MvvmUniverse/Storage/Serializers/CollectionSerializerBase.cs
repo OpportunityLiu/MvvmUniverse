@@ -13,11 +13,33 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
     /// <typeparam name="TElement">Element type</typeparam>
     public abstract class CollectionSerializerBase<TElement>
     {
+        private static int getAlignmentSize(ISerializer<TElement> elementSerializer)
+        {
+            elementSerializer = elementSerializer ?? Serializer<TElement>.Default;
+            if (!elementSerializer.IsFixedSize)
+                return sizeof(int);
+            var size = elementSerializer.CaculateSize(default);
+            if (size <= 1)
+                return 1;
+            if (size <= 2)
+                return 2;
+            if (size <= 4)
+                return 4;
+            if (size <= 8)
+                return 8;
+            var i = 4;
+            while ((1 << i) < size)
+            {
+                i++;
+            }
+            return 1 << i;
+        }
+
         protected CollectionSerializerBase()
-            : this(null, sizeof(int)) { }
+            : this(null) { }
 
         protected CollectionSerializerBase(ISerializer<TElement> elementSerializer)
-            : this(elementSerializer, sizeof(int)) { }
+            : this(elementSerializer, getAlignmentSize(elementSerializer)) { }
 
         protected CollectionSerializerBase(ISerializer<TElement> elementSerializer, int alignment)
         {

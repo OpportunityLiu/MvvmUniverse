@@ -16,17 +16,29 @@ namespace Opportunity.MvvmUniverse.Storage
 
         private static void applicationDataChanged(ApplicationData sender, object args)
         {
-            RoamingProperties.RemoveAll(c => !c.TryGetTarget(out var ignore));
-            foreach (var item in RoamingProperties)
+            foreach (var item in get())
             {
-                if (item.TryGetTarget(out var target))
-                {
-                    target.Populate();
-                }
+                item.Populate();
             }
         }
 
         internal static readonly List<WeakReference<IStorageProperty>> RoamingProperties
             = new List<WeakReference<IStorageProperty>>();
+
+        public static IEnumerable<IStorageProperty> TrackingRoamingStorageProperties => get();
+
+        private static IEnumerable<IStorageProperty> get()
+        {
+            var needClean = false;
+            foreach (var item in RoamingProperties)
+            {
+                if (item.TryGetTarget(out var target))
+                    yield return target;
+                else
+                    needClean = true;
+            }
+            if (needClean)
+                RoamingProperties.RemoveAll(c => !c.TryGetTarget(out var ignore));
+        }
     }
 }

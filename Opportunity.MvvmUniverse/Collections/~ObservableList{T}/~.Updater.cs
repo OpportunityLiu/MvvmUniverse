@@ -245,7 +245,8 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList) => Update(newList, default(IEqualityComparer<T>), null);
+        public int Update(IReadOnlyList<T> newList)
+            => Update(newList, default(IEqualityComparer<T>), null);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>
@@ -255,7 +256,8 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IComparer<T> comparer) => Update(newList, comparer, null);
+        public int Update(IReadOnlyList<T> newList, IComparer<T> comparer)
+            => Update(newList, comparer, null);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>
@@ -265,7 +267,8 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IEqualityComparer<T> comparer) => Update(newList, comparer, null);
+        public int Update(IReadOnlyList<T> newList, IEqualityComparer<T> comparer)
+            => Update(newList, comparer, null);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>
@@ -275,7 +278,8 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, Comparison<T> comparison) => Update(newList, Comparer<T>.Create(comparison), null);
+        public int Update(IReadOnlyList<T> newList, Comparison<T> comparison)
+            => Update(newList, Comparer<T>.Create(comparison), null);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>
@@ -286,7 +290,8 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, Comparison<T> comparison, ItemUpdater<T> itemUpdater) => Update(newList, Comparer<T>.Create(comparison), itemUpdater);
+        public int Update(IReadOnlyList<T> newList, Comparison<T> comparison, ItemUpdater<T> itemUpdater)
+            => Update(newList, Comparer<T>.Create(comparison), itemUpdater);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>
@@ -297,7 +302,8 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <remarks>
         /// If <c><paramref name="newList"/>.<see cref="IReadOnlyCollection{T}.Count"/> * <see cref="Count"/> &gt; 1_000_000</c>,
         /// MED computing will not be executed and -1 will be returned.</remarks>
-        public int Update(IReadOnlyList<T> newList, IComparer<T> comparer, ItemUpdater<T> itemUpdater) => Update(newList, EqualityComparerAdapter.Create(comparer), itemUpdater);
+        public int Update(IReadOnlyList<T> newList, IComparer<T> comparer, ItemUpdater<T> itemUpdater)
+            => Update(newList, EqualityComparerAdapter.Create(comparer), itemUpdater);
         /// <summary>
         /// Change the content of this <see cref="ObservableList{T}"/> to <paramref name="newList"/> with minimum editing distance.
         /// </summary>

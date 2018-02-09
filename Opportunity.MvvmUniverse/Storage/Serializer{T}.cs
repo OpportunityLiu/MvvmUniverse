@@ -19,7 +19,8 @@ namespace Opportunity.MvvmUniverse.Storage
     public interface ISerializer<T>
     {
         /// <summary>
-        /// Returns <see langword="true"/> if <see cref="CaculateSize(T)"/> will return a same value regardless of the arguement,
+        /// Returns <see langword="true"/> if <see cref="CaculateSize(T)"/> will return
+        /// a same value regardless of the arguement, especially, <c>default(T)</c>,
         /// otherwise, <see langword="false"/>.
         /// </summary>
         bool IsFixedSize { get; }

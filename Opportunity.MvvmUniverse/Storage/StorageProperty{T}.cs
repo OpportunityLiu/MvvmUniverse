@@ -1,15 +1,28 @@
 ﻿using Opportunity.Helpers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using Windows.Storage;
 
 namespace Opportunity.MvvmUniverse.Storage
 {
-    internal interface IStorageProperty
+    public interface IStorageProperty : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Write to storage.
+        /// </summary>
         void Flush();
+        /// <summary>
+        /// Load from storage.
+        /// </summary>
         void Populate();
+
+        ApplicationDataLocality Locality { get; }
+
+        object Value { get; set; }
+
+        Type ValueType { get; }
     }
 
     internal static class DataContainerStorage
@@ -191,6 +204,10 @@ namespace Opportunity.MvvmUniverse.Storage
             }
         }
 
+        object IStorageProperty.Value { get => Value; set => Value = (T)value; }
+
+        Type IStorageProperty.ValueType => typeof(T);
+
         private void raiseChanged(T oldValue, T newValue)
         {
             if (TypeTraits.Of<T>().Type.IsValueType || !ReferenceEquals(oldValue, newValue))
@@ -201,13 +218,16 @@ namespace Opportunity.MvvmUniverse.Storage
         private bool populateCore(bool ignoreEmpty)
         {
             var storage = Data;
+            var span = default(Span<byte>);
             if (storage == null)
             {
                 if (ignoreEmpty)
                     return false;
-                storage = Array.Empty<byte>();
+                span = Span<byte>.Empty;
             }
-            this.Serializer.Deserialize(storage, ref this.Cache);
+            else
+                span = new Span<byte>(storage);
+            this.Serializer.Deserialize(span, ref this.Cache);
             return true;
         }
 
@@ -230,7 +250,7 @@ namespace Opportunity.MvvmUniverse.Storage
             ref var field = ref this.Cache;
             var ser = this.Serializer;
             var size = ser.CaculateSize(in field);
-            if (size == 0)
+            if (size <= 0)
             {
                 Data = null;
                 return;
