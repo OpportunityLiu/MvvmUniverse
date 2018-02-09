@@ -12,8 +12,6 @@ namespace Opportunity.MvvmUniverse.Commands
 
     public class ExecutedEventArgs : EventArgs
     {
-        public static ExecutedEventArgs Succeed { get; } = new ExecutedEventArgs(null);
-
         public ExecutedEventArgs() { }
 
         public ExecutedEventArgs(Exception exception)
@@ -22,6 +20,8 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         public Exception Exception { get; private set; }
+
+        public bool Handled { get; set; }
     }
 
     public class ExecutedEventArgs<T> : ExecutedEventArgs

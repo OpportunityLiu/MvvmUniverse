@@ -82,21 +82,24 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <param name="execution">result of <see cref="StartExecutionAsync()"/></param>
         protected virtual void OnFinished(Task execution)
         {
+            var error = default(Exception);
+            if (execution.IsCanceled)
+                error = new TaskCanceledException(execution);
+            else if (execution.IsFaulted)
+                error = execution.Exception;
             var executed = Executed;
             if (executed == null)
             {
-                if (execution.IsCanceled)
-                    ThrowUnhandledError(new TaskCanceledException(execution));
-                else if (execution.IsFaulted)
-                    ThrowUnhandledError(execution.Exception);
+                ThrowUnhandledError(error);
                 return;
             }
-            if (execution.IsCanceled)
-                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new ExecutedEventArgs(new TaskCanceledException(execution))));
-            else if (execution.IsFaulted)
-                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, new ExecutedEventArgs(execution.Exception.InnerException)));
-            else
-                DispatcherHelper.BeginInvoke(() => executed.Invoke(this, ExecutedEventArgs.Succeed));
+            var args = new ExecutedEventArgs(error);
+            DispatcherHelper.BeginInvoke(() =>
+            {
+                executed(this, args);
+                if (!args.Handled)
+                    ThrowUnhandledError(args.Exception);
+            });
         }
 
         /// <summary>

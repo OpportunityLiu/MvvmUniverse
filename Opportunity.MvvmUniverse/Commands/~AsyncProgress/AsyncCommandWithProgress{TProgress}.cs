@@ -29,8 +29,8 @@ namespace Opportunity.MvvmUniverse.Commands
 
         protected override void OnFinished(Task execution)
         {
-            base.OnFinished(execution);
-            setProgress(default);
+            try { base.OnFinished(execution); }
+            finally { setProgress(default); }
         }
 
         /// <summary>

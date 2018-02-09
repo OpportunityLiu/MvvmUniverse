@@ -61,10 +61,10 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         /// <param name="parameter">Parameter of <see cref="Execute(T)"/></param>
         /// <param name="execution">result of <see cref="StartExecutionAsync(T)"/></param>
-        protected override void OnFinished(Task execution, T paramenter)
+        protected override void OnFinished(Task execution, T parameter)
         {
             IsExecuting = false;
-            base.OnFinished(execution, paramenter);
+            base.OnFinished(execution, parameter);
         }
     }
 }

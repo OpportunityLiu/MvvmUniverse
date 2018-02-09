@@ -27,10 +27,10 @@ namespace Opportunity.MvvmUniverse.Commands
             OnPropertyChanged(nameof(Progress), nameof(NormalizedProgress));
         }
 
-        protected override void OnFinished(Task execution, T paramenter)
+        protected override void OnFinished(Task execution, T parameter)
         {
-            base.OnFinished(execution, paramenter);
-            setProgress(paramenter, default);
+            try { base.OnFinished(execution, parameter); }
+            finally { setProgress(parameter, default); }
         }
 
         /// <summary>
