@@ -13,11 +13,11 @@ namespace Opportunity.MvvmUniverse.Commands
 
         bool System.Windows.Input.ICommand.CanExecute(object parameter)
         {
-            try
-            {
-                return CanExecute((T)parameter);
-            }
-            catch { return false; }
+            if (parameter is null)
+                return CanExecute(default);
+            if (parameter is T t)
+                return CanExecute(t);
+            return false;
         }
 
         /// <summary>
