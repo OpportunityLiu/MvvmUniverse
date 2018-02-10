@@ -10,7 +10,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             public Box(T value) { this.Value = value; }
 
-            public T Value { get; private set; }
+            public T Value { get; }
 
             T IReadOnlyList<T>.this[int index] => Value;
 

@@ -92,6 +92,11 @@ namespace Opportunity.MvvmUniverse.Collections
             public void RemoveAt(int index) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
         }
 
+        /// <summary>
+        /// Tell caller of <see cref="OnCollectionChanged(Args)"/> that whether this call can be skipped.
+        /// Returns <c><see cref="CollectionChanged"/> != null</c> by default.
+        /// </summary>
+        protected virtual bool NeedRaiseCollectionChanged => CollectionChanged != null;
         public event Handler CollectionChanged;
 
         protected virtual void OnCollectionChanged(Args args)
@@ -107,14 +112,14 @@ namespace Opportunity.MvvmUniverse.Collections
 
         protected void OnCollectionReset()
         {
-            if (CollectionChanged == null)
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Reset));
         }
 
         protected void OnCollectionMove(T item, int newIndex, int oldIndex)
         {
-            if (CollectionChanged == null)
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Move, item, newIndex, oldIndex));
         }
@@ -124,15 +129,18 @@ namespace Opportunity.MvvmUniverse.Collections
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
             if (items.Count == 1)
+            {
                 OnCollectionMove(items[0], newIndex, oldIndex);
-            if (CollectionChanged == null)
+                return;
+            }
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Move, ListWarpper.WarpIfNeeded(items), newIndex, oldIndex));
         }
 
         protected void OnCollectionAdd(T item, int index)
         {
-            if (CollectionChanged == null)
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Add, item, index));
         }
@@ -142,15 +150,18 @@ namespace Opportunity.MvvmUniverse.Collections
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
             if (items.Count == 1)
+            {
                 OnCollectionAdd(items[0], index);
-            if (CollectionChanged == null)
+                return;
+            }
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Add, ListWarpper.WarpIfNeeded(items), index));
         }
 
         protected void OnCollectionRemove(T item, int index)
         {
-            if (CollectionChanged == null)
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Remove, item, index));
         }
@@ -160,15 +171,18 @@ namespace Opportunity.MvvmUniverse.Collections
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
             if (items.Count == 1)
+            {
                 OnCollectionRemove(items[0], index);
-            if (CollectionChanged == null)
+                return;
+            }
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Remove, ListWarpper.WarpIfNeeded(items), index));
         }
 
         protected void OnCollectionReplace(T newItem, T oldItem, int index)
         {
-            if (CollectionChanged == null)
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Replace, newItem, oldItem, index));
         }
@@ -180,8 +194,11 @@ namespace Opportunity.MvvmUniverse.Collections
             if (oldItems == null)
                 throw new ArgumentNullException(nameof(oldItems));
             if (newItems.Count == 1 && oldItems.Count == 1)
+            {
                 OnCollectionReplace(newItems[0], oldItems[0], index);
-            if (CollectionChanged == null)
+                return;
+            }
+            if (!NeedRaiseCollectionChanged)
                 return;
             OnCollectionChanged(new Args(Action.Replace, ListWarpper.WarpIfNeeded(newItems), ListWarpper.WarpIfNeeded(oldItems), index));
         }
