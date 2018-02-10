@@ -27,6 +27,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>latest</LangVersion>
+    <DocumentationFile>bin\Debug\Opportunity.MvvmUniverse.XML</DocumentationFile>
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -38,6 +41,8 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Opportunity.MvvmUniverse.XML</DocumentationFile>
     <LangVersion>latest</LangVersion>
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>

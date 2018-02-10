@@ -8,7 +8,10 @@ using Args = System.Collections.Specialized.NotifyCollectionChangedEventArgs;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    // Make it strong typed to add type check and decrease boxing
+    /// <summary>
+    /// Base class for observable collections.
+    /// </summary>
+    /// <typeparam name="T">type of objects store in the collection</typeparam>
     public abstract class ObservableCollectionBase<T> : ObservableObject, System.Collections.Specialized.INotifyCollectionChanged
     {
         private sealed class ListWarpper : IList, IReadOnlyList<T>, ICollection, IReadOnlyCollection<T>
@@ -97,19 +100,30 @@ namespace Opportunity.MvvmUniverse.Collections
         /// Returns <c><see cref="CollectionChanged"/> != null</c> by default.
         /// </summary>
         protected virtual bool NeedRaiseCollectionChanged => CollectionChanged != null;
+
+        /// <inheritdoc/>
         public event Handler CollectionChanged;
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event.
+        /// </summary>
+        /// <param name="args">event args</param>
+        /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
+        /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
+        /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
         protected virtual void OnCollectionChanged(Args args)
         {
+            if (args == null)
+                throw new ArgumentNullException(nameof(args));
             var temp = CollectionChanged;
             if (temp == null)
                 return;
-            DispatcherHelper.BeginInvoke(() =>
-            {
-                temp.Invoke(this, args);
-            });
+            DispatcherHelper.BeginInvoke(() => temp(this, args));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Reset"/>.
+        /// </summary>
         protected void OnCollectionReset()
         {
             if (!NeedRaiseCollectionChanged)
@@ -117,6 +131,12 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(new Args(Action.Reset));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Move"/>.
+        /// </summary>
+        /// <param name="item">moved item</param>
+        /// <param name="newIndex">new index of <paramref name="item"/></param>
+        /// <param name="oldIndex">old index of <paramref name="item"/></param>
         protected void OnCollectionMove(T item, int newIndex, int oldIndex)
         {
             if (!NeedRaiseCollectionChanged)
@@ -124,6 +144,13 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(new Args(Action.Move, item, newIndex, oldIndex));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Move"/>.
+        /// </summary>
+        /// <param name="items">moved items</param>
+        /// <param name="newIndex">new index of <paramref name="items"/></param>
+        /// <param name="oldIndex">old index of <paramref name="items"/></param>
+        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/></exception>
         protected void OnCollectionMove(IReadOnlyList<T> items, int newIndex, int oldIndex)
         {
             if (items == null)
@@ -138,6 +165,11 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(new Args(Action.Move, ListWarpper.WarpIfNeeded(items), newIndex, oldIndex));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Add"/>.
+        /// </summary>
+        /// <param name="item">added item</param>
+        /// <param name="index">index of <paramref name="item"/></param>
         protected void OnCollectionAdd(T item, int index)
         {
             if (!NeedRaiseCollectionChanged)
@@ -145,6 +177,12 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(new Args(Action.Add, item, index));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Add"/>.
+        /// </summary>
+        /// <param name="items">added items</param>
+        /// <param name="index">index of <paramref name="items"/></param>
+        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/></exception>
         protected void OnCollectionAdd(IReadOnlyList<T> items, int index)
         {
             if (items == null)
@@ -159,6 +197,11 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(new Args(Action.Add, ListWarpper.WarpIfNeeded(items), index));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Remove"/>.
+        /// </summary>
+        /// <param name="item">removed item</param>
+        /// <param name="index">original index of <paramref name="item"/></param>
         protected void OnCollectionRemove(T item, int index)
         {
             if (!NeedRaiseCollectionChanged)
@@ -166,6 +209,12 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(new Args(Action.Remove, item, index));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Remove"/>.
+        /// </summary>
+        /// <param name="items">removed items</param>
+        /// <param name="index">original index of <paramref name="items"/></param>
+        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/></exception>
         protected void OnCollectionRemove(IReadOnlyList<T> items, int index)
         {
             if (items == null)
@@ -180,6 +229,12 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(new Args(Action.Remove, ListWarpper.WarpIfNeeded(items), index));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Replace"/>.
+        /// </summary>
+        /// <param name="newItem">new item</param>
+        /// <param name="oldItem">replaced item</param>
+        /// <param name="index">index of item</param>
         protected void OnCollectionReplace(T newItem, T oldItem, int index)
         {
             if (!NeedRaiseCollectionChanged)
@@ -187,13 +242,32 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(new Args(Action.Replace, newItem, oldItem, index));
         }
 
+        /// <summary>
+        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Replace"/>.
+        /// </summary>
+        /// <param name="newItems">new items</param>
+        /// <param name="oldItems">replaced items</param>
+        /// <param name="index">index of items</param>
+        /// <exception cref="ArgumentNullException"><paramref name="newItems"/> or <paramref name="oldItems"/> is <see langword="null"/></exception>
         protected void OnCollectionReplace(IReadOnlyList<T> newItems, IReadOnlyList<T> oldItems, int index)
         {
             if (newItems == null)
                 throw new ArgumentNullException(nameof(newItems));
             if (oldItems == null)
                 throw new ArgumentNullException(nameof(oldItems));
-            if (newItems.Count == 1 && oldItems.Count == 1)
+            var oldCount = oldItems.Count;
+            var newCount = newItems.Count;
+            if (oldCount <= 0)
+            {
+                OnCollectionAdd(newItems, index);
+                return;
+            }
+            if (newCount <= 0)
+            {
+                OnCollectionRemove(oldItems, index);
+                return;
+            }
+            if (newCount == 1 && oldCount == 1)
             {
                 OnCollectionReplace(newItems[0], oldItems[0], index);
                 return;

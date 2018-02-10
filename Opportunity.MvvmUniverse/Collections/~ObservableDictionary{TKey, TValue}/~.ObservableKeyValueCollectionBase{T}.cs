@@ -11,11 +11,16 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     public partial class ObservableDictionary<TKey, TValue>
     {
+        /// <summary>
+        /// Base class for observable collections used in <see cref="ObservableDictionary{TKey, TValue}"/>.
+        /// </summary>
+        /// <typeparam name="T">type of elements</typeparam>
         [DebuggerDisplay("Count = {Count}")]
         public abstract class ObservableKeyValueCollectionBase<T> : ObservableCollectionBase<T>
         {
-            protected ObservableDictionary<TKey, TValue> Parent { get; }
+            internal ObservableDictionary<TKey, TValue> Parent { get; }
 
+            /// <inheritdoc/>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public int Count => Parent.Count;
 
@@ -28,7 +33,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 => this.OnPropertyChanged(nameof(Count));
 
             internal void RaiseCollectionChangedInternal(NotifyCollectionChangedEventArgs e)
-                => this.OnCollectionChanged(e);
+                => OnCollectionChanged(e);
 
             internal void RaiseCollectionResetInternal()
                 => OnCollectionReset();

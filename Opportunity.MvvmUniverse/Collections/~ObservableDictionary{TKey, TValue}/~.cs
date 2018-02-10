@@ -12,6 +12,11 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
+    /// <summary>
+    /// Ordered generic dictionary can notify observers when changes happens.
+    /// </summary>
+    /// <typeparam name="TKey">type of key</typeparam>
+    /// <typeparam name="TValue">type of value</typeparam>
     [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
     public partial class ObservableDictionary<TKey, TValue>

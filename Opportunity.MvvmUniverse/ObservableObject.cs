@@ -67,13 +67,21 @@ namespace Opportunity.MvvmUniverse
             OnPropertyChanged(propertyName, addtionalPropertyNames);
         }
 
+        /// <summary>
+        /// Raise <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName">name of changed property</param>
         protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
             if (!NeedRaisePropertyChanged)
                 return;
             OnPropertyChanged(new SinglePropertyChangedEventArgsSource(propertyName));
         }
-
+        /// <summary>
+        /// Raise <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName0">first name of changed property</param>
+        /// <param name="propertyName1">second name of changed property</param>
         protected void OnPropertyChanged(string propertyName0, string propertyName1)
         {
             if (!NeedRaisePropertyChanged)
@@ -85,7 +93,12 @@ namespace Opportunity.MvvmUniverse
                 yield return p1;
             }
         }
-
+        /// <summary>
+        /// Raise <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName0">first name of changed property</param>
+        /// <param name="propertyName1">second name of changed property</param>
+        /// <param name="propertyName2">third name of changed property</param>
         protected void OnPropertyChanged(string propertyName0, string propertyName1, string propertyName2)
         {
             if (!NeedRaisePropertyChanged)
@@ -98,14 +111,16 @@ namespace Opportunity.MvvmUniverse
                 yield return p2;
             }
         }
-
+        /// <summary>
+        /// Raise <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyName">first name of changed property</param>
+        /// <param name="propertyNamesRest">rest names of changed property</param>
+        /// <exception cref="ArgumentNullException"><paramref name="propertyNamesRest"/> is <see langword="null"/></exception>
         protected void OnPropertyChanged(string propertyName, IEnumerable<string> propertyNamesRest)
         {
             if (propertyNamesRest == null)
-            {
-                OnPropertyChanged(propertyName);
-                return;
-            }
+                throw new ArgumentNullException(nameof(propertyNamesRest));
             if (!NeedRaisePropertyChanged)
                 return;
             this.OnPropertyChanged(new MultiPropertyChangedEventArgsSource(g(propertyName, propertyNamesRest)));
@@ -118,10 +133,16 @@ namespace Opportunity.MvvmUniverse
                 }
             }
         }
-
+        /// <summary>
+        /// Raise <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyNames">names of changed property</param>
+        /// <exception cref="ArgumentNullException"><paramref name="propertyNames"/> is <see langword="null"/></exception>
         protected void OnPropertyChanged(params string[] propertyNames)
         {
-            if (propertyNames == null || propertyNames.Length == 0)
+            if (propertyNames == null)
+                throw new ArgumentNullException(nameof(propertyNames));
+            if (propertyNames.Length == 0)
                 return;
             else if (propertyNames.Length == 1)
                 OnPropertyChanged(propertyNames[0]);
@@ -132,24 +153,37 @@ namespace Opportunity.MvvmUniverse
             else
                 OnPropertyChanged((IEnumerable<string>)propertyNames);
         }
-
+        /// <summary>
+        /// Raise <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="propertyNames">names of changed property</param>
+        /// <exception cref="ArgumentNullException"><paramref name="propertyNames"/> is <see langword="null"/></exception>
         protected void OnPropertyChanged(IEnumerable<string> propertyNames)
         {
+            if (propertyNames == null)
+                throw new ArgumentNullException(nameof(propertyNames));
             if (!NeedRaisePropertyChanged)
                 return;
             this.OnPropertyChanged(new MultiPropertyChangedEventArgsSource(propertyNames));
         }
 
         /// <summary>
-        /// Tell caller of <see cref="OnPropertyChanged(PropertyChangedEventArgsSource)"/> that whether this call can be skipped.
-        /// Returns <c><see cref="PropertyChanged"/> != null</c> by default.
+        /// Tell caller of <see cref="OnPropertyChanged(IEnumerable{PropertyChangedEventArgs})"/> that whether this call can be skipped.
+        /// Returns <c><see cref="PropertyChanged"/> != <see langword="null"/></c> by default.
         /// </summary>
         protected virtual bool NeedRaisePropertyChanged => PropertyChanged != null;
 
-        protected virtual void OnPropertyChanged(PropertyChangedEventArgsSource args)
+        /// <summary>
+        /// Raise <see cref="PropertyChanged"/> event.
+        /// </summary>
+        /// <param name="args">event args</param>
+        /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
+        /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
+        /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
+        protected virtual void OnPropertyChanged(IEnumerable<PropertyChangedEventArgs> args)
         {
             if (args == null)
-                return;
+                throw new ArgumentNullException(nameof(args));
             var temp = PropertyChanged;
             if (temp == null)
                 return;
@@ -162,6 +196,7 @@ namespace Opportunity.MvvmUniverse
             });
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged;
     }
 }

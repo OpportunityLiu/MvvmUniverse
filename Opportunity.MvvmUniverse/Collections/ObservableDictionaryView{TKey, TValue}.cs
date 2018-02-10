@@ -11,6 +11,11 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
+    /// <summary>
+    /// Read only view of <see cref="ObservableDictionary{TKey, TValue}"/>.
+    /// </summary>
+    /// <typeparam name="TKey">type of key</typeparam>
+    /// <typeparam name="TValue">type of value</typeparam>
     [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
     public class ObservableDictionaryView<TKey, TValue> : ObservableCollectionBase<KeyValuePair<TKey, TValue>>
