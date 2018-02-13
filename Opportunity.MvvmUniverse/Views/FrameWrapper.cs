@@ -10,18 +10,6 @@ namespace Opportunity.MvvmUniverse.Views
             if (frame == null)
                 throw new ArgumentNullException(nameof(frame));
             this.frame = new WeakReference<Frame>(frame);
-            frame.Navigated += this.Frame_Navigated;
-        }
-
-        private void Frame_Navigated(object sender, Windows.UI.Xaml.Navigation.NavigationEventArgs e)
-        {
-            if (this.Frame == null)
-            {
-                var f = (Frame)sender;
-                f.Navigated -= this.Frame_Navigated;
-                return;
-            }
-            this.RaiseCanGoBackChanged();
         }
 
         private readonly WeakReference<Frame> frame;
@@ -50,6 +38,30 @@ namespace Opportunity.MvvmUniverse.Views
             if (f == null)
                 return;
             f.GoBack();
+        }
+
+        public bool CanGoForward()
+        {
+            var f = Frame;
+            if (f == null)
+                return false;
+            return f.CanGoForward;
+        }
+
+        public void GoForward()
+        {
+            var f = Frame;
+            if (f == null)
+                return;
+            f.GoForward();
+        }
+
+        public bool Navigate(Type sourcePageType, object parameter)
+        {
+            var f = Frame;
+            if (f == null)
+                return false;
+            return f.Navigate(sourcePageType, parameter);
         }
     }
 }

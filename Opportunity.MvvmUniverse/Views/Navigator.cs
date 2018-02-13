@@ -15,9 +15,13 @@ namespace Opportunity.MvvmUniverse.Views
     {
         internal static readonly Dictionary<int, Navigator> NavigatorDictionary = new Dictionary<int, Navigator>();
 
+        private static KeyValuePair<int, Navigator> cache;
+
         public static Navigator GetOrCreateForCurrentView()
         {
             var id = DispatcherHelper.GetCurrentViewId();
+            if (cache.Key == id)
+                return cache.Value;
             if (NavigatorDictionary.TryGetValue(id, out var r))
                 return r;
             return NavigatorDictionary[id] = new Navigator();
@@ -26,14 +30,21 @@ namespace Opportunity.MvvmUniverse.Views
         public static Navigator GetForCurrentView()
         {
             var id = DispatcherHelper.GetCurrentViewId();
+            if (cache.Key == id)
+                return cache.Value;
             if (NavigatorDictionary.TryGetValue(id, out var r))
+            {
+                cache = new KeyValuePair<int, Navigator>(id, r);
                 return r;
+            }
             return null;
         }
 
         public static bool DestoryForCurrentView()
         {
             var id = DispatcherHelper.GetCurrentViewId();
+            if (cache.Key == id)
+                cache = default;
             if (!NavigatorDictionary.TryGetValue(id, out var r))
                 return false;
             NavigatorDictionary.Remove(id);
@@ -93,6 +104,58 @@ namespace Opportunity.MvvmUniverse.Views
                 if (h.CanGoBack())
                 {
                     h.GoBack();
+                    UpdateAppViewBackButtonVisibility();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool CanGoForward()
+        {
+            if (!this.isEnabled)
+                return false;
+            for (var i = Handlers.Count - 1; i >= 0; i--)
+            {
+                if (Handlers[i].CanGoForward())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool GoForward()
+        {
+            if (!this.isEnabled)
+                return false;
+            for (var i = Handlers.Count - 1; i >= 0; i--)
+            {
+                var h = Handlers[i];
+                if (h.CanGoForward())
+                {
+                    h.GoForward();
+                    UpdateAppViewBackButtonVisibility();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool Navigate(Type sourcePageType) => this.Navigate(sourcePageType, null);
+
+        public bool Navigate(Type sourcePageType, object parameter)
+        {
+            if (sourcePageType == null)
+                throw new ArgumentNullException(nameof(sourcePageType));
+            if (!this.isEnabled)
+                return false;
+            for (var i = Handlers.Count - 1; i >= 0; i--)
+            {
+                var h = Handlers[i];
+                if (h.Navigate(sourcePageType, parameter))
+                {
+                    UpdateAppViewBackButtonVisibility();
                     return true;
                 }
             }
