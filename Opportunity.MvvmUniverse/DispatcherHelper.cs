@@ -99,7 +99,7 @@ namespace Opportunity.MvvmUniverse
                 action();
                 return;
             }
-            Dispatcher.Begin(action, CoreDispatcherPriority.Normal);
+            Dispatcher.Begin(action);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Opportunity.MvvmUniverse
             else
             {
                 action();
-                return AsyncWrapper.CreateCompleted();
+                return AsyncAction.CreateCompleted();
             }
         }
 
@@ -128,7 +128,7 @@ namespace Opportunity.MvvmUniverse
             if (Dispatcher == null || Dispatcher.HasThreadAccess)
             {
                 action();
-                return AsyncWrapper.CreateCompleted();
+                return AsyncAction.CreateCompleted();
             }
             return Dispatcher.RunAsync(CoreDispatcherPriority.Normal, action);
         }

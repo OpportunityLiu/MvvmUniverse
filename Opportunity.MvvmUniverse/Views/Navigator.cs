@@ -103,7 +103,7 @@ namespace Opportunity.MvvmUniverse.Views
         public IAsyncOperation<bool> GoBackAsync()
         {
             if (!this.isEnabled || this.navigating)
-                return AsyncWrapper.CreateCompleted(false);
+                return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
             {
                 this.Navigating = true;
@@ -144,7 +144,7 @@ namespace Opportunity.MvvmUniverse.Views
         public IAsyncOperation<bool> GoForwardAsync()
         {
             if (!this.isEnabled || this.navigating)
-                return AsyncWrapper.CreateCompleted(false);
+                return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
             {
                 this.Navigating = true;
@@ -175,7 +175,7 @@ namespace Opportunity.MvvmUniverse.Views
             if (sourcePageType == null)
                 throw new ArgumentNullException(nameof(sourcePageType));
             if (!this.isEnabled || this.navigating)
-                return AsyncWrapper.CreateCompleted(false);
+                return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
             {
                 this.Navigating = true;

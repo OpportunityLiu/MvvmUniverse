@@ -32,7 +32,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 return PollingAsyncWrapper.Wrap(this.loading);
             }
             if (!this.HasMoreItems)
-                return AsyncWrapper.CreateCompleted(new LoadMoreItemsResult());
+                return AsyncOperation<LoadMoreItemsResult>.CreateCompleted(new LoadMoreItemsResult());
             var task = Run(async token =>
             {
                 try

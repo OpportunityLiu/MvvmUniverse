@@ -63,14 +63,14 @@ namespace Opportunity.MvvmUniverse.Collections
         public IAsyncOperation<TCache> GetAsync(TKey key)
         {
             if (this.TryGet(key, out var r))
-                return AsyncWrapper.CreateCompleted(r);
+                return AsyncOperation<TCache>.CreateCompleted(r);
             EnsureCapacity();
             this.cacheQueue.Add(key);
             if (this.asyncLoader == null)
             {
                 var result = this.loader(key);
                 this.cacheDictionary[key] = result;
-                return AsyncWrapper.CreateCompleted(result);
+                return AsyncOperation<TCache>.CreateCompleted(result);
             }
             return Run(async token =>
             {

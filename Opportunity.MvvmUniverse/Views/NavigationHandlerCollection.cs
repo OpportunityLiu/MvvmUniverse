@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Views
 {
-    public class NavigationHandlerCollection : ObservableList<INavigationHandler>
+    public sealed class NavigationHandlerCollection : ObservableList<INavigationHandler>
     {
         internal static readonly Dictionary<INavigationHandler, Navigator> NavigationHandlerDic
             = new Dictionary<INavigationHandler, Navigator>();

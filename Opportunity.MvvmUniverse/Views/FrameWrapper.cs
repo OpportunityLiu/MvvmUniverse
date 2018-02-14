@@ -40,11 +40,11 @@ namespace Opportunity.MvvmUniverse.Views
         {
             var f = Frame;
             if (f == null)
-                return AsyncWrapper.CreateCompleted(false);
+                return AsyncOperation<bool>.CreateCompleted(false);
             if (!f.CanGoBack)
-                return AsyncWrapper.CreateCompleted(false);
+                return AsyncOperation<bool>.CreateCompleted(false);
             f.GoBack();
-            return AsyncWrapper.CreateCompleted(true);
+            return AsyncOperation<bool>.CreateCompleted(true);
         }
 
         public bool CanGoForward()
@@ -59,18 +59,18 @@ namespace Opportunity.MvvmUniverse.Views
         {
             var f = Frame;
             if (f == null)
-                return AsyncWrapper.CreateCompleted(false);
+                return AsyncOperation<bool>.CreateCompleted(false);
             if (!f.CanGoForward)
-                return AsyncWrapper.CreateCompleted(false);
+                return AsyncOperation<bool>.CreateCompleted(false);
             f.GoForward();
-            return AsyncWrapper.CreateCompleted(true);
+            return AsyncOperation<bool>.CreateCompleted(true);
         }
 
         public IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter)
         {
             var f = Frame;
             if (f == null)
-                return AsyncWrapper.CreateCompleted(false);
+                return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
             {
                 if (!f.Navigate(sourcePageType, parameter))
