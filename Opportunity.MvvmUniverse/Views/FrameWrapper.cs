@@ -1,4 +1,8 @@
+using Opportunity.Helpers.Universal.AsyncHelpers;
 using System;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 
 namespace Opportunity.MvvmUniverse.Views
@@ -32,12 +36,15 @@ namespace Opportunity.MvvmUniverse.Views
             return f.CanGoBack;
         }
 
-        public void GoBack()
+        public IAsyncOperation<bool> GoBackAsync()
         {
             var f = Frame;
             if (f == null)
-                return;
+                return AsyncWrapper.CreateCompleted(false);
+            if (!f.CanGoBack)
+                return AsyncWrapper.CreateCompleted(false);
             f.GoBack();
+            return AsyncWrapper.CreateCompleted(true);
         }
 
         public bool CanGoForward()
@@ -48,20 +55,29 @@ namespace Opportunity.MvvmUniverse.Views
             return f.CanGoForward;
         }
 
-        public void GoForward()
+        public IAsyncOperation<bool> GoForwardAsync()
         {
             var f = Frame;
             if (f == null)
-                return;
+                return AsyncWrapper.CreateCompleted(false);
+            if (!f.CanGoForward)
+                return AsyncWrapper.CreateCompleted(false);
             f.GoForward();
+            return AsyncWrapper.CreateCompleted(true);
         }
 
-        public bool Navigate(Type sourcePageType, object parameter)
+        public IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter)
         {
             var f = Frame;
             if (f == null)
-                return false;
-            return f.Navigate(sourcePageType, parameter);
+                return AsyncWrapper.CreateCompleted(false);
+            return AsyncInfo.Run(async token =>
+            {
+                if (!f.Navigate(sourcePageType, parameter))
+                    return false;
+                await f.Dispatcher.YieldIdle();
+                return true;
+            });
         }
     }
 }

@@ -1,14 +1,15 @@
 ﻿using System;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Views
 {
     public interface INavigationHandler
     {
         bool CanGoBack();
-        void GoBack();
+        IAsyncOperation<bool> GoBackAsync();
         bool CanGoForward();
-        void GoForward();
-        bool Navigate(Type sourcePageType, object parameter);
+        IAsyncOperation<bool> GoForwardAsync();
+        IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter);
     }
 
     public static class INavigationHandlerExtension

@@ -8,6 +8,9 @@ using Windows.UI.Xaml;
 using Opportunity.MvvmUniverse.Collections;
 using System;
 using System.Collections.Specialized;
+using Windows.Foundation;
+using Opportunity.Helpers.Universal.AsyncHelpers;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Opportunity.MvvmUniverse.Views
 {
@@ -80,6 +83,9 @@ namespace Opportunity.MvvmUniverse.Views
             }
         }
 
+        private bool navigating;
+        public bool Navigating { get => this.navigating; set => Set(ref this.navigating, value); }
+
         public bool CanGoBack()
         {
             if (!this.isEnabled)
@@ -94,21 +100,31 @@ namespace Opportunity.MvvmUniverse.Views
             return false;
         }
 
-        public bool GoBack()
+        public IAsyncOperation<bool> GoBackAsync()
         {
-            if (!this.isEnabled)
-                return false;
-            for (var i = Handlers.Count - 1; i >= 0; i--)
+            if (!this.isEnabled || this.navigating)
+                return AsyncWrapper.CreateCompleted(false);
+            return AsyncInfo.Run(async token =>
             {
-                var h = Handlers[i];
-                if (h.CanGoBack())
+                this.Navigating = true;
+                try
                 {
-                    h.GoBack();
-                    UpdateAppViewBackButtonVisibility();
-                    return true;
+                    for (var i = Handlers.Count - 1; i >= 0; i--)
+                    {
+                        var h = Handlers[i];
+                        if (await h.GoBackAsync())
+                        {
+                            UpdateAppViewBackButtonVisibility();
+                            return true;
+                        }
+                    }
+                    return false;
                 }
-            }
-            return false;
+                finally
+                {
+                    this.Navigating = false;
+                }
+            });
         }
 
         public bool CanGoForward()
@@ -125,41 +141,62 @@ namespace Opportunity.MvvmUniverse.Views
             return false;
         }
 
-        public bool GoForward()
+        public IAsyncOperation<bool> GoForwardAsync()
         {
-            if (!this.isEnabled)
-                return false;
-            for (var i = Handlers.Count - 1; i >= 0; i--)
+            if (!this.isEnabled || this.navigating)
+                return AsyncWrapper.CreateCompleted(false);
+            return AsyncInfo.Run(async token =>
             {
-                var h = Handlers[i];
-                if (h.CanGoForward())
+                this.Navigating = true;
+                try
                 {
-                    h.GoForward();
-                    UpdateAppViewBackButtonVisibility();
-                    return true;
+                    for (var i = Handlers.Count - 1; i >= 0; i--)
+                    {
+                        var h = Handlers[i];
+                        if (await h.GoForwardAsync())
+                        {
+                            UpdateAppViewBackButtonVisibility();
+                            return true;
+                        }
+                    }
+                    return false;
                 }
-            }
-            return false;
+                finally
+                {
+                    this.Navigating = false;
+                }
+            });
         }
 
-        public bool Navigate(Type sourcePageType) => this.Navigate(sourcePageType, null);
+        public IAsyncOperation<bool> NavigateAsync(Type sourcePageType) => this.NavigateAsync(sourcePageType, null);
 
-        public bool Navigate(Type sourcePageType, object parameter)
+        public IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter)
         {
             if (sourcePageType == null)
                 throw new ArgumentNullException(nameof(sourcePageType));
-            if (!this.isEnabled)
-                return false;
-            for (var i = Handlers.Count - 1; i >= 0; i--)
+            if (!this.isEnabled || this.navigating)
+                return AsyncWrapper.CreateCompleted(false);
+            return AsyncInfo.Run(async token =>
             {
-                var h = Handlers[i];
-                if (h.Navigate(sourcePageType, parameter))
+                this.Navigating = true;
+                try
                 {
-                    UpdateAppViewBackButtonVisibility();
-                    return true;
+                    for (var i = Handlers.Count - 1; i >= 0; i--)
+                    {
+                        var h = Handlers[i];
+                        if (await h.NavigateAsync(sourcePageType, parameter))
+                        {
+                            UpdateAppViewBackButtonVisibility();
+                            return true;
+                        }
+                    }
+                    return false;
                 }
-            }
-            return false;
+                finally
+                {
+                    this.Navigating = false;
+                }
+            });
         }
 
         public AppViewBackButtonVisibility AppViewBackButtonVisibility
@@ -190,10 +227,13 @@ namespace Opportunity.MvvmUniverse.Views
             }
         }
 
-        private void manager_BackRequested(object sender, BackRequestedEventArgs e)
+        private async void manager_BackRequested(object sender, BackRequestedEventArgs e)
         {
-            if (GoBack())
+            if (CanGoBack())
+            {
                 e.Handled = true;
+                await GoBackAsync();
+            }
         }
     }
 }
