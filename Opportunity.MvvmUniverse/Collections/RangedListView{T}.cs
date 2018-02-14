@@ -8,22 +8,44 @@ using Windows.UI.Xaml.Data;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
+    /// <summary>
+    /// Read-only view of <see cref="IReadOnlyList{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">type of elements</typeparam>
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     public readonly struct RangedListView<T> : IReadOnlyList<T>, ICollection<T>, IList
     {
-
+        /// <summary>
+        /// <see cref="RangedListView{T}"/> contains no elements.
+        /// </summary>
         public static RangedListView<T> Empty { get; }
             = new RangedListView<T>(Array.Empty<T>(), 0, 0);
 
+        /// <summary>
+        /// Create new instance of <see cref="RangedListView{T}"/>.
+        /// </summary>
+        /// <param name="items"><see cref="IReadOnlyList{T}"/> be wrapped</param>
+        /// <param name="range">range of elements in <paramref name="items"/> be shown in this view</param>
         public RangedListView(IReadOnlyList<T> items, ItemIndexRange range)
             : this(items, range.FirstIndex, (int)range.Length)
         {
         }
 
+        /// <summary>
+        /// Create new instance of <see cref="RangedListView{T}"/>.
+        /// </summary>
+        /// <param name="items"><see cref="IReadOnlyList{T}"/> be wrapped</param>
+        /// <param name="startIndex">start index of elements in <paramref name="items"/> be shown in this view</param>
         public RangedListView(IReadOnlyList<T> items, int startIndex)
             : this(items, startIndex, (items ?? throw new ArgumentNullException(nameof(items))).Count - startIndex) { }
 
+        /// <summary>
+        /// Create new instance of <see cref="RangedListView{T}"/>.
+        /// </summary>
+        /// <param name="items"><see cref="IReadOnlyList{T}"/> be wrapped</param>
+        /// <param name="startIndex">start index of elements in <paramref name="items"/> be shown in this view</param>
+        /// <param name="count">count of elements in <paramref name="items"/> be shown in this view</param>
         public RangedListView(IReadOnlyList<T> items, int startIndex, int count)
         {
             if (items == null)
@@ -39,6 +61,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         private readonly IReadOnlyList<T> items;
 
+        /// <inheritdoc />
         public T this[int index]
         {
             get
@@ -49,9 +72,16 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <inheritdoc />
         public int Count { get; }
+        /// <summary>
+        /// Start index of this view.
+        /// </summary>
         public int StartIndex { get; }
 
+        /// <summary>
+        /// Range of this view.
+        /// </summary>
         public ItemIndexRange Range => new ItemIndexRange(StartIndex, (uint)Count);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -82,6 +112,7 @@ namespace Opportunity.MvvmUniverse.Collections
         void IList.Clear() => ThrowForReadOnlyCollection(this.items);
         void ICollection<T>.Clear() => ThrowForReadOnlyCollection(this.items);
 
+        /// <inheritdoc />
         public bool Contains(T item) => IndexOf(item) >= 0;
         bool IList.Contains(object value)
         {
@@ -95,6 +126,7 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <inheritdoc />
         public int IndexOf(T item)
         {
             var c = EqualityComparer<T>.Default;
@@ -119,6 +151,7 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <inheritdoc />
         public void CopyTo(T[] array, int arrayIndex)
         {
             if (array == null)
@@ -147,10 +180,14 @@ namespace Opportunity.MvvmUniverse.Collections
         void IList.Remove(object value) => ThrowForReadOnlyCollection(this.items);
         void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(this.items);
 
+        /// <inheritdoc />
         public Enumerator GetEnumerator() => new Enumerator(this);
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        /// <summary>
+        /// Enumerator of <see cref="RangedListView{T}"/>.
+        /// </summary>
         public struct Enumerator : IEnumerator<T>
         {
             internal Enumerator(RangedListView<T> parent)
@@ -162,12 +199,14 @@ namespace Opportunity.MvvmUniverse.Collections
             private RangedListView<T> parent;
             private int currentPosition;
 
+            /// <inheritdoc />
             public T Current => this.parent.items[this.currentPosition];
 
             object IEnumerator.Current => this.Current;
 
             void IDisposable.Dispose() { }
 
+            /// <inheritdoc />
             public bool MoveNext()
             {
                 var ub = this.parent.StartIndex + this.parent.Count;
@@ -177,6 +216,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 return this.currentPosition < ub;
             }
 
+            /// <inheritdoc />
             public void Reset()
             {
                 this.currentPosition = this.parent.StartIndex - 1;

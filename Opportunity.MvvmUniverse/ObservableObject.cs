@@ -9,8 +9,21 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse
 {
+    /// <summary>
+    /// Base class for observable object.
+    /// </summary>
     public abstract class ObservableObject : INotifyPropertyChanged
     {
+        /// <summary>
+        /// If <paramref name="value"/> and <paramref name="field"/> are different,
+        /// set <paramref name="field"/> with <paramref name="value"/> and notify.
+        /// Use default <see cref="EqualityComparer{T}"/> to compare.
+        /// </summary>
+        /// <typeparam name="TProp">type of property</typeparam>
+        /// <param name="field">backing field of property</param>
+        /// <param name="value">new value</param>
+        /// <param name="propertyName">name of property, used for <see cref="PropertyChanged"/> event</param>
+        /// <returns>Whether <paramref name="value"/> has set to <paramref name="field"/> or not.</returns>
         protected bool Set<TProp>(ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             if (EqualityComparer<TProp>.Default.Equals(field, value))
@@ -19,6 +32,17 @@ namespace Opportunity.MvvmUniverse
             return true;
         }
 
+        /// <summary>
+        /// If <paramref name="value"/> and <paramref name="field"/> are different,
+        /// set <paramref name="field"/> with <paramref name="value"/> and notify.
+        /// Use default <see cref="EqualityComparer{T}"/> to compare.
+        /// </summary>
+        /// <typeparam name="TProp">type of property</typeparam>
+        /// <param name="addtionalPropertyName">name of addtional property need to notify</param>
+        /// <param name="field">backing field of property</param>
+        /// <param name="value">new value</param>
+        /// <param name="propertyName">name of property, used for <see cref="PropertyChanged"/> event</param>
+        /// <returns>Whether <paramref name="value"/> has set to <paramref name="field"/> or not.</returns>
         protected bool Set<TProp>(string addtionalPropertyName, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             if (EqualityComparer<TProp>.Default.Equals(field, value))
@@ -27,6 +51,18 @@ namespace Opportunity.MvvmUniverse
             return true;
         }
 
+        /// <summary>
+        /// If <paramref name="value"/> and <paramref name="field"/> are different,
+        /// set <paramref name="field"/> with <paramref name="value"/> and notify.
+        /// Use default <see cref="EqualityComparer{T}"/> to compare.
+        /// </summary>
+        /// <typeparam name="TProp">type of property</typeparam>
+        /// <param name="addtionalPropertyName0">name of first addtional property need to notify</param>
+        /// <param name="addtionalPropertyName1">name of second addtional property need to notify</param>
+        /// <param name="field">backing field of property</param>
+        /// <param name="value">new value</param>
+        /// <param name="propertyName">name of property, used for <see cref="PropertyChanged"/> event</param>
+        /// <returns>Whether <paramref name="value"/> has set to <paramref name="field"/> or not.</returns>
         protected bool Set<TProp>(string addtionalPropertyName0, string addtionalPropertyName1, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             if (EqualityComparer<TProp>.Default.Equals(field, value))
@@ -35,6 +71,17 @@ namespace Opportunity.MvvmUniverse
             return true;
         }
 
+        /// <summary>
+        /// If <paramref name="value"/> and <paramref name="field"/> are different,
+        /// set <paramref name="field"/> with <paramref name="value"/> and notify.
+        /// Use default <see cref="EqualityComparer{T}"/> to compare.
+        /// </summary>
+        /// <typeparam name="TProp">type of property</typeparam>
+        /// <param name="addtionalPropertyNames">names of addtional properties need to notify</param>
+        /// <param name="field">backing field of property</param>
+        /// <param name="value">new value</param>
+        /// <param name="propertyName">name of property, used for <see cref="PropertyChanged"/> event</param>
+        /// <returns>Whether <paramref name="value"/> has set to <paramref name="field"/> or not.</returns>
         protected bool Set<TProp>(IEnumerable<string> addtionalPropertyNames, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             if (EqualityComparer<TProp>.Default.Equals(field, value))
@@ -43,24 +90,60 @@ namespace Opportunity.MvvmUniverse
             return true;
         }
 
+        /// <summary>
+        /// Set <paramref name="field"/> with <paramref name="value"/> and notify,
+        /// regardless <paramref name="value"/> and <paramref name="field"/> are equal or not.
+        /// </summary>
+        /// <typeparam name="TProp">type of property</typeparam>
+        /// <param name="field">backing field of property</param>
+        /// <param name="value">new value</param>
+        /// <param name="propertyName">name of property, used for <see cref="PropertyChanged"/> event</param>
         protected void ForceSet<TProp>(ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;
             OnPropertyChanged(propertyName);
         }
 
+        /// <summary>
+        /// Set <paramref name="field"/> with <paramref name="value"/> and notify,
+        /// regardless <paramref name="value"/> and <paramref name="field"/> are equal or not.
+        /// </summary>
+        /// <typeparam name="TProp">type of property</typeparam>
+        /// <param name="addtionalPropertyName">name of addtional property need to notify</param>
+        /// <param name="field">backing field of property</param>
+        /// <param name="value">new value</param>
+        /// <param name="propertyName">name of property, used for <see cref="PropertyChanged"/> event</param>
         protected void ForceSet<TProp>(string addtionalPropertyName, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;
             OnPropertyChanged(propertyName, addtionalPropertyName);
         }
 
+        /// <summary>
+        /// Set <paramref name="field"/> with <paramref name="value"/> and notify,
+        /// regardless <paramref name="value"/> and <paramref name="field"/> are equal or not.
+        /// </summary>
+        /// <typeparam name="TProp">type of property</typeparam>
+        /// <param name="addtionalPropertyName0">name of first addtional property need to notify</param>
+        /// <param name="addtionalPropertyName1">name of second addtional property need to notify</param>
+        /// <param name="field">backing field of property</param>
+        /// <param name="value">new value</param>
+        /// <param name="propertyName">name of property, used for <see cref="PropertyChanged"/> event</param>
         protected void ForceSet<TProp>(string addtionalPropertyName0, string addtionalPropertyName1, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;
             OnPropertyChanged(propertyName, addtionalPropertyName0, addtionalPropertyName1);
         }
 
+        /// <summary>
+        /// Set <paramref name="field"/> with <paramref name="value"/> and notify,
+        /// regardless <paramref name="value"/> and <paramref name="field"/> are equal or not.
+        /// </summary>
+        /// <typeparam name="TProp">type of property</typeparam>
+        /// <param name="addtionalPropertyNames">names of addtional properties need to notify</param>
+        /// <param name="field">backing field of property</param>
+        /// <param name="value">new value</param>
+        /// <param name="propertyName">name of property, used for <see cref="PropertyChanged"/> event</param>
         protected void ForceSet<TProp>(IEnumerable<string> addtionalPropertyNames, ref TProp field, TProp value, [CallerMemberName]string propertyName = null)
         {
             field = value;

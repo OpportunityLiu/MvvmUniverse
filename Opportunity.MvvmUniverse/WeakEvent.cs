@@ -85,6 +85,10 @@ namespace Opportunity.MvvmUniverse
                 throw new ArithmeticException("TEventArgs doesn't match the type of TDelegate.");
         }
 
+        /// <summary>
+        /// Add handler to event.
+        /// </summary>
+        /// <param name="eventHandler">handler to add</param>
         public void Add(TDelegate eventHandler)
         {
             if (eventHandler == null)
@@ -118,6 +122,10 @@ namespace Opportunity.MvvmUniverse
             this.eventEntries.RemoveAll(ee => ee.TargetReference != null && !ee.TargetReference.IsAlive);
         }
 
+        /// <summary>
+        /// Remove handler from event.
+        /// </summary>
+        /// <param name="eventHandler">handler to remove</param>
         public void Remove(TDelegate eventHandler)
         {
             if (eventHandler == null)
@@ -159,6 +167,11 @@ namespace Opportunity.MvvmUniverse
             }
         }
 
+        /// <summary>
+        /// Raise event.
+        /// </summary>
+        /// <param name="sender">sender of event</param>
+        /// <param name="e">args of event</param>
         public void Raise(TSender sender, TEventArgs e)
         {
             if (this.eventEntries.Count == 0)
