@@ -88,7 +88,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         public bool CanGoBack()
         {
-            if (!this.isEnabled)
+            if (!this.isEnabled || !this.isGoBackEnabled)
                 return false;
             for (var i = Handlers.Count - 1; i >= 0; i--)
             {
@@ -102,7 +102,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         public IAsyncOperation<bool> GoBackAsync()
         {
-            if (!this.isEnabled || this.navigating)
+            if (!this.isEnabled || !this.isGoBackEnabled || this.navigating)
                 return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
             {
@@ -129,7 +129,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         public bool CanGoForward()
         {
-            if (!this.isEnabled)
+            if (!this.isEnabled || !this.isGoForwardEnabled)
                 return false;
             for (var i = Handlers.Count - 1; i >= 0; i--)
             {
@@ -143,7 +143,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         public IAsyncOperation<bool> GoForwardAsync()
         {
-            if (!this.isEnabled || this.navigating)
+            if (!this.isEnabled || !this.isGoForwardEnabled || this.navigating)
                 return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
             {
@@ -174,7 +174,7 @@ namespace Opportunity.MvvmUniverse.Views
         {
             if (sourcePageType == null)
                 throw new ArgumentNullException(nameof(sourcePageType));
-            if (!this.isEnabled || this.navigating)
+            if (!this.isEnabled || !this.isNavigateEnabled || this.navigating)
                 return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
             {
@@ -225,6 +225,31 @@ namespace Opportunity.MvvmUniverse.Views
                 if (Set(ref this.isEnabled, value))
                     UpdateAppViewBackButtonVisibility();
             }
+        }
+
+        private bool isGoBackEnabled = true;
+        public bool IsGoBackEnabled
+        {
+            get => this.isGoBackEnabled;
+            set
+            {
+                if (Set(ref this.isGoBackEnabled, value))
+                    UpdateAppViewBackButtonVisibility();
+            }
+        }
+
+        private bool isGoForwardEnabled = true;
+        public bool IsGoForwardEnabled
+        {
+            get => this.isGoForwardEnabled;
+            set => Set(ref this.isGoForwardEnabled, value);
+        }
+
+        private bool isNavigateEnabled = true;
+        public bool IsNavigateEnabled
+        {
+            get => this.isNavigateEnabled;
+            set => Set(ref this.isNavigateEnabled, value);
         }
 
         private async void manager_BackRequested(object sender, BackRequestedEventArgs e)
