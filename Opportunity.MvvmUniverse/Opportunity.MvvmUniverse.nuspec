@@ -16,8 +16,6 @@
     <dependencies>
       <group targetFramework="uap">
         <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="5.2.3" />
-        <dependency id="System.Memory" version="4.4.0-preview1-25305-02" />
-        <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.4.0" />
         <dependency id="Opportunity.Helpers.Universal" version="1.2.1" />
       </group>
     </dependencies>
