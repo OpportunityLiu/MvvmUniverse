@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
+    public delegate void ItemUpdater<in T>(T existItem, T newItem);
+
     public partial class ObservableList<T>
     {
         private class Updater
@@ -128,25 +130,25 @@ namespace Opportunity.MvvmUniverse.Collections
                         }
                     }
 
-                    DIAG_NO_OPERATION:
+                DIAG_NO_OPERATION:
                     i--;
                     j--;
                     continue;
 
-                    SUBSTITUTION:
+                SUBSTITUTION:
                     i--;
                     j--;
                     this.source[i] = this.target[j];
                     remainDistance--;
                     continue;
 
-                    DELETION:
+                DELETION:
                     i--;
                     this.source.RemoveAt(i);
                     remainDistance--;
                     continue;
 
-                    INSERTION:
+                INSERTION:
                     j--;
                     this.source.Insert(i, this.target[j]);
                     remainDistance--;
@@ -191,26 +193,26 @@ namespace Opportunity.MvvmUniverse.Collections
                         }
                     }
 
-                    DIAG_NO_OPERATION:
+                DIAG_NO_OPERATION:
                     i--;
                     j--;
                     this.itemUpdater(this.source[i], this.target[j]);
                     continue;
 
-                    SUBSTITUTION:
+                SUBSTITUTION:
                     i--;
                     j--;
                     this.source[i] = this.target[j];
                     remainDistance--;
                     continue;
 
-                    DELETION:
+                DELETION:
                     i--;
                     this.source.RemoveAt(i);
                     remainDistance--;
                     continue;
 
-                    INSERTION:
+                INSERTION:
                     j--;
                     this.source.Insert(i, this.target[j]);
                     remainDistance--;

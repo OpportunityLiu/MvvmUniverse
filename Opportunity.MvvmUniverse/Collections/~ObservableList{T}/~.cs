@@ -9,8 +9,6 @@ using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public delegate void ItemUpdater<in T>(T existItem, T newItem);
-
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     public partial class ObservableList<T> : ObservableCollectionBase<T>, IList<T>, IReadOnlyList<T>, IList
@@ -243,7 +241,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         private bool isSameRef(object collection)
         {
-            if (collection == null)
+            if (collection is null)
                 return false;
             return ReferenceEquals(collection, this)
                 || ReferenceEquals(collection, this.Items)

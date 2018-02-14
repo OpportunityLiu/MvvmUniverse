@@ -11,12 +11,23 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
+    /// <summary>
+    /// Read-only view of <see cref="ObservableList{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">type of elements</typeparam>
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     public class ObservableListView<T> : ObservableCollectionBase<T>, IReadOnlyList<T>, IList, ICollection<T>
     {
+        /// <summary>
+        /// <see cref="ObservableList{T}"/> of this view.
+        /// </summary>
         protected internal ObservableList<T> List { get; }
 
+        /// <summary>
+        /// Create a new instance of <see cref="ObservableListView{T}"/>.
+        /// </summary>
+        /// <param name="list"><see cref="ObservableList{T}"/> of this view</param>
         public ObservableListView(ObservableList<T> list)
         {
             this.List = list ?? throw new ArgumentNullException(nameof(list));
@@ -29,6 +40,7 @@ namespace Opportunity.MvvmUniverse.Collections
             OnCollectionChanged(e);
         }
 
+        /// <inheritdoc />
         public T this[int index] => List[index];
         object IList.this[int index]
         {
@@ -36,6 +48,7 @@ namespace Opportunity.MvvmUniverse.Collections
             set => ThrowForReadOnlyCollection(List);
         }
 
+        /// <inheritdoc />
         public int Count => List.Count;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -61,6 +74,7 @@ namespace Opportunity.MvvmUniverse.Collections
         bool IList.Contains(object value) => ((IList)List).Contains(value);
 
         void ICollection.CopyTo(Array array, int index) => ((ICollection)List).CopyTo(array, index);
+        /// <inheritdoc />
         public void CopyTo(T[] array, int arrayIndex) => List.CopyTo(array, arrayIndex);
 
         void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(List);
@@ -71,15 +85,19 @@ namespace Opportunity.MvvmUniverse.Collections
 
         void ICollection<T>.Clear() => ThrowForReadOnlyCollection(List);
 
+        /// <inheritdoc />
         public List<T>.Enumerator GetEnumerator() => List.GetEnumerator();
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => List.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => List.GetEnumerator();
 
         int IList.IndexOf(object value) => ((IList)List).IndexOf(value);
 
+        /// <inheritdoc />
         public bool Contains(T item) => List.Contains(item);
 
+        /// <inheritdoc />
         public void ForEach(Action<T> action) => List.ForEach(action);
+        /// <inheritdoc />
         public void ForEach(Action<int, T> action) => List.ForEach(action);
     }
 }

@@ -24,7 +24,7 @@ namespace Opportunity.MvvmUniverse.Collections
             object IList.this[int index]
             {
                 get => this.list[index];
-                set => throw new NotSupportedException("This is a read only list");
+                set => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
             }
 
             public bool IsFixedSize => false;
@@ -34,22 +34,9 @@ namespace Opportunity.MvvmUniverse.Collections
 
             public bool IsSynchronized => false;
 
-            private object syncRoot;
-            public object SyncRoot
-            {
-                get
-                {
-                    if (this.syncRoot == null)
-                        System.Threading.Interlocked.CompareExchange(ref this.syncRoot, new object(), null);
-                    return this.syncRoot;
-                }
-            }
+            public object SyncRoot => this.list;
 
             public T this[int index] => this.list[index];
-
-            public int Add(object value) => throw new NotSupportedException("This is a read only list");
-
-            public void Clear() => throw new NotSupportedException("This is a read only list");
 
             public bool Contains(object value) => this.list.Contains((T)value);
 
@@ -90,6 +77,8 @@ namespace Opportunity.MvvmUniverse.Collections
                 return -1;
             }
 
+            public int Add(object value) => Internal.Helpers.ThrowForReadOnlyCollection<int>(this.list);
+            public void Clear() => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
             public void Insert(int index, object value) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
             public void Remove(object value) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
             public void RemoveAt(int index) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
