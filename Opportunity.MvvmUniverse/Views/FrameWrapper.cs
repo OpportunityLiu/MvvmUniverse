@@ -71,13 +71,9 @@ namespace Opportunity.MvvmUniverse.Views
             var f = Frame;
             if (f == null)
                 return AsyncOperation<bool>.CreateCompleted(false);
-            return AsyncInfo.Run(async token =>
-            {
-                if (!f.Navigate(sourcePageType, parameter))
-                    return false;
-                await f.Dispatcher.YieldIdle();
-                return true;
-            });
+            if (!f.Navigate(sourcePageType, parameter))
+                return AsyncOperation<bool>.CreateCompleted(false);
+            return AsyncOperation<bool>.CreateCompleted(true);
         }
     }
 }
