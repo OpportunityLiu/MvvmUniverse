@@ -7,8 +7,14 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Base class of command without parameter.
+    /// </summary>
     public abstract class CommandBase : ObservableCommandBase, ICommand
     {
+        /// <summary>
+        /// Create instance of <see cref="CommandBase"/>.
+        /// </summary>
         protected CommandBase() { }
 
         bool System.Windows.Input.ICommand.CanExecute(object parameter) => CanExecute();
@@ -77,7 +83,7 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Raise <see cref="Executed"/> event.
+        /// Raise <see cref="ICommand.Executed"/> event.
         /// </summary>
         /// <param name="execution">result of <see cref="StartExecutionAsync()"/></param>
         protected virtual void OnFinished(Task execution)

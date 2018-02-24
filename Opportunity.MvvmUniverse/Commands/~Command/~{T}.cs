@@ -4,7 +4,17 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Execution body of <see cref="Command{T}"/>.
+    /// </summary>
+    /// <param name="command">Current command of execution.</param>
+    /// <param name="parameter">Current parameter of execution.</param>
     public delegate void Executor<T>(Command<T> command, T parameter);
+    /// <summary>
+    /// Predicate of <see cref="Command{T}"/>.
+    /// </summary>
+    /// <param name="command">Current command of can execute testing.</param>
+    /// <param name="parameter">Current parameter of can execute testing.</param>
     public delegate bool Predicate<T>(Command<T> command, T parameter);
 
     public class Command<T> : CommandBase<T>

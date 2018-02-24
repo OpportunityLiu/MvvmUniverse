@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
+    /// <summary>
+    /// Updater used to copy data from equals items.
+    /// </summary>
+    /// <typeparam name="T">Type of items.</typeparam>
+    /// <param name="existItem">Item exist in the collection.</param>
+    /// <param name="newItem">Item copy data from.</param>
     public delegate void ItemUpdater<in T>(T existItem, T newItem);
 
     public partial class ObservableList<T>
@@ -130,25 +136,25 @@ namespace Opportunity.MvvmUniverse.Collections
                         }
                     }
 
-                DIAG_NO_OPERATION:
+                    DIAG_NO_OPERATION:
                     i--;
                     j--;
                     continue;
 
-                SUBSTITUTION:
+                    SUBSTITUTION:
                     i--;
                     j--;
                     this.source[i] = this.target[j];
                     remainDistance--;
                     continue;
 
-                DELETION:
+                    DELETION:
                     i--;
                     this.source.RemoveAt(i);
                     remainDistance--;
                     continue;
 
-                INSERTION:
+                    INSERTION:
                     j--;
                     this.source.Insert(i, this.target[j]);
                     remainDistance--;
@@ -193,26 +199,26 @@ namespace Opportunity.MvvmUniverse.Collections
                         }
                     }
 
-                DIAG_NO_OPERATION:
+                    DIAG_NO_OPERATION:
                     i--;
                     j--;
                     this.itemUpdater(this.source[i], this.target[j]);
                     continue;
 
-                SUBSTITUTION:
+                    SUBSTITUTION:
                     i--;
                     j--;
                     this.source[i] = this.target[j];
                     remainDistance--;
                     continue;
 
-                DELETION:
+                    DELETION:
                     i--;
                     this.source.RemoveAt(i);
                     remainDistance--;
                     continue;
 
-                INSERTION:
+                    INSERTION:
                     j--;
                     this.source.Insert(i, this.target[j]);
                     remainDistance--;

@@ -35,10 +35,13 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         protected List<TValue> ValueItems => LazyInitializer.EnsureInitialized(ref this.valueItems);
         /// <summary>
-        /// Mapping from key to index.
+        /// Mapping from key to index of <see cref="KeyItems"/> and <see cref="ValueItems"/>.
         /// </summary>
         protected Dictionary<TKey, int> KeySet { get; }
 
+        /// <summary>
+        /// Comparer used to compare keys.
+        /// </summary>
         public IEqualityComparer<TKey> Comparer => KeySet.Comparer;
 
         public ObservableDictionary() : this(null, null) { }
@@ -310,6 +313,10 @@ namespace Opportunity.MvvmUniverse.Collections
         IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
 
         private ObservableDictionaryView<TKey, TValue> readOnlyView;
+        /// <summary>
+        /// Get a read-only view of current instance.
+        /// </summary>
+        /// <returns>A read-only view of current instance.</returns>
         public ObservableDictionaryView<TKey, TValue> AsReadOnly()
             => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory ?? (() => new ObservableDictionaryView<TKey, TValue>(this)));
 

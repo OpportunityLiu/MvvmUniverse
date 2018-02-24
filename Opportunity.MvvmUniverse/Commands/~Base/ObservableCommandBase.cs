@@ -7,11 +7,17 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Base class of command.
+    /// </summary>
     public abstract class ObservableCommandBase : ObservableObject, IControllable
     {
         internal ObservableCommandBase() { }
 
         private bool isEnabled = true;
+        /// <summary>
+        /// Overall switch of command.
+        /// </summary>
         public bool IsEnabled
         {
             get => this.isEnabled;
@@ -45,6 +51,9 @@ namespace Opportunity.MvvmUniverse.Commands
             });
         }
 
+        /// <summary>
+        /// Raise when return value of <see cref="System.Windows.Input.ICommand.CanExecute(object)"/> changes.
+        /// </summary>
         public event EventHandler CanExecuteChanged;
 
         /// <summary>

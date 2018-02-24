@@ -7,14 +7,26 @@ using System.Windows.Input;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Base class of command with parameter of <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of parameter.</typeparam>
     public abstract class CommandBase<T> : ObservableCommandBase, ICommand<T>
     {
+        /// <summary>
+        /// Create instance of <see cref="CommandBase{T}"/>.
+        /// </summary>
         protected CommandBase() { }
 
         bool System.Windows.Input.ICommand.CanExecute(object parameter)
         {
             if (parameter is null)
-                return CanExecute(default);
+            {
+                if (default(T) == null)
+                    return CanExecute(default);
+                else
+                    return false;
+            }
             if (parameter is T t)
                 return CanExecute(t);
             return false;
@@ -51,7 +63,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         /// <param name="parameter">parameter of execution</param>
         /// <returns>Whether execution started or cancelled by
-        /// <see cref="CanExecute()"/> or <see cref="Executing"/></returns>
+        /// <see cref="CanExecute(T)"/> or <see cref="Executing"/></returns>
         public bool Execute(T parameter)
         {
             if (!CanExecute(parameter))

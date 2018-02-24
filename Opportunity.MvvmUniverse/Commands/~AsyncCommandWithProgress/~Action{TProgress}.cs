@@ -7,6 +7,10 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Execution body of <see cref="AsyncCommandWithProgress{TProgress}"/>.
+    /// </summary>
+    /// <param name="command">Current command of execution.</param>
     public delegate IAsyncActionWithProgress<TProgress> AsyncActionWithProgressExecutor<TProgress>(AsyncCommandWithProgress<TProgress> command);
 
     internal sealed class AsyncActionCommandWithProgress<TProgress> : AsyncCommandWithProgress<TProgress>

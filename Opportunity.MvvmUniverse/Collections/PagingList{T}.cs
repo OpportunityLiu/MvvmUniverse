@@ -18,8 +18,15 @@ namespace Opportunity.MvvmUniverse.Collections
     /// <typeparam name="T">Type of record</typeparam>
     public abstract class PagingList<T> : IncrementalLoadingList<T>
     {
+        /// <summary>
+        /// Create instance of <see cref="PagingList{T}"/>.
+        /// </summary>
         protected PagingList() { }
 
+        /// <summary>
+        /// Create instance of <see cref="PagingList{T}"/>.
+        /// </summary>
+        /// <param name="items">Items will be copied to the <see cref="PagingList{T}"/>.</param>
         protected PagingList(IEnumerable<T> items) : base(items) { }
 
         private int recordCount;
@@ -84,6 +91,11 @@ namespace Opportunity.MvvmUniverse.Collections
             OnPropertyChanged(nameof(LoadedPageCount), nameof(PageCount), nameof(RecordCount), nameof(IsEmpty), nameof(HasMoreItems));
         }
 
+        /// <summary>
+        /// Use <see cref="LoadPageAsync(int)"/> to load data.
+        /// </summary>
+        /// <param name="count">Ignored.</param>
+        /// <returns>Loaded data.</returns>
         protected override sealed IAsyncOperation<IEnumerable<T>> LoadMoreItemsImplementAsync(int count)
         {
             return Run(async token =>

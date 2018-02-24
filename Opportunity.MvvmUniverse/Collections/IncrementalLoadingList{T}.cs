@@ -15,8 +15,15 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     public abstract class IncrementalLoadingList<T> : ObservableList<T>, ISupportIncrementalLoading
     {
+        /// <summary>
+        /// Create instance of <see cref="IncrementalLoadingList{T}"/>.
+        /// </summary>
         protected IncrementalLoadingList() { }
 
+        /// <summary>
+        /// Create instance of <see cref="IncrementalLoadingList{T}"/>.
+        /// </summary>
+        /// <param name="items">Items will be copied to the <see cref="IncrementalLoadingList{T}"/>.</param>
         protected IncrementalLoadingList(IEnumerable<T> items) : base(items) { }
 
         public abstract bool HasMoreItems { get; }

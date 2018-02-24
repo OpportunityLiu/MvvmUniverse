@@ -7,6 +7,10 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Predicate of <see cref="AsyncCommand"/>.
+    /// </summary>
+    /// <param name="command">Current command of can execute testing.</param>
     public delegate bool AsyncPredicate(AsyncCommand command);
 
     public abstract class AsyncCommand : CommandBase, IAsyncCommand
@@ -65,7 +69,7 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Raise <see cref="Executing"/> event.
+        /// Raise <see cref="ICommand.Executing"/> event.
         /// If not be cancelled, <see cref="IsExecuting"/> will be set to <c>true</c>.
         /// </summary>
         /// <returns>True if executing not cancelled</returns>
@@ -78,7 +82,7 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Raise <see cref="Executed"/> event and set <see cref="IsExecuting"/> to <c>false</c>.
+        /// Raise <see cref="ICommand.Executed"/> event and set <see cref="IsExecuting"/> to <c>false</c>.
         /// </summary>
         /// <param name="execution">result of <see cref="StartExecutionAsync()"/></param>
         protected override void OnFinished(Task execution)

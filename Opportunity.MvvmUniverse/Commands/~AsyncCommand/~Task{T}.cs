@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Execution body of <see cref="AsyncCommand{T}"/>.
+    /// </summary>
+    /// <param name="command">Current command of execution.</param>
+    /// <param name="parameter">Current parameter of execution.</param>
     public delegate Task AsyncTaskExecutor<T>(AsyncCommand<T> command, T parameter);
 
     internal sealed class AsyncTaskCommand<T> : AsyncCommand<T>

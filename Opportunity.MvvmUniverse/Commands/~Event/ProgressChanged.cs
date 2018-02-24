@@ -24,10 +24,14 @@ namespace Opportunity.MvvmUniverse.Commands
 
             public readonly ProgressChangedEventArgs<TProgress> EventArgs;
 
-            public ref TProgress Progress => ref this.EventArgs.progress;
+            public TProgress Progress
+            {
+                get => this.EventArgs.progress;
+                set => this.EventArgs.progress = value;
+            }
         }
 
-        public ProgressChangedEventArgs(TProgress progress)
+        private ProgressChangedEventArgs(TProgress progress)
         {
             this.progress = progress;
         }
@@ -50,10 +54,14 @@ namespace Opportunity.MvvmUniverse.Commands
 
             public readonly ProgressChangedEventArgs<T, TProgress> EventArgs;
 
-            public ref TProgress Progress => ref this.EventArgs.progress;
+            public TProgress Progress
+            {
+                get => this.EventArgs.progress;
+                set => this.EventArgs.progress = value;
+            }
         }
 
-        public ProgressChangedEventArgs(T parameter, TProgress progress)
+        private ProgressChangedEventArgs(T parameter, TProgress progress)
         {
             this.Parameter = parameter;
             this.progress = progress;

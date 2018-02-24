@@ -7,6 +7,10 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Execution body of <see cref="AsyncCommand"/>.
+    /// </summary>
+    /// <param name="command">Current command of execution.</param>
     public delegate IAsyncAction AsyncActionExecutor(AsyncCommand command);
 
     internal sealed class AsyncActionCommand : AsyncCommand

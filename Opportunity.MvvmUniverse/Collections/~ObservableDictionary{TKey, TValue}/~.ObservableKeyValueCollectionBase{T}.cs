@@ -21,7 +21,6 @@ namespace Opportunity.MvvmUniverse.Collections
             internal ObservableDictionary<TKey, TValue> Parent { get; }
 
             /// <inheritdoc/>
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public int Count => Parent.Count;
 
             internal ObservableKeyValueCollectionBase(ObservableDictionary<TKey, TValue> parent)
