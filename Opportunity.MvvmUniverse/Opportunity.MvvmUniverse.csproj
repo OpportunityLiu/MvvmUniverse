@@ -48,7 +48,8 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Collections\CacheStorage.cs" />
+    <Compile Include="Collections\~Cache\AutoFillCacheStorage.cs" />
+    <Compile Include="Collections\~Cache\CacheStorage.cs" />
     <Compile Include="Collections\IncrementalLoadingList{T}.cs" />
     <Compile Include="Collections\Internal\CollectionDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryDebugView.cs" />

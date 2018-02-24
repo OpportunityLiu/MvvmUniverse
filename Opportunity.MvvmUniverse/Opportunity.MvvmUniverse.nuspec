@@ -14,7 +14,7 @@
     <copyright>Opportunity 2018</copyright>
     <tags>UWP mvvm observable</tags>
     <dependencies>
-      <group targetFramework="uap">
+      <group targetFramework="UAP10.0.10586">
         <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="5.2.4" />
         <dependency id="Opportunity.Helpers.Universal" version="1.2.3" />
       </group>
