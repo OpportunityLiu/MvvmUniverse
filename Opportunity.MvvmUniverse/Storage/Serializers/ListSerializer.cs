@@ -8,13 +8,15 @@ using Windows.Storage.Streams;
 
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
-    public sealed class ListSerializer<TList, TElement> : CollectionSerializerBase<TElement>, ISerializer<TList>
+    public class ListSerializer<TList, TElement> : CollectionSerializerBase<TElement>, ISerializer<TList>
         where TList : IList<TElement>
     {
         public ListSerializer() { }
 
         public ListSerializer(ISerializer<TElement> elementSerializer)
             : base(elementSerializer) { }
+
+        protected virtual TList CreateInstance() => Activator.CreateInstance<TList>();
 
         public void Serialize(in TList value, DataWriter storage)
         {
@@ -39,7 +41,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 return;
             }
             if (value == null)
-                value = Activator.CreateInstance<TList>();
+                value = CreateInstance();
             for (var j = value.Count - 1; j >= length; j--)
             {
                 value.RemoveAt(j);

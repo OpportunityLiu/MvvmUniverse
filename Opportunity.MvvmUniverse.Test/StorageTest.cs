@@ -18,12 +18,6 @@ namespace Opportunity.MvvmUniverse.Test
     [TestClass]
     public class StorageTest
     {
-        [TestInitialize]
-        public async Task Init()
-        {
-            await ApplicationData.Current.ClearAsync();
-        }
-
         [TestMethod]
         public void BasicFunctions()
         {

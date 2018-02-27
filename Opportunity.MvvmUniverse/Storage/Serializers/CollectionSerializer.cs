@@ -8,13 +8,15 @@ using Windows.Storage.Streams;
 
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
-    public sealed class CollectionSerializer<TCollection, TElement> : CollectionSerializerBase<TElement>, ISerializer<TCollection>
+    public class CollectionSerializer<TCollection, TElement> : CollectionSerializerBase<TElement>, ISerializer<TCollection>
         where TCollection : ICollection<TElement>
     {
         public CollectionSerializer() { }
 
         public CollectionSerializer(ISerializer<TElement> elementSerializer)
             : base(elementSerializer) { }
+
+        protected virtual TCollection CreateInstance() => Activator.CreateInstance<TCollection>();
 
         public void Serialize(in TCollection value, DataWriter storage)
         {
@@ -39,7 +41,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
                 return;
             }
             if (value == null)
-                value = Activator.CreateInstance<TCollection>();
+                value = CreateInstance();
             else
                 value.Clear();
             for (var i = 0; i < length; i++)
