@@ -36,7 +36,15 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.AreEqual(123, p1.Value);
             Assert.IsTrue(p1.Populate());
             Assert.AreEqual(777, p1.Value);
+
+            var pa = StorageProperty.Create(ApplicationDataLocality.Local, "AT", default(AT), null, null, Serializer.Create<AT>((t, s) => s.WriteBoolean(false), (s, t) => { s.ReadBoolean(); return t; }));
+            var pp = StorageProperty.Create(ApplicationDataLocality.Local, "PT", default(PT), null, null, Serializer.Create<PT>((t, s) => s.WriteBoolean(false), (s, t) => { s.ReadBoolean(); return t; }));
+            var pi = StorageProperty.Create(ApplicationDataLocality.Local, "IT", default(IT), null, null, Serializer.Create<IT>((t, s) => s.WriteBoolean(false), (s, t) => { s.ReadBoolean(); return t; }));
         }
+
+        private abstract class AT { private AT() { } }
+        private class PT { public PT() { } }
+        private class IT { internal IT() { } }
 
         [TestMethod]
         public void WinRTTypes()

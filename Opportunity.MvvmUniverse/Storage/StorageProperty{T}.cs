@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -81,6 +83,9 @@ namespace Opportunity.MvvmUniverse.Storage
             public ApplicationDataContainer Container => this.parent.container;
             public ApplicationDataLocality Locality => this.parent.Locality;
 
+            public Func<T> DefaultValueCreater => this.parent.defaultValueCreater;
+            public bool ValueCreated => this.parent.valueCreated;
+
             public IEqualityComparer<T> EqualityComparer => this.parent.EqualityComparer;
             public ISerializer<T> Serializer => this.parent.Serializer;
 
@@ -115,6 +120,70 @@ namespace Opportunity.MvvmUniverse.Storage
             }
         }
 
+        private static class ActivatorFactory
+        {
+            public readonly static Func<T> Activator = Default;
+
+            private static string EmptyString() => "";
+
+            private static T Default() => default;
+
+            private static T UseActivator() => System.Activator.CreateInstance<T>();
+
+            private static readonly ConstructorInfo constructor;
+            private static T UseConstucterWithNoParameters() => (T)constructor.Invoke(Array.Empty<object>());
+
+            static ActivatorFactory()
+            {
+                var tt = TypeTraits.Of<T>();
+                if (tt.IsNullable || !tt.CanBeNull)
+                {
+                    return;
+                }
+                if (tt.Type.AsType() == typeof(string))
+                {
+                    Activator = (Func<T>)(object)new Func<string>(EmptyString);
+                    return;
+                }
+                try
+                {
+                    UseActivator();
+                    Activator = UseActivator;
+                    return;
+                }
+                catch (Exception) { };
+                try
+                {
+                    var c = typeof(T).GetInfo().Type.DeclaredConstructors.FirstOrDefault(i => i.GetParameters().Length == 0);
+                    if (c != null)
+                    {
+                        c.Invoke(Array.Empty<object>());
+                        constructor = c;
+                        Activator = UseConstucterWithNoParameters;
+                        return;
+                    }
+                }
+                catch (Exception) { }
+            }
+
+            private class ValueActivator
+            {
+                private readonly T value;
+
+                public T FromValue() => this.value;
+
+                public ValueActivator(T v) => this.value = v;
+            }
+
+            public static Func<T> GetActivator(T def)
+            {
+                if (def != null)
+                    return new ValueActivator(def).FromValue;
+                return Activator;
+            }
+        }
+
+
         internal StorageProperty(
             ApplicationDataLocality locality,
             string path,
@@ -134,9 +203,7 @@ namespace Opportunity.MvvmUniverse.Storage
                 throw new ArgumentNullException($"Failed to generate default serializer by Serializer<{typeof(T)}>.Default, must specify by parameter.", ex);
             }
             this.EqualityComparer = equalityComparer ?? EqualityComparer<T>.Default;
-            if (defaultValueCreater == null)
-                defaultValueCreater = () => def;
-            this.defaultValueCreater = defaultValueCreater;
+            this.defaultValueCreater = defaultValueCreater ?? ActivatorFactory.GetActivator(def);
             this.propertyChangedCallback = callback;
             if (this.Locality == ApplicationDataLocality.Roaming)
                 RoamingStoragePropertyManager.RoamingProperties.Add(new WeakReference<IStorageProperty>(this));
@@ -150,7 +217,13 @@ namespace Opportunity.MvvmUniverse.Storage
         /// </summary>
         public ApplicationDataLocality Locality => this.container.Locality;
 
+        /// <summary>
+        /// Used to compare values to decide whether stored value should be updated or not.
+        /// </summary>
         public IEqualityComparer<T> EqualityComparer { get; }
+        /// <summary>
+        /// Used to serialize and deserialize <see cref="Value"/>.
+        /// </summary>
         public ISerializer<T> Serializer { get; }
 
         internal byte[] Data
@@ -174,7 +247,7 @@ namespace Opportunity.MvvmUniverse.Storage
         }
 
         private readonly Func<T> defaultValueCreater;
-        private bool defaultValueCreated;
+        private bool valueCreated;
 
         private T value;
         /// <summary>
@@ -184,23 +257,15 @@ namespace Opportunity.MvvmUniverse.Storage
         {
             get
             {
-                if (!this.defaultValueCreated)
-                    lock (this.defaultValueCreater)
-                        if (!this.defaultValueCreated)
-                        {
-                            if (!Populate())
-                            {
-                                this.value = this.defaultValueCreater();
-                                Flush();
-                            }
-                            this.defaultValueCreated = true;
-                        }
+                if (!this.valueCreated && !Populate())
+                    Flush();
                 return this.value;
             }
             set
             {
-                if (EqualityComparer.Equals(this.value, value))
+                if (this.valueCreated && EqualityComparer.Equals(this.value, value))
                     return;
+                this.valueCreated = true;
                 this.value = value;
                 Flush();
                 raiseChanged();
@@ -221,19 +286,33 @@ namespace Opportunity.MvvmUniverse.Storage
         /// <returns>Whether data readed successfully.</returns>
         public bool Populate()
         {
-            try
+            lock (this.defaultValueCreater)
             {
-                var storage = Data;
-                var reader = default(DataReader);
-                if (storage == null)
+                var cv = false;
+                if (!this.valueCreated)
+                {
+                    this.value = this.defaultValueCreater();
+                    this.valueCreated = true;
+                    cv = true;
+                }
+                try
+                {
+                    var storage = Data;
+                    if (storage == null)
+                    {
+                        if (cv)
+                            raiseChanged();
+                        return false;
+                    }
+                    using (var reader = DataReader.FromBuffer(storage.AsBuffer()))
+                        this.Serializer.Deserialize(reader, ref this.value);
+                }
+                catch
+                {
+                    if (cv)
+                        raiseChanged();
                     return false;
-                else
-                    reader = DataReader.FromBuffer(storage.AsBuffer());
-                this.Serializer.Deserialize(reader, ref this.value);
-            }
-            catch (Exception)
-            {
-                return false;
+                }
             }
             raiseChanged();
             return true;
@@ -244,6 +323,8 @@ namespace Opportunity.MvvmUniverse.Storage
         /// </summary>
         public void Flush()
         {
+            if (!this.valueCreated)
+                Populate();
             var ser = this.Serializer;
             var data = default(byte[]);
             using (var dw = new DataWriter())
@@ -255,7 +336,7 @@ namespace Opportunity.MvvmUniverse.Storage
             lock (this.defaultValueCreater)
             {
                 Data = data;
-                this.defaultValueCreated = true;
+                this.valueCreated = true;
             }
         }
 
@@ -264,11 +345,11 @@ namespace Opportunity.MvvmUniverse.Storage
         /// </summary>
         public void Delete()
         {
-            this.Data = null;
             lock (this.defaultValueCreater)
             {
+                this.Data = null;
                 this.value = default;
-                this.defaultValueCreated = false;
+                this.valueCreated = false;
             }
             raiseChanged();
         }
