@@ -137,19 +137,19 @@ namespace Opportunity.MvvmUniverse
         /// Change context to UI thread of <see cref="Dispatcher"/>.
         /// </summary>
         /// <returns>Awaiter of yield</returns>
-        public static DispatcherAwaiterSource Yield() => Dispatcher.Yield();
+        public static DispatcherYieldAwaiterSource Yield() => Dispatcher.Yield();
 
         /// <summary>
         /// Change context to UI thread of <see cref="Dispatcher"/>.
         /// </summary>
         /// <param name="priority">priority of context changing</param>
         /// <returns>Awaiter of yield</returns>
-        public static DispatcherAwaiterSource Yield(CoreDispatcherPriority priority) => Dispatcher.Yield(priority);
+        public static DispatcherYieldAwaiterSource Yield(CoreDispatcherPriority priority) => Dispatcher.Yield(priority);
 
         /// <summary>
         /// Change context to UI thread of <see cref="Dispatcher"/> with idle priority.
         /// </summary>
         /// <returns>Awaiter of yield</returns>
-        public static DispatcherAwaiterSource YieldIdle() => Dispatcher.YieldIdle();
+        public static DispatcherYieldAwaiterSource YieldIdle() => Dispatcher.YieldIdle();
     }
 }

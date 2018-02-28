@@ -44,10 +44,29 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         public IEqualityComparer<TKey> Comparer => KeySet.Comparer;
 
+        /// <summary>
+        /// Create new instance of <see cref="ObservableDictionary{TKey, TValue}"/>.
+        /// </summary>
         public ObservableDictionary() : this(null, null) { }
+        /// <summary>
+        /// Create new instance of <see cref="ObservableDictionary{TKey, TValue}"/>
+        /// with specific <paramref name="comparer"/>.
+        /// </summary>
+        /// <param name="comparer"><see cref="IEqualityComparer{T}"/> to compare keys.</param>
         public ObservableDictionary(IEqualityComparer<TKey> comparer) : this(null, comparer) { }
+        /// <summary>
+        /// Create new instance of <see cref="ObservableDictionary{TKey, TValue}"/>
+        /// by copying data from <paramref name="dictionary"/>.
+        /// </summary>
+        /// <param name="dictionary">An <see cref="IDictionary{TKey, TValue}"/> to copy data from.</param>
         public ObservableDictionary(IDictionary<TKey, TValue> dictionary) : this(dictionary, null) { }
-
+        /// <summary>
+        /// Create new instance of <see cref="ObservableDictionary{TKey, TValue}"/>
+        /// by copying data from <paramref name="dictionary"/>
+        /// with specific <paramref name="comparer"/>.
+        /// </summary>
+        /// <param name="dictionary">An <see cref="IDictionary{TKey, TValue}"/> to copy data from.</param>
+        /// <param name="comparer"><see cref="IEqualityComparer{T}"/> to compare keys.</param>
         public ObservableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
         {
             comparer = comparer ?? EqualityComparer<TKey>.Default;
@@ -94,9 +113,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <summary>
         /// Insert new key-value pair to given <paramref name="index"/> of the dictionary.
         /// </summary>
-        /// <param name="key">Key to insert</param>
-        /// <param name="value">Value to insert</param>
-        /// <param name="index">position of insertion</param>
+        /// <param name="key">Key to insert.</param>
+        /// <param name="value">Value to insert.</param>
+        /// <param name="index">Position of insertion.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> out of range of the dictionary.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="key"/> found in the dictionay.</exception>
@@ -127,9 +146,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <summary>
         /// Remove key-value pair of given <paramref name="key"/>.
         /// </summary>
-        /// <param name="key">Key to remove</param>
-        /// <returns>True if <paramref name="key"/> found and removed, otherwise, false.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <param name="key">Key to remove.</param>
+        /// <returns><see langword="true"/> if <paramref name="key"/> found and removed, otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
         protected virtual bool RemoveItem(TKey key)
         {
             check();
@@ -181,9 +200,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <summary>
         /// Move key-value pair with the given <paramref name="key"/> to <paramref name="newIndex"/>.
         /// </summary>
-        /// <param name="key">Key of key-value pair to move</param>
-        /// <param name="newIndex">new position</param>
-        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <param name="key">Key of key-value pair to move.</param>
+        /// <param name="newIndex">New position.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
         /// <exception cref="KeyNotFoundException"><paramref name="key"/> not found in the dictionay.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="newIndex"/> out of range of the dictionary.</exception>
         protected virtual void MoveItem(TKey key, int newIndex)
@@ -246,13 +265,28 @@ namespace Opportunity.MvvmUniverse.Collections
                 InsertItem(Count, key, value);
         }
 
+        /// <summary>
+        /// Move key-value pair with the given <paramref name="key"/> to <paramref name="newIndex"/>.
+        /// </summary>
+        /// <param name="key">Key of key-value pair to move.</param>
+        /// <param name="newIndex">New position.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
+        /// <exception cref="KeyNotFoundException"><paramref name="key"/> not found in the dictionay.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="newIndex"/> out of range of the dictionary.</exception>
         public void Move(TKey key, int newIndex) => MoveItem(key, newIndex);
 
+        /// <inheritdoc/>
         public TValue this[TKey key]
         {
             get => ValueItems[KeySet[key]];
             set => setOrAdd(key, value);
         }
+        /// <summary>
+        /// Get key-value pair at <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">Index of key-value pair.</param>
+        /// <returns>Key-value pair at <paramref name="index"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> out of range of the dictionary.</exception>
         public KeyValuePair<TKey, TValue> ItemAt(int index) => CreateKVP(KeyItems[index], ValueItems[index]);
         object IDictionary.this[object key]
         {
@@ -294,8 +328,10 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private ObservableValueCollection values;
 
+        /// <inheritdoc/>
         public ObservableKeyCollection Keys
             => LazyInitializer.EnsureInitialized(ref this.keys, () => new ObservableKeyCollection(this));
+        /// <inheritdoc/>
         public ObservableValueCollection Values
             => LazyInitializer.EnsureInitialized(ref this.values, () => new ObservableValueCollection(this));
 
@@ -318,13 +354,15 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <returns>A read-only view of current instance.</returns>
         public ObservableDictionaryView<TKey, TValue> AsReadOnly()
-            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory ?? (() => new ObservableDictionaryView<TKey, TValue>(this)));
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory);
 
         /// <summary>
-        /// This delegate will be called when <see cref="AsReadOnly()"/> first called on this instance.
+        /// This method will be called when <see cref="AsReadOnly()"/> first called on this instance.
         /// </summary>
-        protected virtual Func<ObservableDictionaryView<TKey, TValue>> ReadOnlyViewFactory => () => new ObservableDictionaryView<TKey, TValue>(this);
+        protected virtual ObservableDictionaryView<TKey, TValue> ReadOnlyViewFactory()
+            => new ObservableDictionaryView<TKey, TValue>(this);
 
+        /// <inheritdoc/>
         public int Count => KeySet.Count;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -344,6 +382,13 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => ((ICollection)this.KeySet).SyncRoot;
 
+        /// <summary>
+        /// Add new key-value pair at the end of the dictionary.
+        /// </summary>
+        /// <param name="key">Key to add.</param>
+        /// <param name="value">Value to add.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="key"/> found in the dictionay.</exception>
         public void Add(TKey key, TValue value) => InsertItem(Count, key, value);
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
         void IDictionary.Add(object key, object value) => Add(CastKey<TKey>(key), CastValue<TValue>(value));
@@ -353,6 +398,15 @@ namespace Opportunity.MvvmUniverse.Collections
             return this.Count - 1;
         }
 
+        /// <summary>
+        /// Insert new key-value pair to given <paramref name="index"/> of the dictionary.
+        /// </summary>
+        /// <param name="key">Key to insert.</param>
+        /// <param name="value">Value to insert.</param>
+        /// <param name="index">Position of insertion.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> out of range of the dictionary.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="key"/> found in the dictionay.</exception>
         public void Insert(int index, TKey key, TValue value) => InsertItem(index, key, value);
         void IList<KeyValuePair<TKey, TValue>>.Insert(int index, KeyValuePair<TKey, TValue> item)
             => Insert(index, item.Key, item.Value);
@@ -360,7 +414,9 @@ namespace Opportunity.MvvmUniverse.Collections
         void IOrderedDictionary.Insert(int index, object key, object value)
             => Insert(index, CastKey<TKey>(key), CastValue<TValue>(value));
 
+        /// <inheritdoc/>
         public bool ContainsKey(TKey key) => KeySet.ContainsKey(key);
+        /// <inheritdoc/>
         public bool ContainsValue(TValue value) => ValueItems.Contains(value);
         bool IDictionary.Contains(object key) => ((IDictionary)KeySet).Contains(key);
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
@@ -383,6 +439,12 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <summary>
+        /// Remove key-value pair of given <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">Key to remove.</param>
+        /// <returns><see langword="true"/> if <paramref name="key"/> found and removed, otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
         public bool Remove(TKey key) => RemoveItem(key);
         void IDictionary.Remove(object key) => Remove(CastKey<TKey>(key));
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
@@ -398,23 +460,43 @@ namespace Opportunity.MvvmUniverse.Collections
         void IList.Remove(object value)
             => ((IList<KeyValuePair<TKey, TValue>>)this).Remove(CastKVP<TKey, TValue>(value));
 
+        /// <summary>
+        /// Remove key-value pair at <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">Index of key-value pair to remove.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> out of range of the dictionary.</exception>
         public void RemoveAt(int index)
         {
             var key = KeyItems[index];
             RemoveItem(key);
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        /// <summary>
+        /// Try get key-value pair in the dictionary.
+        /// </summary>
+        /// <param name="key">Key to find in the dictionary.</param>
+        /// <param name="value">Value of the <paramref name="key"/>, or default value, if key not found.</param>
+        /// <returns><see langword="true"/> if <paramref name="key"/> found in the dictionary, otherwise, <see langword="false"/>.</returns>
+        public bool TryGetValue(TKey key, out TValue value) => TryGetValue(key, out value, out _);
+        /// <summary>
+        /// Try get key-value pair and its index in the dictionary.
+        /// </summary>
+        /// <param name="key">Key to find in the dictionary.</param>
+        /// <param name="value">Value of the <paramref name="key"/>, or default value, if key not found.</param>
+        /// <param name="index">Index of the key-value pair, or default value, if key not found.</param>
+        /// <returns><see langword="true"/> if <paramref name="key"/> found in the dictionary, otherwise, <see langword="false"/>.</returns>
+        public bool TryGetValue(TKey key, out TValue value, out int index)
         {
-            if (!KeySet.TryGetValue(key, out var index))
+            if (!KeySet.TryGetValue(key, out index))
             {
-                value = default(TValue);
+                value = default;
                 return false;
             }
             value = ValueItems[index];
             return true;
         }
 
+        /// <inheritdoc/>
         public DictionaryEnumerator GetEnumerator()
             => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IEnumeratorKVP);
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
@@ -426,6 +508,10 @@ namespace Opportunity.MvvmUniverse.Collections
         IDictionaryEnumerator IDictionary.GetEnumerator()
             => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IDictionaryEnumerator);
 
+        /// <summary>
+        /// Iterate all key-value pairs in the dictionary.
+        /// </summary>
+        /// <param name="action">Action for each key-value pair.</param>
         public void ForEach(Action<TKey, TValue> action)
         {
             if (action == null)
@@ -438,6 +524,10 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
             }
         }
+        /// <summary>
+        /// Iterate all key-value pairs and their index in the dictionary.
+        /// </summary>
+        /// <param name="action">Action for each key-value pair and its index.</param>
         public void ForEach(Action<int, TKey, TValue> action)
         {
             if (action == null)
@@ -453,6 +543,9 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <summary>
+        /// Enumerator of <see cref="ObservableDictionary{TKey, TValue}"/>.
+        /// </summary>
         public struct DictionaryEnumerator : IDictionaryEnumerator, IEnumerator<KeyValuePair<TKey, TValue>>
         {
             internal enum Type { Unknown = 0, IDictionaryEnumerator, IEnumeratorKVP }
@@ -470,12 +563,15 @@ namespace Opportunity.MvvmUniverse.Collections
 
             DictionaryEntry IDictionaryEnumerator.Entry => new DictionaryEntry(Key, Value);
 
+            /// <inheritdoc/>
             public TKey Key => this.keyEnumerator.Current;
+            /// <inheritdoc/>
             public TValue Value => this.valueEnumerator.Current;
 
             object IDictionaryEnumerator.Key => Key;
             object IDictionaryEnumerator.Value => Value;
 
+            /// <inheritdoc/>
             public KeyValuePair<TKey, TValue> Current => CreateKVP(Key, Value);
             object IEnumerator.Current
             {
@@ -490,12 +586,14 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
             }
 
+            /// <inheritdoc/>
             public void Dispose()
             {
                 this.keyEnumerator.Dispose();
                 this.valueEnumerator.Dispose();
             }
 
+            /// <inheritdoc/>
             public bool MoveNext()
             {
                 var kr = this.keyEnumerator.MoveNext();
@@ -512,6 +610,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 enumerator.Reset();
             }
 
+            /// <inheritdoc/>
             public void Reset()
             {
                 reset(ref this.keyEnumerator);
@@ -519,6 +618,7 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <inheritdoc/>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             if (this.Count + arrayIndex > array.Length)
@@ -552,6 +652,9 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <summary>
+        /// Clear all key-value pairs in the dictionary.
+        /// </summary>
         public void Clear() => ClearItems();
     }
 }

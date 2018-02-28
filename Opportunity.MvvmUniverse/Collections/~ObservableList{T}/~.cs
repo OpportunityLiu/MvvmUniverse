@@ -212,14 +212,21 @@ namespace Opportunity.MvvmUniverse.Collections
             set => this[index] = CastValue<T>(value);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Add item at the end of <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="item">Item to add.</param>
         public void Add(T item) => InsertItems(Items.Count, new Box(item));
         int IList.Add(object value)
         {
             Add(CastValue<T>(value));
             return Items.Count - 1;
         }
-        /// <inheritdoc/>
+        /// <summary>
+        /// Add items at the end of <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="items">Items to add.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/>.</exception>
         public int AddRange(IEnumerable<T> items)
         {
             if (items == null)
@@ -229,10 +236,25 @@ namespace Opportunity.MvvmUniverse.Collections
             return toAdd.Count;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Insert item in the <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="index">Index of item to insert.</param>
+        /// <param name="item">Item to insert.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> less than 0 or greater than <see cref="Count"/>.
+        /// </exception>
         public void Insert(int index, T item) => InsertItems(index, new Box(item));
         void IList.Insert(int index, object value) => Insert(index, CastValue<T>(value));
-        /// <inheritdoc/>
+        /// <summary>
+        /// Insert items in the <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="index">Start index of items to insert.</param>
+        /// <param name="items">Items to insert.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> less than 0 or greater than <see cref="Count"/>.
+        /// </exception>
         public int InsertRange(int index, IEnumerable<T> items)
         {
             if (items == null)
@@ -242,7 +264,16 @@ namespace Opportunity.MvvmUniverse.Collections
             return toAdd.Count;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Set items in the <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="index">Start index of items to set new value.</param>
+        /// <param name="items">New value of items.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> less than 0
+        /// or greater than <see cref="Count"/> - <paramref name="items"/>.<see cref="IReadOnlyCollection{T}.Count"/>.
+        /// </exception>
         public int SetRange(int index, IEnumerable<T> items)
         {
             if (items == null)
@@ -252,9 +283,27 @@ namespace Opportunity.MvvmUniverse.Collections
             return toSet.Count;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Move item in the <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="oldIndex">Old index of item to move.</param>
+        /// <param name="newIndex">New index of item to move.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="oldIndex"/> less than 0 or greater than <see cref="Count"/> - 1,
+        /// or <paramref name="newIndex"/> less than 0 or greater than <see cref="Count"/> - 1.
+        /// </exception>
         public void Move(int oldIndex, int newIndex) => MoveItems(oldIndex, newIndex, 1);
-        /// <inheritdoc/>
+        /// <summary>
+        /// Move items in the <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="oldIndex">Old start index of items to move.</param>
+        /// <param name="newIndex">New start index of items to move.</param>
+        /// <param name="count">Count of items to move.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="oldIndex"/> less than 0,
+        /// <paramref name="count"/> less than 0 or greater than <see cref="Count"/> - <paramref name="oldIndex"/>,
+        /// or <paramref name="newIndex"/> less than 0 or greater than <see cref="Count"/> - <paramref name="count"/>.
+        /// </exception>
         public void MoveRange(int oldIndex, int newIndex, int count) => MoveItems(oldIndex, newIndex, count);
 
         /// <inheritdoc/>
@@ -269,15 +318,31 @@ namespace Opportunity.MvvmUniverse.Collections
         void IList.Remove(object value) => Remove(CastValue<T>(value));
         /// <inheritdoc/>
         public void RemoveAt(int index) => RemoveItems(index, 1);
-        /// <inheritdoc/>
+        /// <summary>
+        /// Remove items in the <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="index">Start index of items to remove.</param>
+        /// <param name="count">Count of items to remove.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> less than 0,
+        /// or <paramref name="count"/> less than 0 or greater than <see cref="Count"/> - <paramref name="index"/>.
+        /// </exception>
         public void RemoveRange(int index, int count) => RemoveItems(index, count);
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Remove all items in the <see cref="ObservableList{T}"/>.
+        /// </summary>
         public void Clear() => ClearItems();
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Iterate all items in the list.
+        /// </summary>
+        /// <param name="action">Action for each item.</param>
         public void ForEach(Action<T> action) => Items.ForEach(action);
-        /// <inheritdoc/>
+        /// <summary>
+        /// Iterate all items and their index in the list.
+        /// </summary>
+        /// <param name="action">Action for each item and its index.</param>
         public void ForEach(Action<int, T> action)
         {
             if (action == null)
@@ -304,12 +369,12 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <returns>A read-only view of current instance.</returns>
         public ObservableListView<T> AsReadOnly()
-            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory ?? (() => new ObservableListView<T>(this)));
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory);
 
         /// <summary>
-        /// This delegate will be called when <see cref="AsReadOnly()"/> first called on this instance.
+        /// This method will be called when <see cref="AsReadOnly()"/> first called on this instance.
         /// </summary>
-        protected virtual Func<ObservableListView<T>> ReadOnlyViewFactory => () => new ObservableListView<T>(this);
+        protected virtual ObservableListView<T> ReadOnlyViewFactory() => new ObservableListView<T>(this);
 
         /// <inheritdoc/>
         public int IndexOf(T item) => Items.IndexOf(item);
