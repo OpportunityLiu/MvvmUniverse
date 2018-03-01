@@ -14,10 +14,19 @@ namespace Opportunity.MvvmUniverse.Commands
             this.ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
         }
 
+        /// <summary>
+        /// Used to map <see cref="Progress"/> to <see cref="NormalizedProgress"/>.
+        /// </summary>
         protected ProgressMapper<TProgress> ProgressMapper { get; }
 
+        /// <summary>
+        /// Progress data of current execution. Will return default value if <see cref="IAsyncCommand.IsExecuting"/> is <see langword="false"/>.
+        /// </summary>
         public TProgress Progress { get; private set; }
 
+        /// <summary>
+        /// Normalized progress of current execution, for binding usage.
+        /// </summary>
         public double NormalizedProgress { get; private set; }
 
         private void setProgress(TProgress progress)
@@ -27,6 +36,12 @@ namespace Opportunity.MvvmUniverse.Commands
             OnPropertyChanged(nameof(Progress), nameof(NormalizedProgress));
         }
 
+        /// <summary>
+        /// Call <see cref="AsyncCommand.OnFinished(Task)"/> and
+        /// set <see cref="Progress"/> to default value,
+        /// set <see cref="NormalizedProgress"/> to <c><see cref="ProgressMapper"/>(default)</c>.
+        /// </summary>
+        /// <param name="execution">result of <see cref="CommandBase.StartExecutionAsync()"/></param>
         protected override void OnFinished(Task execution)
         {
             try { base.OnFinished(execution); }

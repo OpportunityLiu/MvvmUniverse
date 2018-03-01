@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="DictionaryTest.cs" />
     <Compile Include="CacheTest.cs" />
+    <Compile Include="VMTest.cs" />
     <Compile Include="WeakEventTest.cs" />
     <Compile Include="ListTest.cs" />
     <Compile Include="StorageTest.cs" />

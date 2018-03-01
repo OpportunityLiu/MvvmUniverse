@@ -71,7 +71,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Raise <see cref="Executing"/> event.
         /// </summary>
-        /// <returns>True if executing not cancelled</returns>
+        /// <returns>True if executing not canceled</returns>
         protected virtual bool OnStarting()
         {
             var executing = this.Executing;
@@ -79,7 +79,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 return true;
             var eventarg = new ExecutingEventArgs();
             executing.Invoke(this, eventarg);
-            return !eventarg.Cancelled;
+            return !eventarg.Canceled;
         }
 
         /// <summary>

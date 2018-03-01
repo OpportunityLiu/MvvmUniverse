@@ -12,11 +12,9 @@ namespace Opportunity.MvvmUniverse.Commands
 
     public class ExecutingEventArgs : EventArgs
     {
-        public ExecutingEventArgs()
-        {
-        }
+        public ExecutingEventArgs() { }
 
-        public bool Cancelled { get; set; }
+        public bool Canceled { get; set; }
     }
 
     public class ExecutingEventArgs<T> : ExecutingEventArgs

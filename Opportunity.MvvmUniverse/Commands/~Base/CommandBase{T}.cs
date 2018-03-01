@@ -90,7 +90,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// Raise <see cref="Executing"/> event.
         /// </summary>
         /// <param name="parameter">Parameter of <see cref="Execute(T)"/></param>
-        /// <returns>True if executing not cancelled</returns>
+        /// <returns>True if executing not canceled</returns>
         protected virtual bool OnStarting(T parameter)
         {
             var executing = this.Executing;
@@ -98,7 +98,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 return true;
             var eventarg = new ExecutingEventArgs<T>(parameter);
             executing.Invoke(this, eventarg);
-            return !eventarg.Cancelled;
+            return !eventarg.Canceled;
         }
 
         /// <summary>

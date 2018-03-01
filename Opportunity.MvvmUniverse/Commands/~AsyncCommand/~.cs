@@ -45,6 +45,9 @@ namespace Opportunity.MvvmUniverse.Commands
         protected AsyncPredicate CanExecuteDelegate { get; }
 
         private bool isExecuting = false;
+        /// <summary>
+        /// Indicates whether the command is executing. 
+        /// </summary>
         public bool IsExecuting
         {
             get => this.isExecuting;
@@ -69,10 +72,10 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Raise <see cref="ICommand.Executing"/> event.
-        /// If not be cancelled, <see cref="IsExecuting"/> will be set to <c>true</c>.
+        /// Call <see cref="CommandBase.OnStarting()"/>.
+        /// If not be canceled, <see cref="IsExecuting"/> will be set to <see langword="true"/>.
         /// </summary>
-        /// <returns>True if executing not cancelled</returns>
+        /// <returns>True if executing not canceled</returns>
         protected override bool OnStarting()
         {
             var r = base.OnStarting();
@@ -82,9 +85,9 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Raise <see cref="ICommand.Executed"/> event and set <see cref="IsExecuting"/> to <c>false</c>.
+        /// Call <see cref="CommandBase.OnFinished(Task)"/> and set <see cref="IsExecuting"/> to <see langword="false"/>.
         /// </summary>
-        /// <param name="execution">result of <see cref="StartExecutionAsync()"/></param>
+        /// <param name="execution">result of <see cref="CommandBase.StartExecutionAsync()"/></param>
         protected override void OnFinished(Task execution)
         {
             IsExecuting = false;
