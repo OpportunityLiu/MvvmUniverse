@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Web.Http;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -17,5 +18,15 @@ namespace Opportunity.MvvmUniverse.Commands
             => new AsyncActionCommandWithProgress<T, TProgress>(execute, progressMapper, null);
         public static AsyncCommandWithProgress<T, TProgress> Create<T, TProgress>(AsyncActionWithProgressExecutor<T, TProgress> execute, ProgressMapper<T, TProgress> progressMapper, AsyncPredicate<T> canExecute)
             => new AsyncActionCommandWithProgress<T, TProgress>(execute, progressMapper, canExecute);
+
+        public static AsyncCommandWithProgress<HttpProgress> Create(AsyncActionWithProgressExecutor<HttpProgress> execute)
+            => Create(execute, ProgressMappers.HttpProgressMapper);
+        public static AsyncCommandWithProgress<HttpProgress> Create(AsyncActionWithProgressExecutor<HttpProgress> execute, AsyncPredicate canExecute)
+            => Create(execute, ProgressMappers.HttpProgressMapper, canExecute);
+
+        public static AsyncCommandWithProgress<T, HttpProgress> Create<T>(AsyncActionWithProgressExecutor<T, HttpProgress> execute)
+            => Create(execute, ProgressMappers.HttpProgressMapper);
+        public static AsyncCommandWithProgress<T, HttpProgress> Create<T>(AsyncActionWithProgressExecutor<T, HttpProgress> execute, AsyncPredicate<T> canExecute)
+            => Create(execute, ProgressMappers.HttpProgressMapper, canExecute);
     }
 }

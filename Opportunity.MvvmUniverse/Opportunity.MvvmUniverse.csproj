@@ -71,6 +71,7 @@
     <Compile Include="Collections\~ObservableList{T}\~.Updater.cs" />
     <Compile Include="Collections\PagingList{T}.cs" />
     <Compile Include="Collections\RangedListView{T}.cs" />
+    <Compile Include="Commands\~AsyncCommandWithProgress\ProgressMappers.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{T, TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~.cs" />
