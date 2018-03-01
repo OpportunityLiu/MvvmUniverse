@@ -11,8 +11,12 @@ namespace Opportunity.MvvmUniverse.Commands
     /// Predicate of <see cref="AsyncCommand"/>.
     /// </summary>
     /// <param name="command">Current command of can execute testing.</param>
+    /// <returns>Whether the command can execute or not.</returns>
     public delegate bool AsyncPredicate(AsyncCommand command);
 
+    /// <summary>
+    /// Base class for commands implements <see cref="IAsyncCommand"/>.
+    /// </summary>
     public abstract class AsyncCommand : CommandBase, IAsyncCommand
     {
         #region Factory methods
@@ -37,11 +41,18 @@ namespace Opportunity.MvvmUniverse.Commands
             => new AsyncActionCommand<T>(execute, canExecute);
         #endregion Factory methods
 
+        /// <summary>
+        /// Create new instance of <see cref="AsyncCommand"/>.
+        /// </summary>
+        /// <param name="canExecute">Value for <see cref="CanExecuteDelegate"/></param>
         protected AsyncCommand(AsyncPredicate canExecute)
         {
             this.CanExecuteDelegate = canExecute;
         }
 
+        /// <summary>
+        /// Delegate for <see cref="CanExecuteOverride()"/>.
+        /// </summary>
         protected AsyncPredicate CanExecuteDelegate { get; }
 
         private bool isExecuting = false;

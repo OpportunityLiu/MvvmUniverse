@@ -29,8 +29,19 @@ namespace Opportunity.MvvmUniverse.Storage
         void Deserialize(DataReader storage, ref T value);
     }
 
+    /// <summary>
+    /// Contains factory methods for <see cref="Serializer{T}"/> creation.
+    /// </summary>
     public abstract class Serializer
     {
+        /// <summary>
+        /// Create a <see cref="Serializer{T}"/> implemented by delegates.
+        /// </summary>
+        /// <typeparam name="T">Supported type of <see cref="Serializer{T}"/>.</typeparam>
+        /// <param name="serializer">Delegete for serialize</param>
+        /// <param name="deserializer">Delegete for deserialize.</param>
+        /// <returns>A <see cref="Serializer{T}"/> implmented by delegates.</returns>
+        /// <exception cref="ArgumentNullException">Parameter is <see langword="null"/>.</exception>
         public static Serializer<T> Create<T>(Action<T, DataWriter> serializer, Func<DataReader, T, T> deserializer)
         {
             if (serializer == null)
@@ -88,6 +99,10 @@ namespace Opportunity.MvvmUniverse.Storage
         }
     }
 
+    /// <summary>
+    /// Base class for serializers implements <see cref="ISerializer{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">Supported type.</typeparam>
     public abstract class Serializer<T> : Serializer, ISerializer<T>
     {
         internal static class Storage
@@ -162,6 +177,10 @@ namespace Opportunity.MvvmUniverse.Storage
             return null;
         }
 
+        /// <summary>
+        /// Default <see cref="ISerializer{T}"/> for current type.
+        /// Value could be <see langword="null"/>.
+        /// </summary>
         public static ISerializer<T> Default
         {
             get
@@ -178,7 +197,17 @@ namespace Opportunity.MvvmUniverse.Storage
             set => Storage.Value = value;
         }
 
+        /// <summary>
+        /// Serialize value to storage value.
+        /// </summary>
+        /// <param name="value">value to serialize</param>
+        /// <param name="storage">storage to write into</param>
         public abstract void Serialize(in T value, DataWriter storage);
+        /// <summary>
+        /// Deserialize storage value to value.
+        /// </summary>
+        /// <param name="storage">storage to read from</param>
+        /// <param name="value">value to deserialize, old value can be reused or replaced</param>
         public abstract void Deserialize(DataReader storage, ref T value);
     }
 }

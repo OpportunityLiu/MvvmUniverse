@@ -25,7 +25,7 @@ namespace Opportunity.MvvmUniverse.Views
         {
             var id = DispatcherHelper.GetCurrentViewId();
             var cache = Navigator.cache;
-            if (cache.Item1 == id)
+            if (cache != null && cache.Item1 == id)
                 return cache.Item2;
             if (NavigatorDictionary.TryGetValue(id, out var r))
                 return r;
@@ -42,7 +42,7 @@ namespace Opportunity.MvvmUniverse.Views
         {
             var id = DispatcherHelper.GetCurrentViewId();
             var cache = Navigator.cache;
-            if (cache.Item1 == id)
+            if (cache != null && cache.Item1 == id)
                 return cache.Item2;
             if (NavigatorDictionary.TryGetValue(id, out var r))
             {
@@ -60,35 +60,41 @@ namespace Opportunity.MvvmUniverse.Views
             lock (NavigatorDictionary)
             {
                 var cache = Navigator.cache;
-                if (cache.Item1 == id)
-                    Navigator.cache = default;
+                if (cache != null && cache.Item1 == id)
+                    Navigator.cache = null;
                 NavigatorDictionary.Remove(id);
                 r.destory();
                 return true;
             }
         }
 
-        public NavigationHandlerCollection Handlers { get; }
+        public NavigationHandlerCollection Handlers { get; private set; }
 
-        public SystemNavigationManager NavigationManager { get; } = SystemNavigationManager.GetForCurrentView();
+        public SystemNavigationManager NavigationManager { get; private set; } = SystemNavigationManager.GetForCurrentView();
 
-        private Navigator()
+        public AppViewBackButtonVisibility AppViewBackButtonVisibility
         {
-            this.Handlers = new NavigationHandlerCollection(this);
-            this.NavigationManager.BackRequested += this.manager_BackRequested;
+            get
+            {
+                CheckAvailable();
+                return NavigationManager.AppViewBackButtonVisibility;
+            }
+            private set => NavigationManager.AppViewBackButtonVisibility = value;
         }
 
-        private void destory()
+        private async void manager_BackRequested(object sender, BackRequestedEventArgs e)
         {
-            this.NavigationManager.BackRequested -= this.manager_BackRequested;
-            this.Handlers.Clear();
+            if (CanGoBack())
+            {
+                e.Handled = true;
+                await GoBackAsync();
+            }
         }
 
         public void UpdateAppViewBackButtonVisibility()
         {
             var ov = AppViewBackButtonVisibility;
-            var nv = this.appViewBackButtonVisibilityOverride
-                ?? (CanGoBack() ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed);
+            var nv = (CanGoBack() ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed);
             if (ov != nv)
             {
                 AppViewBackButtonVisibility = nv;
@@ -96,11 +102,61 @@ namespace Opportunity.MvvmUniverse.Views
             }
         }
 
+        private Navigator()
+        {
+            this.Handlers = new NavigationHandlerCollection(this);
+            this.NavigationManager.BackRequested += this.manager_BackRequested;
+        }
+
+        private bool destoryed = false;
+        private void destory()
+        {
+            if (!this.destoryed)
+            {
+                this.NavigationManager.BackRequested -= this.manager_BackRequested;
+                this.Handlers.Clear();
+                this.Handlers = null;
+                this.NavigationManager = null;
+                this.destoryed = true;
+            }
+        }
+
+        private void CheckAvailable()
+        {
+            if (this.destoryed)
+                throw new InvalidOperationException("This navigator has been destoryed.");
+        }
+
         private bool navigating;
-        public bool Navigating { get => this.navigating; set => Set(ref this.navigating, value); }
+        public bool Navigating { get => this.navigating; private set => Set(ref this.navigating, value); }
+
+        private bool isEnabled = true;
+        public bool IsEnabled
+        {
+            get => this.isEnabled;
+            set
+            {
+                CheckAvailable();
+                if (Set(ref this.isEnabled, value))
+                    UpdateAppViewBackButtonVisibility();
+            }
+        }
+
+        private bool isGoBackEnabled = true;
+        public bool IsGoBackEnabled
+        {
+            get => this.isGoBackEnabled;
+            set
+            {
+                CheckAvailable();
+                if (Set(ref this.isGoBackEnabled, value))
+                    UpdateAppViewBackButtonVisibility();
+            }
+        }
 
         public bool CanGoBack()
         {
+            CheckAvailable();
             if (!this.isEnabled || !this.isGoBackEnabled)
                 return false;
             for (var i = Handlers.Count - 1; i >= 0; i--)
@@ -115,6 +171,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         public IAsyncOperation<bool> GoBackAsync()
         {
+            CheckAvailable();
             if (!this.isEnabled || !this.isGoBackEnabled || this.navigating)
                 return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
@@ -140,8 +197,20 @@ namespace Opportunity.MvvmUniverse.Views
             });
         }
 
+        private bool isGoForwardEnabled = true;
+        public bool IsGoForwardEnabled
+        {
+            get => this.isGoForwardEnabled;
+            set
+            {
+                CheckAvailable();
+                Set(ref this.isGoForwardEnabled, value);
+            }
+        }
+
         public bool CanGoForward()
         {
+            CheckAvailable();
             if (!this.isEnabled || !this.isGoForwardEnabled)
                 return false;
             for (var i = Handlers.Count - 1; i >= 0; i--)
@@ -156,6 +225,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         public IAsyncOperation<bool> GoForwardAsync()
         {
+            CheckAvailable();
             if (!this.isEnabled || !this.isGoForwardEnabled || this.navigating)
                 return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncInfo.Run(async token =>
@@ -181,10 +251,22 @@ namespace Opportunity.MvvmUniverse.Views
             });
         }
 
+        private bool isNavigateEnabled = true;
+        public bool IsNavigateEnabled
+        {
+            get => this.isNavigateEnabled;
+            set
+            {
+                CheckAvailable();
+                Set(ref this.isNavigateEnabled, value);
+            }
+        }
+
         public IAsyncOperation<bool> NavigateAsync(Type sourcePageType) => this.NavigateAsync(sourcePageType, null);
 
         public IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter)
         {
+            CheckAvailable();
             if (sourcePageType == null)
                 throw new ArgumentNullException(nameof(sourcePageType));
             if (!this.isEnabled || !this.isNavigateEnabled || this.navigating)
@@ -210,68 +292,6 @@ namespace Opportunity.MvvmUniverse.Views
                     this.Navigating = false;
                 }
             });
-        }
-
-        public AppViewBackButtonVisibility AppViewBackButtonVisibility
-        {
-            get => NavigationManager.AppViewBackButtonVisibility;
-            private set => NavigationManager.AppViewBackButtonVisibility = value;
-        }
-
-        private AppViewBackButtonVisibility? appViewBackButtonVisibilityOverride = null;
-        public AppViewBackButtonVisibility? AppViewBackButtonVisibilityOverride
-        {
-            get => this.appViewBackButtonVisibilityOverride;
-            set
-            {
-                if (Set(ref this.appViewBackButtonVisibilityOverride, value))
-                    UpdateAppViewBackButtonVisibility();
-            }
-        }
-
-        private bool isEnabled = true;
-        public bool IsEnabled
-        {
-            get => this.isEnabled;
-            set
-            {
-                if (Set(ref this.isEnabled, value))
-                    UpdateAppViewBackButtonVisibility();
-            }
-        }
-
-        private bool isGoBackEnabled = true;
-        public bool IsGoBackEnabled
-        {
-            get => this.isGoBackEnabled;
-            set
-            {
-                if (Set(ref this.isGoBackEnabled, value))
-                    UpdateAppViewBackButtonVisibility();
-            }
-        }
-
-        private bool isGoForwardEnabled = true;
-        public bool IsGoForwardEnabled
-        {
-            get => this.isGoForwardEnabled;
-            set => Set(ref this.isGoForwardEnabled, value);
-        }
-
-        private bool isNavigateEnabled = true;
-        public bool IsNavigateEnabled
-        {
-            get => this.isNavigateEnabled;
-            set => Set(ref this.isNavigateEnabled, value);
-        }
-
-        private async void manager_BackRequested(object sender, BackRequestedEventArgs e)
-        {
-            if (CanGoBack())
-            {
-                e.Handled = true;
-                await GoBackAsync();
-            }
         }
     }
 }

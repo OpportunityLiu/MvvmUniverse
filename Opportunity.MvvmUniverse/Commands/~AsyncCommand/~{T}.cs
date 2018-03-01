@@ -7,19 +7,32 @@ using System.Threading.Tasks;
 namespace Opportunity.MvvmUniverse.Commands
 {
     /// <summary>
-    /// Execution body of <see cref="AsyncCommand{T}"/>.
+    /// Predicate of <see cref="AsyncCommand{T}"/>.
     /// </summary>
-    /// <param name="command">Current command of execution.</param>
-    /// <param name="parameter">Current parameter of execution.</param>
+    /// <typeparam name="T">Type of parameter.</typeparam>
+    /// <param name="command">Current command of can execute testing.</param>
+    /// <param name="parameter">Current parameter of can execute testing.</param>
+    /// <returns>Whether the command can execute or not.</returns>
     public delegate bool AsyncPredicate<T>(AsyncCommand<T> command, T parameter);
 
+    /// <summary>
+    /// Base class for commands implements <see cref="IAsyncCommand"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of parameter.</typeparam>
     public abstract class AsyncCommand<T> : CommandBase<T>, IAsyncCommand
     {
+        /// <summary>
+        /// Create new instance of <see cref="AsyncCommand{T}"/>.
+        /// </summary>
+        /// <param name="canExecute">Value for <see cref="CanExecuteDelegate"/></param>
         protected AsyncCommand(AsyncPredicate<T> canExecute)
         {
             this.CanExecuteDelegate = canExecute;
         }
 
+        /// <summary>
+        /// Delegate for <see cref="CanExecuteOverride(T)"/>.
+        /// </summary>
         protected AsyncPredicate<T> CanExecuteDelegate { get; }
 
         private bool isExecuting = false;

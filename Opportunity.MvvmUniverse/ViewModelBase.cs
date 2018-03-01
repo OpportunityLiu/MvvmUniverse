@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Windows.ApplicationModel;
 
@@ -43,5 +44,14 @@ namespace Opportunity.MvvmUniverse
         /// Commands of the vm, all <see cref="IControllable"/>'s <see cref="IControllable.Tag"/> in this dictionary will be set to the instance in the constructor <see cref="ViewModelBase()"/>.
         /// </summary>
         protected virtual IReadOnlyDictionary<string, System.Windows.Input.ICommand> Commands => null;
+
+        /// <summary>
+        /// Get command from <see cref="Commands"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of command.</typeparam>
+        /// <param name="key">Key of command.</param>
+        /// <returns>Command with <paramref name="key"/> from <see cref="Commands"/>.</returns>
+        protected T GetCommand<T>([CallerMemberName] string key = null)
+            where T : System.Windows.Input.ICommand => (T)Commands[key];
     }
 }
