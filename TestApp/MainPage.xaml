@@ -1,0 +1,61 @@
+﻿<Page x:Class="TestApp.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:TestApp"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      NavigationCacheMode="Enabled"
+      mc:Ignorable="d">
+  <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid.RowDefinitions>
+      <RowDefinition />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition />
+      <ColumnDefinition />
+    </Grid.ColumnDefinitions>
+    <ListView x:Name="ItemView"
+              ItemsSource="{x:Bind Source.View, Mode=OneWay}">
+      <ListView.ItemTemplate>
+        <DataTemplate x:DataType="local:DataItem">
+          <TextBlock Text="{x:Bind Name}" />
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+    <ListView x:Name="ItemView2"
+              Grid.Column="1"
+              SelectionMode="None"
+              ItemsSource="{x:Bind Source.View, Mode=OneWay}">
+      <ListView.ItemTemplate>
+        <DataTemplate x:DataType="local:DataItem">
+          <TextBlock Text="{x:Bind Name}" />
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+    <StackPanel Orientation="Horizontal"
+                Grid.Row="1">
+      <Button Click="Button_Click"
+              IsEnabled="{x:Bind Frame.CanGoBack, Mode=OneWay}"
+              Content="&lt;-" />
+      <Button Content="&lt;&lt;"
+              Click="{x:Bind Source.View.MoveCurrentToFirst, Mode=OneWay}" />
+      <Button Content="&lt;"
+              Click="{x:Bind Source.View.MoveCurrentToPrevious, Mode=OneWay}" />
+      <Button Content="&gt;"
+              Click="{x:Bind Source.View.MoveCurrentToNext, Mode=OneWay}" />
+      <Button Content="&gt;&gt;"
+              Click="{x:Bind Source.View.MoveCurrentToLast, Mode=OneWay}" />
+      <Button Click="Button_Click_1"
+              IsEnabled="{x:Bind Frame.CanGoForward, Mode=OneWay}"
+              Content="-&gt;" />
+      <Button Click="Button_Click_2"
+              Content="New" />
+    </StackPanel>
+    <StackPanel Grid.Row="1"
+                Grid.Column="1">
+      <TextBlock  Text="{x:Bind ((local:DataItem)Source.View.CurrentItem).Name, Mode=OneWay, FallbackValue='NULL'}" />
+      <TextBlock  Text="{x:Bind Source.View.CurrentPosition.ToString(), Mode=OneWay}" />
+    </StackPanel>
+  </Grid>
+</Page>

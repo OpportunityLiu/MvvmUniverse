@@ -50,13 +50,12 @@
   <ItemGroup>
     <Compile Include="Collections\~Cache\AutoFillCacheStorage.cs" />
     <Compile Include="Collections\~Cache\CacheStorage.cs" />
-    <Compile Include="Collections\IncrementalLoadingList{T}.cs" />
+    <Compile Include="Collections\~Data\IncrementalLoadingList{T}.cs" />
     <Compile Include="Collections\Internal\CollectionDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryKeyCollectionDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryValueCollectionDebugView.cs" />
     <Compile Include="Collections\Internal\Helpers.cs" />
-    <Compile Include="Collections\LoadMoreItemsExceptionEventArgs.cs" />
     <Compile Include="Collections\ObservableCollectionBase{T}.cs" />
     <Compile Include="Collections\ObservableDictionaryView{TKey, TValue}.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~.Updater.cs" />
@@ -69,7 +68,7 @@
     <Compile Include="Collections\~ObservableList{T}\~.cs" />
     <Compile Include="Collections\~ObservableList{T}\~.EqualityComparerAdapter.cs" />
     <Compile Include="Collections\~ObservableList{T}\~.Updater.cs" />
-    <Compile Include="Collections\PagingList{T}.cs" />
+    <Compile Include="Collections\~Data\FixedIncrementalLoadingList{T}.cs" />
     <Compile Include="Collections\RangedListView{T}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\ProgressMappers.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{T, TProgress}.cs" />

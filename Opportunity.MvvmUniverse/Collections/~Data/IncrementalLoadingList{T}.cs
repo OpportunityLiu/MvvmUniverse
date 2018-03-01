@@ -28,54 +28,40 @@ namespace Opportunity.MvvmUniverse.Collections
 
         public abstract bool HasMoreItems { get; }
 
-        protected abstract IAsyncOperation<IEnumerable<T>> LoadMoreItemsImplementAsync(int count);
+        protected abstract IAsyncOperation<IEnumerable<T>> LoadItemsAsync(int count);
+
+        public bool IsLoading => this.loading?.Status == AsyncStatus.Started;
 
         private IAsyncOperation<LoadMoreItemsResult> loading;
 
         public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
         {
-            if (this.loading?.Status == AsyncStatus.Started)
+            var currentLoading = this.loading;
+            if (currentLoading?.Status == AsyncStatus.Started)
             {
-                return PollingAsyncWrapper.Wrap(this.loading);
+                return PollingAsyncWrapper.Wrap(currentLoading);
             }
             if (!this.HasMoreItems)
                 return AsyncOperation<LoadMoreItemsResult>.CreateCompleted(new LoadMoreItemsResult());
-            var task = Run(async token =>
+            currentLoading = Run(async token =>
             {
                 try
                 {
-                    var lp = LoadMoreItemsImplementAsync((int)count);
+                    var lp = LoadItemsAsync((int)count);
                     token.Register(lp.Cancel);
                     var re = await lp;
+                    token.ThrowIfCancellationRequested();
                     var lc = this.AddRange(re);
                     return new LoadMoreItemsResult { Count = (uint)lc };
                 }
-                catch (Exception ex)
+                finally
                 {
-                    if (!await tryHandle(ex))
-                        throw;
-                    return default;
+                    OnPropertyChanged(nameof(IsLoading), nameof(HasMoreItems));
                 }
             });
-            this.loading = task;
-            return task;
-        }
-
-        public event LoadMoreItemsExceptionEventHadler<T> LoadMoreItemsException;
-
-        private async Task<bool> tryHandle(Exception ex)
-        {
-            var temp = LoadMoreItemsException;
-            if (temp == null)
-                return false;
-            var h = false;
-            await DispatcherHelper.RunAsync(() =>
-            {
-                var args = new LoadMoreItemsExceptionEventArgs(ex);
-                temp(this, args);
-                h = args.Handled;
-            });
-            return h;
+            this.loading = currentLoading;
+            OnPropertyChanged(nameof(IsLoading));
+            return currentLoading;
         }
     }
 }

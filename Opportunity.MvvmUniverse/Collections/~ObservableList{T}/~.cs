@@ -227,6 +227,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="items">Items to add.</param>
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/>.</exception>
+        /// <returns>Count of items added.</returns>
         public int AddRange(IEnumerable<T> items)
         {
             if (items == null)
@@ -255,6 +256,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="index"/> less than 0 or greater than <see cref="Count"/>.
         /// </exception>
+        /// <returns>Count of items inserted.</returns>
         public int InsertRange(int index, IEnumerable<T> items)
         {
             if (items == null)
@@ -274,6 +276,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <paramref name="index"/> less than 0
         /// or greater than <see cref="Count"/> - <paramref name="items"/>.<see cref="IReadOnlyCollection{T}.Count"/>.
         /// </exception>
+        /// <returns>Count of items changed.</returns>
         public int SetRange(int index, IEnumerable<T> items)
         {
             if (items == null)
