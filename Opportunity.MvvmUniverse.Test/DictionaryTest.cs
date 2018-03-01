@@ -82,39 +82,6 @@ namespace Opportunity.MvvmUniverse.Test
         }
 
         [TestMethod]
-        public void MoveElements()
-        {
-            var dic = new ObservableDictionary<int, int>
-            {
-                { 0, 0 },
-                { 1, 1 },
-                { 2, 2 },
-                { 3, 3 },
-                { 4, 4 },
-                { 5, 5 },
-            };
-            dic.Move(0, 1);
-            Assert.AreEqual(1, dic.ItemAt(0).Key);
-            Assert.AreEqual(0, dic.ItemAt(1).Key);
-            Assert.AreEqual(2, dic.ItemAt(2).Key);
-            dic.Move(0, 0);
-            Assert.AreEqual(0, dic.ItemAt(0).Key);
-            Assert.AreEqual(1, dic.ItemAt(1).Key);
-            Assert.AreEqual(2, dic.ItemAt(2).Key);
-            dic.Move(0, 4);
-            Assert.AreEqual(0, dic.ItemAt(4).Key);
-            Assert.AreEqual(4, dic.ItemAt(3).Key);
-            Assert.AreEqual(5, dic.ItemAt(5).Key);
-            dic.Move(0, 0);
-            Assert.AreEqual(0, dic.ItemAt(0).Key);
-            Assert.AreEqual(1, dic.ItemAt(1).Key);
-            Assert.AreEqual(2, dic.ItemAt(2).Key);
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => dic.Move(0, -1));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => dic.Move(0, 6));
-            Assert.ThrowsException<KeyNotFoundException>(() => dic.Move(6, 0));
-        }
-
-        [TestMethod]
         public void Update()
         {
             var dic = new ObservableDictionary<string, string>

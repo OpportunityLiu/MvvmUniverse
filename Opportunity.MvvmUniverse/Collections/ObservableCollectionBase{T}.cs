@@ -2,268 +2,237 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Action = System.Collections.Specialized.NotifyCollectionChangedAction;
-using Handler = System.Collections.Specialized.NotifyCollectionChangedEventHandler;
-using Args = System.Collections.Specialized.NotifyCollectionChangedEventArgs;
+using Action = Windows.Foundation.Collections.CollectionChange;
+using Handler = Windows.UI.Xaml.Interop.BindableVectorChangedEventHandler;
+using Args = Opportunity.MvvmUniverse.Collections.VectorChangedEventArgs;
+using Windows.Foundation.Collections;
+using Windows.UI.Xaml.Interop;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
+using System.Diagnostics;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
     /// <summary>
-    /// Base class for observable collections.
+    /// Base class for observable collections. Derived class must implement <see cref="IList{T}"/> or <see cref="IReadOnlyList{T}"/>.
     /// </summary>
     /// <typeparam name="T">type of objects store in the collection</typeparam>
-    public abstract class ObservableCollectionBase<T> : ObservableObject, System.Collections.Specialized.INotifyCollectionChanged
+    public abstract class ObservableCollectionBase<T> : ObservableObject, IBindableObservableVector
     {
-        private sealed class ListWarpper : IList, IReadOnlyList<T>, ICollection, IReadOnlyCollection<T>
+        /// <summary>
+        /// Create new instance of <see cref="ObservableCollectionBase{T}"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Derived class does not implement <see cref="IList{T}"/> or <see cref="IReadOnlyList{T}"/>.
+        /// </exception>
+        protected ObservableCollectionBase()
         {
-            public static IList WarpIfNeeded(IReadOnlyList<T> listObj) => (listObj as IList) ?? new ListWarpper(listObj);
-
-            private readonly IReadOnlyList<T> list;
-            public ListWarpper(IReadOnlyList<T> toWarp) => this.list = toWarp;
-
-            object IList.this[int index]
-            {
-                get => this.list[index];
-                set => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
-            }
-
-            public bool IsFixedSize => false;
-            public bool IsReadOnly => true;
-
-            public int Count => this.list.Count;
-
-            public bool IsSynchronized => false;
-
-            public object SyncRoot => this.list;
-
-            public T this[int index] => this.list[index];
-
-            public bool Contains(object value) => this.list.Contains((T)value);
-
-            public void CopyTo(Array array, int index)
-            {
-                if (array is T[] a)
-                {
-                    if (this.list is IList<T> l)
-                    {
-                        l.CopyTo(a, index);
-                        return;
-                    }
-                    if (this.list.Count + index > a.Length)
-                        throw new ArgumentException("Not enough space in array");
-                    for (var i = 0; i < this.list.Count; i++)
-                    {
-                        a[index + i] = this.list[i];
-                    }
-                    return;
-                }
-                throw new ArgumentException("Unsupported array", nameof(array));
-            }
-
-            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)this.list).GetEnumerator();
-            public IEnumerator<T> GetEnumerator() => this.list.GetEnumerator();
-
-            public int IndexOf(object value)
-            {
-                var v = (T)value;
-                if (this.list is IList<T> l)
-                    return l.IndexOf(v);
-                var c = EqualityComparer<T>.Default;
-                for (var i = 0; i < this.list.Count; i++)
-                {
-                    if (c.Equals(v, this.list[i]))
-                        return i;
-                }
-                return -1;
-            }
-
-            public int Add(object value) => Internal.Helpers.ThrowForReadOnlyCollection<int>(this.list);
-            public void Clear() => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
-            public void Insert(int index, object value) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
-            public void Remove(object value) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
-            public void RemoveAt(int index) => Internal.Helpers.ThrowForReadOnlyCollection(this.list);
+            if (!(this is IList<T>) && !(this is IReadOnlyList<T>))
+                throw new InvalidOperationException("Derived class must implement IList<T> or IReadOnlyList<T>");
         }
 
         /// <summary>
-        /// Tell caller of <see cref="OnCollectionChanged(Args)"/> that whether this call can be skipped.
-        /// Returns <c><see cref="CollectionChanged"/> != null</c> by default.
+        /// Tell caller of <see cref="OnVectorChanged(IVectorChangedEventArgs)"/> that whether this call can be skipped.
+        /// Returns <c><see cref="VectorChanged"/> != null</c> by default.
         /// </summary>
-        protected virtual bool NeedRaiseCollectionChanged => CollectionChanged != null;
+        protected virtual bool NeedRaiseVectorChanged => VectorChanged != null;
 
         /// <inheritdoc/>
-        public event Handler CollectionChanged;
+        public event Handler VectorChanged;
 
         /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event.
+        /// Raise <see cref="VectorChanged"/> event.
         /// </summary>
         /// <param name="args">event args</param>
         /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
         /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
         /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
-        protected virtual void OnCollectionChanged(Args args)
+        protected virtual void OnVectorChanged(IVectorChangedEventArgs args)
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
-            var temp = CollectionChanged;
+            var temp = VectorChanged;
             if (temp == null)
                 return;
             DispatcherHelper.BeginInvoke(() => temp(this, args));
         }
 
         /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Reset"/>.
+        /// Raise <see cref="VectorChanged"/> event of <see cref="Action.Reset"/>.
         /// </summary>
-        protected void OnCollectionReset()
+        protected void OnVectorReset()
         {
-            if (!NeedRaiseCollectionChanged)
+            if (!NeedRaiseVectorChanged)
                 return;
-            OnCollectionChanged(new Args(Action.Reset));
+            OnVectorChanged(Args.Reset);
         }
 
         /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Move"/>.
+        /// Raise <see cref="VectorChanged"/> event of <see cref="Action.ItemInserted"/>.
         /// </summary>
-        /// <param name="item">moved item</param>
-        /// <param name="newIndex">new index of <paramref name="item"/></param>
-        /// <param name="oldIndex">old index of <paramref name="item"/></param>
-        protected void OnCollectionMove(T item, int newIndex, int oldIndex)
+        /// <param name="index">Index of inserted item.</param>
+        protected void OnItemInserted(int index)
         {
-            if (!NeedRaiseCollectionChanged)
+            if (!NeedRaiseVectorChanged)
                 return;
-            OnCollectionChanged(new Args(Action.Move, item, newIndex, oldIndex));
+            OnVectorChanged(new Args(Action.ItemInserted, (uint)index));
         }
 
         /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Move"/>.
+        /// Raise <see cref="VectorChanged"/> event of <see cref="Action.ItemRemoved"/>.
         /// </summary>
-        /// <param name="items">moved items</param>
-        /// <param name="newIndex">new index of <paramref name="items"/></param>
-        /// <param name="oldIndex">old index of <paramref name="items"/></param>
-        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/></exception>
-        protected void OnCollectionMove(IReadOnlyList<T> items, int newIndex, int oldIndex)
+        /// <param name="index">Index of removed item.</param>
+        protected void OnItemRemoved(int index)
         {
-            if (items == null)
-                throw new ArgumentNullException(nameof(items));
-            if (items.Count == 1)
+            if (!NeedRaiseVectorChanged)
+                return;
+            OnVectorChanged(new Args(Action.ItemRemoved, (uint)index));
+        }
+
+        /// <summary>
+        /// Raise <see cref="VectorChanged"/> event of <see cref="Action.ItemChanged"/>.
+        /// </summary>
+        /// <param name="index">Index of changed item.</param>
+        protected void OnItemChanged(int index)
+        {
+            if (!NeedRaiseVectorChanged)
+                return;
+            OnVectorChanged(new Args(Action.ItemChanged, (uint)index));
+        }
+
+        private bool IsReadOnly => (this as ICollection<T>)?.IsReadOnly ?? true;
+
+        int IList.Add(object value)
+        {
+            if (IsReadOnly) ThrowForReadOnlyCollection();
+            var that = (ICollection<T>)this;
+            that.Add(CastValue<T>(value));
+            return that.Count - 1;
+        }
+
+        void IList.Clear()
+        {
+            if (IsReadOnly) ThrowForReadOnlyCollection();
+            ((ICollection<T>)this).Clear();
+        }
+
+        bool IList.Contains(object value)
+        {
+            try
             {
-                OnCollectionMove(items[0], newIndex, oldIndex);
-                return;
+                var item = CastValue<T>(value);
+                if (this is ICollection<T> col)
+                    return col.Contains(item);
+                var rcol = (IReadOnlyList<T>)this;
+                return rcol.Contains(item);
             }
-            if (!NeedRaiseCollectionChanged)
-                return;
-            OnCollectionChanged(new Args(Action.Move, ListWarpper.WarpIfNeeded(items), newIndex, oldIndex));
-        }
-
-        /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Add"/>.
-        /// </summary>
-        /// <param name="item">added item</param>
-        /// <param name="index">index of <paramref name="item"/></param>
-        protected void OnCollectionAdd(T item, int index)
-        {
-            if (!NeedRaiseCollectionChanged)
-                return;
-            OnCollectionChanged(new Args(Action.Add, item, index));
-        }
-
-        /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Add"/>.
-        /// </summary>
-        /// <param name="items">added items</param>
-        /// <param name="index">index of <paramref name="items"/></param>
-        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/></exception>
-        protected void OnCollectionAdd(IReadOnlyList<T> items, int index)
-        {
-            if (items == null)
-                throw new ArgumentNullException(nameof(items));
-            if (items.Count == 1)
+            catch (Exception)
             {
-                OnCollectionAdd(items[0], index);
-                return;
+                return false;
             }
-            if (!NeedRaiseCollectionChanged)
-                return;
-            OnCollectionChanged(new Args(Action.Add, ListWarpper.WarpIfNeeded(items), index));
         }
 
-        /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Remove"/>.
-        /// </summary>
-        /// <param name="item">removed item</param>
-        /// <param name="index">original index of <paramref name="item"/></param>
-        protected void OnCollectionRemove(T item, int index)
+        int IList.IndexOf(object value)
         {
-            if (!NeedRaiseCollectionChanged)
-                return;
-            OnCollectionChanged(new Args(Action.Remove, item, index));
+            try
+            {
+                var item = CastValue<T>(value);
+                if (this is IList<T> col)
+                    return col.IndexOf(item);
+                var rcol = (IReadOnlyList<T>)this;
+                var ind = 0;
+                foreach (var i in rcol)
+                {
+                    if (EqualityComparer<T>.Default.Equals(i, item))
+                        return ind;
+                    ind++;
+                }
+                return -1;
+            }
+            catch
+            {
+                return -1;
+            }
         }
 
-        /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Remove"/>.
-        /// </summary>
-        /// <param name="items">removed items</param>
-        /// <param name="index">original index of <paramref name="items"/></param>
-        /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/></exception>
-        protected void OnCollectionRemove(IReadOnlyList<T> items, int index)
+        void IList.Insert(int index, object value)
         {
-            if (items == null)
-                throw new ArgumentNullException(nameof(items));
-            if (items.Count == 1)
-            {
-                OnCollectionRemove(items[0], index);
-                return;
-            }
-            if (!NeedRaiseCollectionChanged)
-                return;
-            OnCollectionChanged(new Args(Action.Remove, ListWarpper.WarpIfNeeded(items), index));
+            if (IsReadOnly) ThrowForReadOnlyCollection();
+            ((IList<T>)this).Insert(index, CastValue<T>(value));
         }
 
-        /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Replace"/>.
-        /// </summary>
-        /// <param name="newItem">new item</param>
-        /// <param name="oldItem">replaced item</param>
-        /// <param name="index">index of item</param>
-        protected void OnCollectionReplace(T newItem, T oldItem, int index)
+        void IList.Remove(object value)
         {
-            if (!NeedRaiseCollectionChanged)
-                return;
-            OnCollectionChanged(new Args(Action.Replace, newItem, oldItem, index));
+            if (IsReadOnly) ThrowForReadOnlyCollection();
+            ((ICollection<T>)this).Remove(CastValue<T>(value));
         }
 
-        /// <summary>
-        /// Raise <see cref="CollectionChanged"/> event of <see cref="Action.Replace"/>.
-        /// </summary>
-        /// <param name="newItems">new items</param>
-        /// <param name="oldItems">replaced items</param>
-        /// <param name="index">index of items</param>
-        /// <exception cref="ArgumentNullException"><paramref name="newItems"/> or <paramref name="oldItems"/> is <see langword="null"/></exception>
-        protected void OnCollectionReplace(IReadOnlyList<T> newItems, IReadOnlyList<T> oldItems, int index)
+        void IList.RemoveAt(int index)
         {
-            if (newItems == null)
-                throw new ArgumentNullException(nameof(newItems));
-            if (oldItems == null)
-                throw new ArgumentNullException(nameof(oldItems));
-            var oldCount = oldItems.Count;
-            var newCount = newItems.Count;
-            if (oldCount <= 0)
-            {
-                OnCollectionAdd(newItems, index);
-                return;
-            }
-            if (newCount <= 0)
-            {
-                OnCollectionRemove(oldItems, index);
-                return;
-            }
-            if (newCount == 1 && oldCount == 1)
-            {
-                OnCollectionReplace(newItems[0], oldItems[0], index);
-                return;
-            }
-            if (!NeedRaiseCollectionChanged)
-                return;
-            OnCollectionChanged(new Args(Action.Replace, ListWarpper.WarpIfNeeded(newItems), ListWarpper.WarpIfNeeded(oldItems), index));
+            if (IsReadOnly) ThrowForReadOnlyCollection();
+            ((IList<T>)this).RemoveAt(index);
         }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool IList.IsFixedSize => false;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool IList.IsReadOnly => IsReadOnly;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        object IList.this[int index]
+        {
+            get
+            {
+                if (this is IList<T> list)
+                    return list[index];
+                return ((IReadOnlyList<T>)this)[index];
+            }
+            set
+            {
+                if (IsReadOnly) ThrowForReadOnlyCollection();
+                ((IList<T>)this)[index] = CastValue<T>(value);
+            }
+        }
+        void ICollection.CopyTo(Array array, int index)
+        {
+            var arr = CastValue<T[]>(array, nameof(array));
+            if (this is ICollection<T> col)
+                col.CopyTo(arr, index);
+            var rcol = (IReadOnlyCollection<T>)this;
+            if (index + rcol.Count > arr.Length)
+                throw new ArgumentException("Not enough space for copy.");
+            foreach (var item in rcol)
+            {
+                arr[index] = item;
+                index++;
+            }
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        int ICollection.Count
+        {
+            get
+            {
+                if (this is ICollection<T> col)
+                    return col.Count;
+                return ((IReadOnlyCollection<T>)this).Count;
+            }
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool ICollection.IsSynchronized => false;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private object syncRoot;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        object ICollection.SyncRoot
+        {
+            get
+            {
+                if (this.syncRoot == null)
+                {
+                    System.Threading.Interlocked.CompareExchange<object>(ref this.syncRoot, new object(), null);
+                }
+                return this.syncRoot;
+            }
+        }
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
     }
 }

@@ -51,8 +51,13 @@ namespace Opportunity.MvvmUniverse.Collections
                     token.Register(lp.Cancel);
                     var re = await lp;
                     token.ThrowIfCancellationRequested();
-                    var lc = this.AddRange(re);
-                    return new LoadMoreItemsResult { Count = (uint)lc };
+                    var lc = 0u;
+                    foreach (var item in re)
+                    {
+                        this.Add(item);
+                        lc++;
+                    }
+                    return new LoadMoreItemsResult { Count = lc };
                 }
                 finally
                 {

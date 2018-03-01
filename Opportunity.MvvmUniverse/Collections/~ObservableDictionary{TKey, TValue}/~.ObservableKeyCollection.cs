@@ -11,40 +11,34 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     public partial class ObservableDictionary<TKey, TValue>
     {
+        /// <summary>
+        /// Key collection of <see cref="ObservableDictionary{TKey, TValue}"/>.
+        /// </summary>
         [DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
-        public sealed class ObservableKeyCollection : ObservableKeyValueCollectionBase<TKey>, ICollection<TKey>, IReadOnlyList<TKey>, IList
+        public sealed class ObservableKeyCollection : ObservableKeyValueCollectionBase<TKey>, ICollection<TKey>, IReadOnlyList<TKey>
         {
             internal ObservableKeyCollection(ObservableDictionary<TKey, TValue> parent) : base(parent) { }
 
+            /// <inheritdoc/>
             public TKey this[int index] => this.Parent.KeyItems[index];
-
-            object IList.this[int index]
-            {
-                get => this[index];
-                set => ThrowForReadOnlyCollection(Parent);
-            }
-
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            bool IList.IsFixedSize => false;
-
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            bool IList.IsReadOnly => true;
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool ICollection<TKey>.IsReadOnly => true;
 
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            bool ICollection.IsSynchronized => false;
-
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            object ICollection.SyncRoot => ((ICollection)this.Parent).SyncRoot;
-
+            /// <inheritdoc/>
             public List<TKey>.Enumerator GetEnumerator() => this.Parent.KeyItems.GetEnumerator();
             IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator() => GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+            /// <summary>
+            /// Iterate all keys in the list.
+            /// </summary>
+            /// <param name="action">Action for each key.</param>
             public void ForEach(Action<TKey> action) => Parent.KeyItems.ForEach(action);
+            /// <summary>
+            /// Iterate all keys and their index in the list.
+            /// </summary>
+            /// <param name="action">Action for each key and its index.</param>
             public void ForEach(Action<int, TKey> action)
             {
                 if (action == null)
@@ -57,42 +51,24 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
             }
 
-            int IList.Add(object value) => ThrowForReadOnlyCollection(Parent, 0);
             void ICollection<TKey>.Add(TKey item) => ThrowForReadOnlyCollection(Parent);
-
-            void IList.Clear() => ThrowForReadOnlyCollection(Parent);
             void ICollection<TKey>.Clear() => ThrowForReadOnlyCollection(Parent);
+            bool ICollection<TKey>.Remove(TKey item) => ThrowForReadOnlyCollection(Parent, false);
 
+            /// <inheritdoc/>
             public bool Contains(TKey key) => this.Parent.ContainsKey(key);
-            bool IList.Contains(object value) => ((IDictionary)this.Parent).Contains(value);
 
+            /// <inheritdoc/>
             public void CopyTo(TKey[] array, int arrayIndex) => this.Parent.KeyItems.CopyTo(array, arrayIndex);
-            void ICollection.CopyTo(Array array, int index) => ((ICollection)this.Parent.KeyItems).CopyTo(array, index);
 
+            /// <inheritdoc/>
             public int IndexOf(TKey key)
             {
                 if (Parent.KeySet.TryGetValue(key, out var index))
                     return index;
                 return -1;
             }
-            int IList.IndexOf(object value)
-            {
-                try
-                {
-                    return IndexOf(CastKey<TKey>(value));
-                }
-                catch (ArgumentException)
-                {
-                    return -1;
-                }
-            }
 
-            void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(Parent);
-
-            void IList.Remove(object value) => ThrowForReadOnlyCollection(Parent);
-            bool ICollection<TKey>.Remove(TKey item) => ThrowForReadOnlyCollection(Parent, false);
-
-            void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(Parent);
         }
     }
 }

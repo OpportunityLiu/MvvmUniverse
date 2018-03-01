@@ -45,7 +45,10 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
                 if (this.sourceCount <= 0)
                 {
-                    this.source.InsertItems(0, this.target);
+                    foreach (var item in this.target)
+                    {
+                        this.source.Add(item);
+                    }
                     return this.targetCount;
                 }
                 if (this.sourceCount * this.targetCount > 1_000_000)
@@ -228,19 +231,10 @@ namespace Opportunity.MvvmUniverse.Collections
 
             private void swap()
             {
-                if (this.source.Count > this.target.Count)
+                this.source.ClearItems();
+                foreach (var item in this.target)
                 {
-                    this.source.SetItems(0, this.target);
-                    this.source.RemoveItems(this.target.Count, this.source.Count - this.target.Count);
-                }
-                else if (this.source.Count < this.target.Count)
-                {
-                    this.source.SetItems(0, new RangedListView<T>(this.target, 0, this.source.Count));
-                    this.source.InsertItems(this.source.Count, new RangedListView<T>(this.target, this.source.Count));
-                }
-                else
-                {
-                    this.source.SetItems(0, this.target);
+                    this.source.Add(item);
                 }
             }
         }
@@ -330,6 +324,15 @@ namespace Opportunity.MvvmUniverse.Collections
                 return 0;
             comparer = comparer ?? EqualityComparer<T>.Default;
             return new Updater(this, newList, comparer, itemUpdater).Update();
+        }
+
+        private bool isSameRef(object collection)
+        {
+            if (collection is null)
+                return false;
+            return ReferenceEquals(collection, this)
+                || ReferenceEquals(collection, this.Items)
+                || (collection is ObservableListView<T> view && ReferenceEquals(view.List, this));
         }
     }
 }

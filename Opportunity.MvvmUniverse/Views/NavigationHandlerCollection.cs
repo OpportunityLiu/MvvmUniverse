@@ -54,45 +54,34 @@ namespace Opportunity.MvvmUniverse.Views
             this.navigator.UpdateAppViewBackButtonVisibility();
         }
 
-        protected override void InsertItems(int index, IReadOnlyList<INavigationHandler> items)
+        protected override void InsertItem(int index, INavigationHandler item)
         {
             using (GetLock())
             {
-                foreach (var item in items)
-                {
-                    NavigationHandlerDic.Add(item, this.navigator);
-                }
+                NavigationHandlerDic.Add(item, this.navigator);
             }
-            base.InsertItems(index, items);
+            base.InsertItem(index, item);
             this.navigator.UpdateAppViewBackButtonVisibility();
         }
 
-        protected override void SetItems(int index, IReadOnlyList<INavigationHandler> items)
+        protected override void SetItem(int index, INavigationHandler item)
         {
             using (GetLock())
             {
-                var offset = 0;
-                foreach (var item in items)
-                {
-                    NavigationHandlerDic.Remove(this[index + offset]);
-                    NavigationHandlerDic.Add(item, this.navigator);
-                    offset++;
-                }
+                NavigationHandlerDic.Remove(this[index]);
+                NavigationHandlerDic.Add(item, this.navigator);
             }
-            base.SetItems(index, items);
+            base.SetItem(index, item);
             this.navigator.UpdateAppViewBackButtonVisibility();
         }
 
-        protected override void RemoveItems(int index, int count)
+        protected override void RemoveItem(int index)
         {
             using (GetLock())
             {
-                for (var i = 0; i < count; i++)
-                {
-                    NavigationHandlerDic.Remove(this[index + i]);
-                }
+                NavigationHandlerDic.Remove(this[index]);
             }
-            base.RemoveItems(index, count);
+            base.RemoveItem(index);
             this.navigator.UpdateAppViewBackButtonVisibility();
         }
     }

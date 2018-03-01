@@ -89,17 +89,20 @@ namespace Opportunity.MvvmUniverse.Collections
                         // Match at right posiiton.
                         syncData(in sourceKey, this.source.ValueItems[i], in targetKey, in this.targetValue[i]);
                     }
-                    else if (this.source.ContainsKey(targetKey))
+                    else if (this.source.TryGetValue(targetKey, out var sourceValue))
                     {
                         // Must be found after posiiton i. Move forward.
-                        this.source.MoveItem(targetKey, i);
+                        this.source.RemoveItem(targetKey);
+                        this.source.InsertItem(i, targetKey, sourceValue);
 
                         syncData(this.source.KeyItems[i], this.source.ValueItems[i], in targetKey, in this.targetValue[i]);
+                        edit += 2;
                     }
                     else
                     {
                         // Not found. Insert.
                         this.source.InsertItem(i, targetKey, this.targetValue[i]);
+                        edit++;
                     }
                 }
                 return edit;

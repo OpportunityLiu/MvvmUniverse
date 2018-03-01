@@ -6,13 +6,19 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 {
     internal static class Helpers
     {
-        public static T CastValue<T>(object value)
+        public static T CastValue<T>(object value) => CastValue<T>(value, nameof(value));
+
+        public static T CastValue<T>(object value, string paramName)
         {
-            if (value is null && default(T) == null)
-                return default;
+            if (value is null)
+            {
+                if (default(T) == null)
+                    return default;
+                throw new ArgumentNullException(nameof(paramName));
+            }
             if (value is T v)
                 return v;
-            throw new ArgumentException("Wrong type of value", nameof(value));
+            throw new ArgumentException($"Wrong type of value, {typeof(T)} expected.", nameof(paramName));
         }
 
         public static KeyValuePair<TKey, TValue> CastKVP<TKey, TValue>(object value)
@@ -21,7 +27,7 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
                 throw new ArgumentNullException(nameof(value));
             if (value is KeyValuePair<TKey, TValue> v)
                 return v;
-            throw new ArgumentException("Wrong type of value", nameof(value));
+            throw new ArgumentException($"Wrong type of value, {typeof(KeyValuePair<TKey, TValue>)} expected.", nameof(value));
         }
 
         public static TKey CastKey<TKey>(object key)
@@ -30,12 +36,17 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
                 throw new ArgumentNullException(nameof(key));
             if (key is TKey v)
                 return v;
-            throw new ArgumentException("Wrong type of key", nameof(key));
+            throw new ArgumentException($"Wrong type of key, {typeof(TKey)} expected.", nameof(key));
         }
 
         public static KeyValuePair<TKey, TValue> CreateKVP<TKey, TValue>(TKey key, TValue value)
         {
             return new KeyValuePair<TKey, TValue>(key, value);
+        }
+
+        public static void ThrowForReadOnlyCollection()
+        {
+            throw new InvalidOperationException($"This collection is read only.");
         }
 
         public static void ThrowForReadOnlyCollection(object parent)

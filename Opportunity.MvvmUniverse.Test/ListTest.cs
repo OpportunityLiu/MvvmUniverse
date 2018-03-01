@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Opportunity.MvvmUniverse.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Foundation.Collections;
 
 namespace Opportunity.MvvmUniverse.Test
 {
@@ -54,42 +56,6 @@ namespace Opportunity.MvvmUniverse.Test
             CollectionAssert.AreEqual(("assfdgsf").ToCharArray(), l);
         }
 
-        [TestMethod]
-        public void InsertSelf()
-        {
-            var eve = false;
-            var l = new CharList("assfdgsf");
-            l.CollectionChanged += (s, e) =>
-            {
-                Assert.AreEqual(System.Collections.Specialized.NotifyCollectionChangedAction.Add, e.Action);
-                CollectionAssert.AreEqual(("assfdgsf").ToCharArray(), e.NewItems);
-                Assert.AreEqual("assfdgsf".Length, e.NewStartingIndex);
-                eve = true;
-            };
-            l.AddRange(l);
-            CollectionAssert.AreEqual(("assfdgsf" + "assfdgsf").ToCharArray(), l);
-            Assert.IsTrue(eve);
-        }
-
-        [TestMethod]
-        public void SetSelf()
-        {
-            var eve = false;
-            var l = new CharList("assfdgsf");
-            l.CollectionChanged += (s, e) =>
-            {
-                Assert.AreEqual(System.Collections.Specialized.NotifyCollectionChangedAction.Replace, e.Action);
-                CollectionAssert.AreEqual(("assfdgsf").ToCharArray(), e.NewItems);
-                CollectionAssert.AreEqual(("assfdgsf").ToCharArray(), e.OldItems);
-                Assert.AreEqual(0, e.NewStartingIndex);
-                Assert.AreEqual(0, e.OldStartingIndex);
-                eve = true;
-            };
-            l.SetRange(0, l);
-            CollectionAssert.AreEqual("assfdgsf".ToCharArray(), l);
-            Assert.IsTrue(eve);
-        }
-
         public class CharList : ObservableList<char>
         {
             public CharList()
@@ -103,6 +69,14 @@ namespace Opportunity.MvvmUniverse.Test
             public override string ToString()
             {
                 return new string(this.ToArray());
+            }
+
+            internal void AddRange(string source)
+            {
+                foreach (var item in source)
+                {
+                    Add(item);
+                }
             }
         }
     }

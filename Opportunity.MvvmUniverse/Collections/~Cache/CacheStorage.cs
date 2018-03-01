@@ -1,4 +1,5 @@
 ﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+using Opportunity.MvvmUniverse.Collections.Internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ using static System.Runtime.InteropServices.WindowsRuntime.AsyncInfo;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
+    [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
+    [DebuggerDisplay("Count = {Count}")]
     public class CacheStorage<TKey, TCache> : IDictionary<TKey, TCache>
     {
         protected struct CacheDataNode

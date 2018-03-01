@@ -57,14 +57,14 @@
     <Compile Include="Collections\Internal\DictionaryValueCollectionDebugView.cs" />
     <Compile Include="Collections\Internal\Helpers.cs" />
     <Compile Include="Collections\ObservableCollectionBase{T}.cs" />
-    <Compile Include="Collections\ObservableDictionaryView{TKey, TValue}.cs" />
+    <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~View.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~.Updater.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~.ObservableKeyCollection.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~.ObservableKeyValueCollectionBase{T}.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~.ObservableValueCollection.cs" />
-    <Compile Include="Collections\ObservableListView{T}.cs" />
-    <Compile Include="Collections\~ObservableList{T}\~.Box.cs" />
+    <Compile Include="Collections\~ObservableList{T}\~View.cs" />
+    <Compile Include="Collections\VectorChangedEventArgs.cs" />
     <Compile Include="Collections\~ObservableList{T}\~.cs" />
     <Compile Include="Collections\~ObservableList{T}\~.EqualityComparerAdapter.cs" />
     <Compile Include="Collections\~ObservableList{T}\~.Updater.cs" />

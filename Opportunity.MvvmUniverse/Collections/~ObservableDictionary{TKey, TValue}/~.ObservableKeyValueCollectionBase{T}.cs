@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Collections.Specialized;
+using Windows.Foundation.Collections;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -16,7 +17,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <typeparam name="T">type of elements</typeparam>
         [DebuggerDisplay("Count = {Count}")]
-        public abstract class ObservableKeyValueCollectionBase<T> : ObservableCollectionBase<T>
+        public abstract class ObservableKeyValueCollectionBase<T> : ObservableCollectionBase<T>, ICollection
         {
             internal ObservableDictionary<TKey, TValue> Parent { get; }
 
@@ -31,23 +32,26 @@ namespace Opportunity.MvvmUniverse.Collections
             internal void RaiseCountChangedInternal()
                 => this.OnPropertyChanged(nameof(Count));
 
-            internal void RaiseCollectionChangedInternal(NotifyCollectionChangedEventArgs e)
-                => OnCollectionChanged(e);
+            internal void RaiseVectorChangedInternal(IVectorChangedEventArgs e)
+                => OnVectorChanged(e);
 
-            internal void RaiseCollectionResetInternal()
-                => OnCollectionReset();
+            internal void RaiseVectorResetInternal()
+                => OnVectorReset();
 
-            internal void RaiseCollectionMoveInternal(T item, int newIndex, int oldIndex)
-                => OnCollectionMove(item, newIndex, oldIndex);
+            internal void RaiseItemInsertedInternal(int index)
+                => OnItemInserted(index);
 
-            internal void RaiseCollectionAddInternal(T item, int index)
-                => OnCollectionAdd(item, index);
+            internal void RaiseItemRemovedInternal(int index)
+                => OnItemRemoved(index);
 
-            internal void RaiseCollectionRemoveInternal(T item, int index)
-                => OnCollectionRemove(item, index);
+            internal void RaiseItemChangedInternal(int index)
+                => OnItemChanged(index);
 
-            internal void RaiseCollectionReplaceInternal(T newItem, T oldItem, int index)
-                => OnCollectionReplace(newItem, oldItem, index);
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            bool ICollection.IsSynchronized => false;
+
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            object ICollection.SyncRoot => ((ICollection)this.Parent).SyncRoot;
         }
     }
 }

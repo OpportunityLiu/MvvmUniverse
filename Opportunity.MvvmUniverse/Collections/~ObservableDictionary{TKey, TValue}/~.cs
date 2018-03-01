@@ -15,25 +15,23 @@ namespace Opportunity.MvvmUniverse.Collections
     /// <summary>
     /// Ordered generic dictionary can notify observers when changes happens.
     /// </summary>
-    /// <typeparam name="TKey">type of key</typeparam>
-    /// <typeparam name="TValue">type of value</typeparam>
+    /// <typeparam name="TKey">Type of keys.</typeparam>
+    /// <typeparam name="TValue">Type of values.</typeparam>
     [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
     public partial class ObservableDictionary<TKey, TValue>
         : ObservableCollectionBase<KeyValuePair<TKey, TValue>>
         , IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IOrderedDictionary
-        , IList<KeyValuePair<TKey, TValue>>, IReadOnlyList<KeyValuePair<TKey, TValue>>, IList
+        , IList<KeyValuePair<TKey, TValue>>, IReadOnlyList<KeyValuePair<TKey, TValue>>
     {
-        private List<TKey> keyItems;
-        private List<TValue> valueItems;
         /// <summary>
         /// Ordered keys.
         /// </summary>
-        protected List<TKey> KeyItems => LazyInitializer.EnsureInitialized(ref this.keyItems);
+        protected List<TKey> KeyItems { get; } = new List<TKey>();
         /// <summary>
         /// Ordered values.
         /// </summary>
-        protected List<TValue> ValueItems => LazyInitializer.EnsureInitialized(ref this.valueItems);
+        protected List<TValue> ValueItems { get; } = new List<TValue>();
         /// <summary>
         /// Mapping from key to index of <see cref="KeyItems"/> and <see cref="ValueItems"/>.
         /// </summary>
@@ -93,20 +91,12 @@ namespace Opportunity.MvvmUniverse.Collections
         [Conditional("DEBUG")]
         private void check()
         {
-            if (KeySet.Count == 0)
+            var c = KeySet.Count;
+            Debug.Assert(KeyItems.Count == c, "KeyItems.Count != KeySet.Count");
+            Debug.Assert(ValueItems.Count == c, "ValueItems.Count != KeySet.Count");
+            for (var i = 0; i < KeyItems.Count; i++)
             {
-                Debug.Assert(this.keyItems == null || this.keyItems.Count == 0, "KeyItems is not null or empty.");
-                Debug.Assert(this.valueItems == null || this.valueItems.Count == 0, "ValueItems is not null or empty.");
-            }
-            else
-            {
-                var c = KeySet.Count;
-                Debug.Assert(KeyItems.Count == c, "KeyItems.Count != KeySet.Count");
-                Debug.Assert(ValueItems.Count == c, "ValueItems.Count != KeySet.Count");
-                for (var i = 0; i < KeyItems.Count; i++)
-                {
-                    Debug.Assert(KeySet[KeyItems[i]] == i, $"Key in KeySet and KeyItems not match at {i}");
-                }
+                Debug.Assert(KeySet[KeyItems[i]] == i, $"Key in KeySet and KeyItems not match at {i}");
             }
         }
 
@@ -131,15 +121,15 @@ namespace Opportunity.MvvmUniverse.Collections
             if (this.keys != null)
             {
                 this.keys.RaiseCountChangedInternal();
-                this.keys.RaiseCollectionAddInternal(key, KeyItems.Count - 1);
+                this.keys.RaiseItemInsertedInternal(KeyItems.Count - 1);
             }
             if (this.values != null)
             {
                 this.values.RaiseCountChangedInternal();
-                this.values.RaiseCollectionAddInternal(value, ValueItems.Count - 1);
+                this.values.RaiseItemInsertedInternal(ValueItems.Count - 1);
             }
             OnPropertyChanged(nameof(Count));
-            OnCollectionAdd(CreateKVP(key, value), KeySet.Count - 1);
+            OnItemInserted(KeySet.Count - 1);
             check();
         }
 
@@ -162,15 +152,15 @@ namespace Opportunity.MvvmUniverse.Collections
             if (this.keys != null)
             {
                 this.keys.RaiseCountChangedInternal();
-                this.keys.RaiseCollectionRemoveInternal(key, removedIndex);
+                this.keys.RaiseItemRemovedInternal(removedIndex);
             }
             if (this.values != null)
             {
                 this.values.RaiseCountChangedInternal();
-                this.values.RaiseCollectionRemoveInternal(removedValue, removedIndex);
+                this.values.RaiseItemRemovedInternal(removedIndex);
             }
             OnPropertyChanged(nameof(Count));
-            OnCollectionRemove(CreateKVP(key, removedValue), removedIndex);
+            OnItemRemoved(removedIndex);
             check();
             return true;
         }
@@ -191,45 +181,9 @@ namespace Opportunity.MvvmUniverse.Collections
             // Key collection will not change.
             if (this.values != null)
             {
-                this.values.RaiseCollectionReplaceInternal(value, oldValue, index);
+                this.values.RaiseItemChangedInternal(index);
             }
-            OnCollectionReplace(CreateKVP(key, value), CreateKVP(key, oldValue), index);
-            check();
-        }
-
-        /// <summary>
-        /// Move key-value pair with the given <paramref name="key"/> to <paramref name="newIndex"/>.
-        /// </summary>
-        /// <param name="key">Key of key-value pair to move.</param>
-        /// <param name="newIndex">New position.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
-        /// <exception cref="KeyNotFoundException"><paramref name="key"/> not found in the dictionay.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="newIndex"/> out of range of the dictionary.</exception>
-        protected virtual void MoveItem(TKey key, int newIndex)
-        {
-            check();
-            if (newIndex < 0 || newIndex >= this.Count)
-                throw new ArgumentOutOfRangeException(nameof(newIndex));
-            var oldIndex = KeySet[key];
-            if (oldIndex == newIndex)
-                return;
-            var value = ValueItems[oldIndex];
-            ValueItems.RemoveAt(oldIndex);
-            ValueItems.Insert(newIndex, value);
-            KeyItems.RemoveAt(oldIndex);
-            KeyItems.Insert(newIndex, key);
-            var start = Math.Min(oldIndex, newIndex);
-            var end = Math.Max(oldIndex, newIndex);
-            updateIndex(start, end - start + 1);
-            if (this.keys != null)
-            {
-                this.keys.RaiseCollectionMoveInternal(key, newIndex, oldIndex);
-            }
-            if (this.values != null)
-            {
-                this.values.RaiseCollectionMoveInternal(value, newIndex, oldIndex);
-            }
-            OnCollectionMove(CreateKVP(key, value), newIndex, oldIndex);
+            OnItemChanged(index);
             check();
         }
 
@@ -239,21 +193,21 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void ClearItems()
         {
             check();
-            this.keyItems?.Clear();
-            this.valueItems?.Clear();
+            this.KeyItems.Clear();
+            this.ValueItems.Clear();
             KeySet.Clear();
             if (this.keys != null)
             {
                 this.keys.RaiseCountChangedInternal();
-                this.keys.RaiseCollectionResetInternal();
+                this.keys.RaiseVectorResetInternal();
             }
             if (this.values != null)
             {
                 this.values.RaiseCountChangedInternal();
-                this.values.RaiseCollectionResetInternal();
+                this.values.RaiseVectorResetInternal();
             }
             OnPropertyChanged(nameof(Count));
-            OnCollectionReset();
+            OnVectorReset();
             check();
         }
 
@@ -264,16 +218,6 @@ namespace Opportunity.MvvmUniverse.Collections
             else
                 InsertItem(Count, key, value);
         }
-
-        /// <summary>
-        /// Move key-value pair with the given <paramref name="key"/> to <paramref name="newIndex"/>.
-        /// </summary>
-        /// <param name="key">Key of key-value pair to move.</param>
-        /// <param name="newIndex">New position.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
-        /// <exception cref="KeyNotFoundException"><paramref name="key"/> not found in the dictionay.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="newIndex"/> out of range of the dictionary.</exception>
-        public void Move(TKey key, int newIndex) => MoveItem(key, newIndex);
 
         /// <inheritdoc/>
         public TValue this[TKey key]
@@ -312,11 +256,6 @@ namespace Opportunity.MvvmUniverse.Collections
         }
         KeyValuePair<TKey, TValue> IReadOnlyList<KeyValuePair<TKey, TValue>>.this[int index]
             => ((IList<KeyValuePair<TKey, TValue>>)this)[index];
-        object IList.this[int index]
-        {
-            get => ((IList<KeyValuePair<TKey, TValue>>)this)[index];
-            set => ((IList<KeyValuePair<TKey, TValue>>)this)[index] = CastKVP<TKey, TValue>(value);
-        }
         object IOrderedDictionary.this[int index]
         {
             get => ValueItems[index];
@@ -360,7 +299,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// This method will be called when <see cref="AsReadOnly()"/> first called on this instance.
         /// </summary>
         protected virtual ObservableDictionaryView<TKey, TValue> ReadOnlyViewFactory()
-            => new ObservableDictionaryView<TKey, TValue>(this);
+            => new UndisposableObservableDictionaryView<TKey, TValue>(this);
 
         /// <inheritdoc/>
         public int Count => KeySet.Count;
@@ -370,17 +309,7 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IDictionary.IsReadOnly => false;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool IList.IsReadOnly => false;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IDictionary.IsFixedSize => false;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool IList.IsFixedSize => false;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool ICollection.IsSynchronized => false;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object ICollection.SyncRoot => ((ICollection)this.KeySet).SyncRoot;
 
         /// <summary>
         /// Add new key-value pair at the end of the dictionary.
@@ -392,11 +321,6 @@ namespace Opportunity.MvvmUniverse.Collections
         public void Add(TKey key, TValue value) => InsertItem(Count, key, value);
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
         void IDictionary.Add(object key, object value) => Add(CastKey<TKey>(key), CastValue<TValue>(value));
-        int IList.Add(object value)
-        {
-            ((IList<KeyValuePair<TKey, TValue>>)this).Add(CastKVP<TKey, TValue>(value));
-            return this.Count - 1;
-        }
 
         /// <summary>
         /// Insert new key-value pair to given <paramref name="index"/> of the dictionary.
@@ -410,7 +334,6 @@ namespace Opportunity.MvvmUniverse.Collections
         public void Insert(int index, TKey key, TValue value) => InsertItem(index, key, value);
         void IList<KeyValuePair<TKey, TValue>>.Insert(int index, KeyValuePair<TKey, TValue> item)
             => Insert(index, item.Key, item.Value);
-        void IList.Insert(int index, object value) => ((IList<KeyValuePair<TKey, TValue>>)this).Insert(index, CastKVP<TKey, TValue>(value));
         void IOrderedDictionary.Insert(int index, object key, object value)
             => Insert(index, CastKey<TKey>(key), CastValue<TValue>(value));
 
@@ -426,17 +349,6 @@ namespace Opportunity.MvvmUniverse.Collections
                 return EqualityComparer<TValue>.Default.Equals(item.Value, value);
             }
             return false;
-        }
-        bool IList.Contains(object value)
-        {
-            try
-            {
-                return ((IList<KeyValuePair<TKey, TValue>>)this).Contains(CastKVP<TKey, TValue>(value));
-            }
-            catch (ArgumentException)
-            {
-                return false;
-            }
         }
 
         /// <summary>
@@ -457,8 +369,6 @@ namespace Opportunity.MvvmUniverse.Collections
             RemoveItem(item.Key);
             return true;
         }
-        void IList.Remove(object value)
-            => ((IList<KeyValuePair<TKey, TValue>>)this).Remove(CastKVP<TKey, TValue>(value));
 
         /// <summary>
         /// Remove key-value pair at <paramref name="index"/>.
@@ -500,8 +410,6 @@ namespace Opportunity.MvvmUniverse.Collections
         public DictionaryEnumerator GetEnumerator()
             => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IEnumeratorKVP);
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
-            => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IEnumeratorKVP);
-        IEnumerator IEnumerable.GetEnumerator()
             => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IEnumeratorKVP);
         IDictionaryEnumerator IOrderedDictionary.GetEnumerator()
             => new DictionaryEnumerator(this, DictionaryEnumerator.Type.IDictionaryEnumerator);
@@ -628,8 +536,6 @@ namespace Opportunity.MvvmUniverse.Collections
                 array[arrayIndex++] = item;
             }
         }
-        void ICollection.CopyTo(Array array, int index)
-            => CopyTo((KeyValuePair<TKey, TValue>[])array, index);
 
         int IList<KeyValuePair<TKey, TValue>>.IndexOf(KeyValuePair<TKey, TValue> item)
         {
@@ -639,17 +545,6 @@ namespace Opportunity.MvvmUniverse.Collections
             if (EqualityComparer<TValue>.Default.Equals(v, item.Value))
                 return index;
             return -1;
-        }
-        int IList.IndexOf(object value)
-        {
-            try
-            {
-                return ((IList<KeyValuePair<TKey, TValue>>)this).IndexOf(CastKVP<TKey, TValue>(value));
-            }
-            catch (ArgumentException)
-            {
-                return -1;
-            }
         }
 
         /// <summary>
