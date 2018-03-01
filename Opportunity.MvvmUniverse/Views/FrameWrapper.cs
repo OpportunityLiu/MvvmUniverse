@@ -7,59 +7,36 @@ using Windows.UI.Xaml.Controls;
 
 namespace Opportunity.MvvmUniverse.Views
 {
+    public static class FrameExtension
+    {
+        public static FrameWrapper AsNavigationHandler(this Frame frame) => new FrameWrapper(frame);
+    }
+
     public class FrameWrapper : INavigationHandler
     {
         public FrameWrapper(Frame frame)
         {
-            if (frame == null)
-                throw new ArgumentNullException(nameof(frame));
-            this.frame = new WeakReference<Frame>(frame);
+            this.Frame = frame ?? throw new ArgumentNullException(nameof(frame));
         }
 
-        private readonly WeakReference<Frame> frame;
+        public Frame Frame { get; }
 
-        public Frame Frame
-        {
-            get
-            {
-                if (this.frame.TryGetTarget(out var t))
-                    return t;
-                return null;
-            }
-        }
-
-        public bool CanGoBack()
-        {
-            var f = Frame;
-            if (f == null)
-                return false;
-            return f.CanGoBack;
-        }
+        public bool CanGoBack() => Frame.CanGoBack;
 
         public IAsyncOperation<bool> GoBackAsync()
         {
             var f = Frame;
-            if (f == null)
-                return AsyncOperation<bool>.CreateCompleted(false);
             if (!f.CanGoBack)
                 return AsyncOperation<bool>.CreateCompleted(false);
             f.GoBack();
             return AsyncOperation<bool>.CreateCompleted(true);
         }
 
-        public bool CanGoForward()
-        {
-            var f = Frame;
-            if (f == null)
-                return false;
-            return f.CanGoForward;
-        }
+        public bool CanGoForward() => Frame.CanGoForward;
 
         public IAsyncOperation<bool> GoForwardAsync()
         {
             var f = Frame;
-            if (f == null)
-                return AsyncOperation<bool>.CreateCompleted(false);
             if (!f.CanGoForward)
                 return AsyncOperation<bool>.CreateCompleted(false);
             f.GoForward();
@@ -69,8 +46,6 @@ namespace Opportunity.MvvmUniverse.Views
         public IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter)
         {
             var f = Frame;
-            if (f == null)
-                return AsyncOperation<bool>.CreateCompleted(false);
             if (!f.Navigate(sourcePageType, parameter))
                 return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncOperation<bool>.CreateCompleted(true);

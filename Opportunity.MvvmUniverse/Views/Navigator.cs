@@ -11,6 +11,7 @@ using System.Collections.Specialized;
 using Windows.Foundation;
 using Opportunity.Helpers.Universal.AsyncHelpers;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Opportunity.MvvmUniverse.Commands;
 
 namespace Opportunity.MvvmUniverse.Views
 {
@@ -18,26 +19,34 @@ namespace Opportunity.MvvmUniverse.Views
     {
         internal static readonly Dictionary<int, Navigator> NavigatorDictionary = new Dictionary<int, Navigator>();
 
-        private static KeyValuePair<int, Navigator> cache;
+        private static Tuple<int, Navigator> cache;
 
         public static Navigator GetOrCreateForCurrentView()
         {
             var id = DispatcherHelper.GetCurrentViewId();
-            if (cache.Key == id)
-                return cache.Value;
+            var cache = Navigator.cache;
+            if (cache.Item1 == id)
+                return cache.Item2;
             if (NavigatorDictionary.TryGetValue(id, out var r))
                 return r;
-            return NavigatorDictionary[id] = new Navigator();
+            lock (NavigatorDictionary)
+            {
+                var nav = new Navigator();
+                NavigatorDictionary[id] = nav;
+                Navigator.cache = Tuple.Create(id, nav);
+                return nav;
+            }
         }
 
         public static Navigator GetForCurrentView()
         {
             var id = DispatcherHelper.GetCurrentViewId();
-            if (cache.Key == id)
-                return cache.Value;
+            var cache = Navigator.cache;
+            if (cache.Item1 == id)
+                return cache.Item2;
             if (NavigatorDictionary.TryGetValue(id, out var r))
             {
-                cache = new KeyValuePair<int, Navigator>(id, r);
+                Navigator.cache = Tuple.Create(id, r);
                 return r;
             }
             return null;
@@ -46,13 +55,17 @@ namespace Opportunity.MvvmUniverse.Views
         public static bool DestoryForCurrentView()
         {
             var id = DispatcherHelper.GetCurrentViewId();
-            if (cache.Key == id)
-                cache = default;
             if (!NavigatorDictionary.TryGetValue(id, out var r))
                 return false;
-            NavigatorDictionary.Remove(id);
-            r.destory();
-            return true;
+            lock (NavigatorDictionary)
+            {
+                var cache = Navigator.cache;
+                if (cache.Item1 == id)
+                    Navigator.cache = default;
+                NavigatorDictionary.Remove(id);
+                r.destory();
+                return true;
+            }
         }
 
         public NavigationHandlerCollection Handlers { get; }
@@ -114,7 +127,6 @@ namespace Opportunity.MvvmUniverse.Views
                         var h = Handlers[i];
                         if (await h.GoBackAsync())
                         {
-                            UpdateAppViewBackButtonVisibility();
                             return true;
                         }
                     }
@@ -122,6 +134,7 @@ namespace Opportunity.MvvmUniverse.Views
                 }
                 finally
                 {
+                    UpdateAppViewBackButtonVisibility();
                     this.Navigating = false;
                 }
             });
@@ -155,7 +168,6 @@ namespace Opportunity.MvvmUniverse.Views
                         var h = Handlers[i];
                         if (await h.GoForwardAsync())
                         {
-                            UpdateAppViewBackButtonVisibility();
                             return true;
                         }
                     }
@@ -163,6 +175,7 @@ namespace Opportunity.MvvmUniverse.Views
                 }
                 finally
                 {
+                    UpdateAppViewBackButtonVisibility();
                     this.Navigating = false;
                 }
             });
@@ -186,7 +199,6 @@ namespace Opportunity.MvvmUniverse.Views
                         var h = Handlers[i];
                         if (await h.NavigateAsync(sourcePageType, parameter))
                         {
-                            UpdateAppViewBackButtonVisibility();
                             return true;
                         }
                     }
@@ -194,6 +206,7 @@ namespace Opportunity.MvvmUniverse.Views
                 }
                 finally
                 {
+                    UpdateAppViewBackButtonVisibility();
                     this.Navigating = false;
                 }
             });
