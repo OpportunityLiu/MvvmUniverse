@@ -25,16 +25,19 @@ namespace Opportunity.MvvmUniverse
 
     public sealed class SinglePropertyChangedEventArgsSource : PropertyChangedEventArgsSource
     {
-        private readonly string name;
+        private readonly PropertyChangedEventArgs args;
 
         public SinglePropertyChangedEventArgsSource(string propertyName)
+            : this(new PropertyChangedEventArgs(propertyName)) { }
+
+        public SinglePropertyChangedEventArgsSource(PropertyChangedEventArgs args)
         {
-            this.name = propertyName;
+            this.args = args ?? throw new ArgumentNullException(nameof(args));
         }
 
         public override IEnumerator<PropertyChangedEventArgs> GetEnumerator()
         {
-            yield return new PropertyChangedEventArgs(this.name);
+            yield return args;
         }
     }
 

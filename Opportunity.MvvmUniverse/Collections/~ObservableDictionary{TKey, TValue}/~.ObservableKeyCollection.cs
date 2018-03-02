@@ -16,7 +16,11 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         [DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
-        public sealed class ObservableKeyCollection : ObservableKeyValueCollectionBase<TKey>, ICollection<TKey>, IReadOnlyList<TKey>
+        public sealed class ObservableKeyCollection : ObservableKeyValueCollectionBase<TKey>
+            , IReadOnlyList<TKey>
+            , ICollection<TKey>, IReadOnlyCollection<TKey>
+            , IEnumerable<TKey>
+
         {
             internal ObservableKeyCollection(ObservableDictionary<TKey, TValue> parent) : base(parent) { }
 

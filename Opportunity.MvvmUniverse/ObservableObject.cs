@@ -252,6 +252,7 @@ namespace Opportunity.MvvmUniverse
 
         /// <summary>
         /// Tell caller of <see cref="OnPropertyChanged(IEnumerable{PropertyChangedEventArgs})"/> that whether this call can be skipped.
+        /// <para></para>
         /// Returns <c><see cref="PropertyChanged"/> != <see langword="null"/></c> by default.
         /// </summary>
         protected virtual bool NeedRaisePropertyChanged => PropertyChanged != null;

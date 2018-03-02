@@ -13,11 +13,20 @@ namespace TestApp
     public class DataItem
     {
         public string Name { get; set; }
+
+        public int Index => GetHashCode();
     }
 
     public class DataList : IncrementalLoadingList<DataItem>
     {
-        public override bool HasMoreItems => this.Count < 1000;
+        public DataList() : base(getData(0, 100)) { }
+
+        private static IEnumerable<DataItem> getData(int start, int count)
+        {
+            return Enumerable.Range(start, count).Select(i => new DataItem { Name = i.ToString() });
+        }
+
+        public override bool HasMoreItems => Count < 200;
 
         protected override IAsyncOperation<IEnumerable<DataItem>> LoadItemsAsync(int count)
         {
@@ -26,8 +35,13 @@ namespace TestApp
             {
                 await Task.Delay(count * 50);
                 Debug.WriteLine($"{count} items loaded.");
-                return Enumerable.Range(this.Count, count).Select(i => new DataItem { Name = i.ToString() });
+                return getData(this.Count, count);
             });
+        }
+
+        public void Swap(int i)
+        {
+            this[i] = new DataItem { Name = this[i].Name + "*" };
         }
     }
 }

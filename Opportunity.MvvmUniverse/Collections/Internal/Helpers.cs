@@ -49,6 +49,11 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
             throw new InvalidOperationException($"This collection is read only.");
         }
 
+        public static void ThrowForFixedSizeCollection()
+        {
+            throw new InvalidOperationException($"This collection is fixed size.");
+        }
+
         public static void ThrowForReadOnlyCollection(object parent)
         {
             throw new InvalidOperationException($"This collection is a read only view of \"{parent}\".");

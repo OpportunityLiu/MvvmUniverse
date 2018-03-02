@@ -23,7 +23,10 @@ namespace Opportunity.MvvmUniverse.Collections
     [DebuggerDisplay("Count = {Count}")]
     public class ObservableDictionaryView<TKey, TValue> : ObservableCollectionBase<KeyValuePair<TKey, TValue>>
         , IReadOnlyDictionary<TKey, TValue>, IOrderedDictionary
-        , IReadOnlyList<KeyValuePair<TKey, TValue>>, ICollection<KeyValuePair<TKey, TValue>>, IDisposable
+        , IReadOnlyList<KeyValuePair<TKey, TValue>>
+        , ICollection<KeyValuePair<TKey, TValue>>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>, ICollection
+        , IEnumerable<KeyValuePair<TKey, TValue>>
+        , IDisposable
     {
         private ObservableDictionary<TKey, TValue> dictionary;
         /// <summary>
@@ -54,7 +57,7 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void OnDictionaryPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (NeedRaisePropertyChanged)
-                OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e.PropertyName));
+                OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e));
         }
 
         protected virtual void OnDictionaryVectorChanged(IBindableObservableVector vector, object e)
@@ -127,7 +130,6 @@ namespace Opportunity.MvvmUniverse.Collections
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection.IsSynchronized => ((ICollection)Dictionary).IsSynchronized;
-
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => ((ICollection)Dictionary).SyncRoot;
 

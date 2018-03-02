@@ -13,7 +13,11 @@ using static System.Runtime.InteropServices.WindowsRuntime.AsyncInfo;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public abstract class IncrementalLoadingList<T> : ObservableList<T>, ISupportIncrementalLoading
+    /// <summary>
+    /// A list implements <see cref="ISupportIncrementalLoading"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of items.</typeparam>
+    public abstract class IncrementalLoadingList<T> : ObservableList<T>, ISupportIncrementalLoading, IList
     {
         /// <summary>
         /// Create instance of <see cref="IncrementalLoadingList{T}"/>.
@@ -26,24 +30,37 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="items">Items will be copied to the <see cref="IncrementalLoadingList{T}"/>.</param>
         protected IncrementalLoadingList(IEnumerable<T> items) : base(items) { }
 
+        /// <inheritdoc/>
         public abstract bool HasMoreItems { get; }
 
         protected abstract IAsyncOperation<IEnumerable<T>> LoadItemsAsync(int count);
 
-        public bool IsLoading => this.loading?.Status == AsyncStatus.Started;
+        public bool IsLoading { get; private set; }
 
-        private IAsyncOperation<LoadMoreItemsResult> loading;
-
+        /// <inheritdoc/>
         public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
         {
-            var currentLoading = this.loading;
-            if (currentLoading?.Status == AsyncStatus.Started)
+            if (IsLoading)
             {
-                return PollingAsyncWrapper.Wrap(currentLoading);
+                return Run(async token =>
+                {
+                    while (!token.IsCancellationRequested)
+                    {
+                        await Task.Delay(1000, token);
+                        token.ThrowIfCancellationRequested();
+                        if (!IsLoading)
+                            break;
+                    }
+                    var load = LoadMoreItemsAsync(count);
+                    token.Register(load.Cancel);
+                    return await load;
+                });
             }
             if (!this.HasMoreItems)
                 return AsyncOperation<LoadMoreItemsResult>.CreateCompleted(new LoadMoreItemsResult());
-            currentLoading = Run(async token =>
+            IsLoading = true;
+            OnPropertyChanged(nameof(IsLoading));
+            return Run(async token =>
             {
                 try
                 {
@@ -61,12 +78,10 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
                 finally
                 {
+                    IsLoading = false;
                     OnPropertyChanged(nameof(IsLoading), nameof(HasMoreItems));
                 }
             });
-            this.loading = currentLoading;
-            OnPropertyChanged(nameof(IsLoading));
-            return currentLoading;
         }
     }
 }

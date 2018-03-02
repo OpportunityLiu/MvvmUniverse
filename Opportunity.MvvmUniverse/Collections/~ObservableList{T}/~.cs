@@ -17,7 +17,10 @@ namespace Opportunity.MvvmUniverse.Collections
     /// <typeparam name="T">Type of items.</typeparam>
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public partial class ObservableList<T> : ObservableCollectionBase<T>, IList<T>, IReadOnlyList<T>
+    public partial class ObservableList<T> : ObservableCollectionBase<T>
+        , IList<T>, IReadOnlyList<T>
+        , ICollection<T>, IReadOnlyCollection<T>, ICollection
+        , IEnumerable<T>
     {
         /// <summary>
         /// Item storage of the <see cref="ObservableList{T}"/>.
@@ -81,7 +84,6 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void SetItem(int index, T item)
         {
             Items[index] = item;
-            OnPropertyChanged(nameof(Count));
             OnItemChanged(index);
         }
 
@@ -176,6 +178,11 @@ namespace Opportunity.MvvmUniverse.Collections
 
         /// <inheritdoc/>
         public void CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool ICollection.IsSynchronized => false;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        object ICollection.SyncRoot => ((ICollection)Items).SyncRoot;
 
         private ObservableListView<T> readOnlyView;
         /// <summary>

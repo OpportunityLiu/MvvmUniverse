@@ -20,7 +20,11 @@ namespace Opportunity.MvvmUniverse.Collections
     /// <typeparam name="T">Type of elements.</typeparam>
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ObservableListView<T> : ObservableCollectionBase<T>, IReadOnlyList<T>, ICollection<T>, IDisposable
+    public class ObservableListView<T> : ObservableCollectionBase<T>
+        , IReadOnlyList<T>
+        , ICollection<T>, IReadOnlyCollection<T>, ICollection
+        , IEnumerable<T>
+        , IDisposable
     {
         private ObservableList<T> list;
 
@@ -52,7 +56,7 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void OnListPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (NeedRaisePropertyChanged)
-                OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e.PropertyName));
+                OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e));
         }
 
         protected virtual void OnListVectorChanged(IBindableObservableVector vector, object e)
@@ -81,6 +85,10 @@ namespace Opportunity.MvvmUniverse.Collections
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection<T>.IsReadOnly => true;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool ICollection.IsSynchronized => ((ICollection)List).IsSynchronized;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        object ICollection.SyncRoot => ((ICollection)List).SyncRoot;
 
         /// <inheritdoc />
         public void CopyTo(T[] array, int arrayIndex) => List.CopyTo(array, arrayIndex);

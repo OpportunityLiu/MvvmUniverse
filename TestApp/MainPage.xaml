@@ -23,16 +23,15 @@
         </DataTemplate>
       </ListView.ItemTemplate>
     </ListView>
-    <ListView x:Name="ItemView2"
+    <FlipView x:Name="ItemView2"
               Grid.Column="1"
-              SelectionMode="None"
               ItemsSource="{x:Bind Source.View, Mode=OneWay}">
-      <ListView.ItemTemplate>
+      <FlipView.ItemTemplate>
         <DataTemplate x:DataType="local:DataItem">
-          <TextBlock Text="{x:Bind Name}" />
+          <TextBlock Text="{x:Bind Name}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </DataTemplate>
-      </ListView.ItemTemplate>
-    </ListView>
+      </FlipView.ItemTemplate>
+    </FlipView>
     <StackPanel Orientation="Horizontal"
                 Grid.Row="1">
       <Button Click="Button_Click"
@@ -51,6 +50,8 @@
               Content="-&gt;" />
       <Button Click="Button_Click_2"
               Content="New" />
+      <Button Click="Button_Click_3"
+              Content="Test" />
     </StackPanel>
     <StackPanel Grid.Row="1"
                 Grid.Column="1">

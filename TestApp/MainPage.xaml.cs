@@ -34,7 +34,15 @@ namespace TestApp
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+            if (Source != null)
+                Source.View.CurrentChanged -= this.View_CurrentChanged;
             Source = (CollectionViewSource)e.Parameter ?? new CollectionViewSource { Source = Data };
+            Source.View.CurrentChanged += this.View_CurrentChanged;
+            Bindings.Update();
+        }
+
+        private void View_CurrentChanged(object sender, object e)
+        {
             Bindings.Update();
         }
 
@@ -55,6 +63,11 @@ namespace TestApp
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(MainPage), new CollectionViewSource { Source = Data });
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            Source.View.Add(null);
         }
     }
 }
