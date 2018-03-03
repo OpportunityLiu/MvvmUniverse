@@ -57,7 +57,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             void ICollection<TKey>.Add(TKey item) => ThrowForReadOnlyCollection(Parent);
             void ICollection<TKey>.Clear() => ThrowForReadOnlyCollection(Parent);
-            bool ICollection<TKey>.Remove(TKey item) => ThrowForReadOnlyCollection(Parent, false);
+            bool ICollection<TKey>.Remove(TKey item) => ThrowForReadOnlyCollection<bool>(Parent);
 
             /// <inheritdoc/>
             public bool Contains(TKey key) => this.Parent.ContainsKey(key);

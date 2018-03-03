@@ -27,6 +27,10 @@ namespace Opportunity.MvvmUniverse.Commands
     /// <returns>Mapped progress.</returns>
     public delegate double ProgressMapper<TProgress>(IAsyncCommandWithProgress<TProgress> command, TProgress progress);
 
+    /// <summary>
+    /// Represents a command without parameter, with progress.
+    /// </summary>
+    /// <typeparam name="TProgress">Type of progress data.</typeparam>
     public interface IAsyncCommandWithProgress<TProgress> : ICommand, ICommandWithProgress<TProgress>
     {
         /// <summary>
@@ -46,6 +50,11 @@ namespace Opportunity.MvvmUniverse.Commands
     /// <returns>Mapped progress.</returns>
     public delegate double ProgressMapper<T, TProgress>(IAsyncCommandWithProgress<T, TProgress> command, T parameter, TProgress progress);
 
+    /// <summary>
+    /// Represents a command with parameter of <typeparamref name="T"/>, with progress.
+    /// </summary>
+    /// <typeparam name="T">Type of parameter.</typeparam>
+    /// <typeparam name="TProgress">Type of progress data.</typeparam>
     public interface IAsyncCommandWithProgress<T, TProgress> : ICommand<T>, ICommandWithProgress<TProgress>
     {
 

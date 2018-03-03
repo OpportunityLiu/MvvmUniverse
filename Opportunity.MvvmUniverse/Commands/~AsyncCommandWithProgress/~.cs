@@ -7,6 +7,9 @@ using Windows.Web.Http;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Factory methods for <see cref="AsyncCommandWithProgress{TProgress}"/> and <see cref="AsyncCommandWithProgress{T, TProgress}"/>.
+    /// </summary>
     public static class AsyncCommandWithProgress
     {
         public static AsyncCommandWithProgress<TProgress> Create<TProgress>(AsyncActionWithProgressExecutor<TProgress> execute, ProgressMapper<TProgress> progressMapper)

@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/OpportunityLiu/MvvmUniverse</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>An Mvvm lib for UWP apps.</description>
-    <releaseNotes>More methods for Navigation.</releaseNotes>
+    <releaseNotes>New implementation for collections.</releaseNotes>
     <copyright>Opportunity 2018</copyright>
     <tags>UWP mvvm observable</tags>
     <dependencies>

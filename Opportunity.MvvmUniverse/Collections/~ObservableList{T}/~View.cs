@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml.Interop;
 using Windows.Foundation.Collections;
 using System.Threading;
+using System.ComponentModel;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -49,20 +50,38 @@ namespace Opportunity.MvvmUniverse.Collections
         public ObservableListView(ObservableList<T> list)
         {
             this.list = list ?? throw new ArgumentNullException(nameof(list));
-            list.VectorChanged += this.OnListVectorChanged;
-            list.PropertyChanged += this.OnListPropertyChanged;
+            list.VectorChanged += this.onListVectorChanged;
+            list.PropertyChanged += this.onListPropertyChanged;
         }
 
-        protected virtual void OnListPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void onListPropertyChanged(object dictionary, PropertyChangedEventArgs e)
+        {
+            OnListPropertyChanged(e);
+        }
+
+        /// <summary>
+        /// Event handler for <see cref="INotifyPropertyChanged.PropertyChanged"/> of <see cref="List"/>.
+        /// </summary>
+        /// <param name="e">Event args.</param>
+        protected virtual void OnListPropertyChanged(PropertyChangedEventArgs e)
         {
             if (NeedRaisePropertyChanged)
                 OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e));
         }
 
-        protected virtual void OnListVectorChanged(IBindableObservableVector vector, object e)
+        private void onListVectorChanged(IBindableObservableVector dictionary, object e)
+        {
+            OnListVectorChanged((IVectorChangedEventArgs)e);
+        }
+
+        /// <summary>
+        /// Event handler for <see cref="IBindableObservableVector.VectorChanged"/> of <see cref="List"/>.
+        /// </summary>
+        /// <param name="e">Event args.</param>
+        protected virtual void OnListVectorChanged(IVectorChangedEventArgs e)
         {
             if (NeedRaiseVectorChanged)
-                OnVectorChanged((IVectorChangedEventArgs)e);
+                OnVectorChanged(e);
         }
 
         /// <summary>
@@ -73,8 +92,8 @@ namespace Opportunity.MvvmUniverse.Collections
             var l = Interlocked.Exchange(ref this.list, null);
             if (l == null)
                 return;
-            l.VectorChanged -= this.OnListVectorChanged;
-            l.PropertyChanged -= this.OnListPropertyChanged;
+            l.VectorChanged -= this.onListVectorChanged;
+            l.PropertyChanged -= this.onListPropertyChanged;
         }
 
         /// <inheritdoc />
@@ -111,7 +130,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="action">Action for each item and its index.</param>
         public void ForEach(Action<int, T> action) => List.ForEach(action);
 
-        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection(List, false);
+        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(List);
         void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(List);
         void ICollection<T>.Clear() => ThrowForReadOnlyCollection(List);
     }

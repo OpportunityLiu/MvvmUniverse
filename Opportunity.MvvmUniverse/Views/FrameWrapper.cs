@@ -7,12 +7,20 @@ using Windows.UI.Xaml.Controls;
 
 namespace Opportunity.MvvmUniverse.Views
 {
+    /// <summary>
+    /// Extension methods for <see cref="Frame"/>.
+    /// </summary>
     public static class FrameExtension
     {
-        public static FrameWrapper AsNavigationHandler(this Frame frame) => new FrameWrapper(frame);
+        /// <summary>
+        /// Create a wrapper of <paramref name="frame"/> implements <see cref="INavigationHandler"/>.
+        /// </summary>
+        /// <param name="frame"><see cref="Frame"/> to wrap.</param>
+        /// <returns>A wrapper of <paramref name="frame"/> implements <see cref="INavigationHandler"/>.</returns>
+        public static INavigationHandler AsNavigationHandler(this Frame frame) => new FrameWrapper(frame);
     }
 
-    public class FrameWrapper : INavigationHandler
+    internal class FrameWrapper : INavigationHandler
     {
         public FrameWrapper(Frame frame)
         {

@@ -33,8 +33,16 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public abstract bool HasMoreItems { get; }
 
-        protected abstract IAsyncOperation<IEnumerable<T>> LoadItemsAsync(int count);
+        /// <summary>
+        /// Implementation of <see cref="LoadMoreItemsAsync(uint)"/>.
+        /// </summary>
+        /// <param name="count">Items need to be loaded.</param>
+        /// <returns>Loaded items.</returns>
+        protected abstract IAsyncOperation<LoadItemsResult<T>> LoadItemsAsync(int count);
 
+        /// <summary>
+        /// Indicates <see cref="LoadMoreItemsAsync(uint)"/> is running.
+        /// </summary>
         public bool IsLoading { get; private set; }
 
         /// <inheritdoc/>
@@ -69,10 +77,28 @@ namespace Opportunity.MvvmUniverse.Collections
                     var re = await lp;
                     token.ThrowIfCancellationRequested();
                     var lc = 0u;
-                    foreach (var item in re)
+                    if (re.StartIndex > this.Count)
+                        throw new InvalidOperationException("Wrong range returned from implementation of LoadItemsAsync(int).");
+                    else if (re.StartIndex == this.Count)
                     {
-                        this.Add(item);
-                        lc++;
+                        foreach (var item in re.Items)
+                        {
+                            this.Add(item);
+                            lc++;
+                        }
+                    }
+                    else
+                    {
+                        var current = re.StartIndex;
+                        foreach (var item in re.Items)
+                        {
+                            if (current < Count)
+                                this.SetItem(current, item);
+                            else
+                                this.Add(item);
+                            lc++;
+                            current++;
+                        }
                     }
                     return new LoadMoreItemsResult { Count = lc };
                 }

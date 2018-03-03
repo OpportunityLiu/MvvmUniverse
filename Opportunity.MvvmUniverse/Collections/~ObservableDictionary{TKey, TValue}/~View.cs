@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml.Interop;
 using Windows.Foundation.Collections;
 using System.Threading;
+using System.ComponentModel;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -50,20 +51,38 @@ namespace Opportunity.MvvmUniverse.Collections
         public ObservableDictionaryView(ObservableDictionary<TKey, TValue> dictionary)
         {
             this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
-            dictionary.PropertyChanged += this.OnDictionaryPropertyChanged;
-            dictionary.VectorChanged += this.OnDictionaryVectorChanged;
+            dictionary.PropertyChanged += this.onDictionaryPropertyChanged;
+            dictionary.VectorChanged += this.onDictionaryVectorChanged;
         }
 
-        protected virtual void OnDictionaryPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void onDictionaryPropertyChanged(object dictionary, PropertyChangedEventArgs e)
+        {
+            OnDictionaryPropertyChanged(e);
+        }
+
+        /// <summary>
+        /// Event handler for <see cref="INotifyPropertyChanged.PropertyChanged"/> of <see cref="Dictionary"/>.
+        /// </summary>
+        /// <param name="e">Event args.</param>
+        protected virtual void OnDictionaryPropertyChanged(PropertyChangedEventArgs e)
         {
             if (NeedRaisePropertyChanged)
                 OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e));
         }
 
-        protected virtual void OnDictionaryVectorChanged(IBindableObservableVector vector, object e)
+        private void onDictionaryVectorChanged(IBindableObservableVector dictionary, object e)
+        {
+            OnDictionaryVectorChanged((IVectorChangedEventArgs)e);
+        }
+
+        /// <summary>
+        /// Event handler for <see cref="IBindableObservableVector.VectorChanged"/> of <see cref="Dictionary"/>.
+        /// </summary>
+        /// <param name="e">Event args.</param>
+        protected virtual void OnDictionaryVectorChanged(IVectorChangedEventArgs e)
         {
             if (NeedRaiseVectorChanged)
-                OnVectorChanged((IVectorChangedEventArgs)e);
+                OnVectorChanged(e);
         }
 
         /// <summary>
@@ -74,8 +93,8 @@ namespace Opportunity.MvvmUniverse.Collections
             var dic = Interlocked.Exchange(ref this.dictionary, null);
             if (dic == null)
                 return;
-            dic.VectorChanged -= this.OnDictionaryVectorChanged;
-            dic.PropertyChanged -= this.OnDictionaryPropertyChanged;
+            dic.VectorChanged -= this.onDictionaryVectorChanged;
+            dic.PropertyChanged -= this.onDictionaryPropertyChanged;
         }
 
         /// <inheritdoc/>
@@ -156,9 +175,10 @@ namespace Opportunity.MvvmUniverse.Collections
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => Dictionary.CopyTo(array, arrayIndex);
 
         void IDictionary.Remove(object key) => ThrowForReadOnlyCollection(Dictionary);
-        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection(Dictionary, false);
+        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection<bool>(Dictionary);
         void IOrderedDictionary.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary);
 
+        /// <inheritdoc/>
         public ObservableDictionary<TKey, TValue>.DictionaryEnumerator GetEnumerator() => Dictionary.GetEnumerator();
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => ((IEnumerable<KeyValuePair<TKey, TValue>>)Dictionary).GetEnumerator();
         IDictionaryEnumerator IDictionary.GetEnumerator() => ((IDictionary)Dictionary).GetEnumerator();

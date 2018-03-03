@@ -56,7 +56,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             void ICollection<TValue>.Add(TValue item) => ThrowForReadOnlyCollection(Parent);
             void ICollection<TValue>.Clear() => ThrowForReadOnlyCollection(Parent);
-            bool ICollection<TValue>.Remove(TValue item) => ThrowForReadOnlyCollection(Parent, false);
+            bool ICollection<TValue>.Remove(TValue item) => ThrowForReadOnlyCollection<bool>(Parent);
 
             /// <inheritdoc/>
             public bool Contains(TValue value) => this.Parent.ContainsValue(value);

@@ -4,10 +4,8 @@ using Windows.Storage;
 
 namespace Opportunity.MvvmUniverse.Storage
 {
-    public abstract class StorageProperty : ObservableObject
+    public static class StorageProperty
     {
-        internal StorageProperty() { }
-
         public static StorageProperty<T> CreateLocal<T>(
             string path,
             IEqualityComparer<T> equalityComparer = null,

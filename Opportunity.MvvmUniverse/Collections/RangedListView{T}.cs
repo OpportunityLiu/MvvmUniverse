@@ -104,7 +104,7 @@ namespace Opportunity.MvvmUniverse.Collections
             set => ThrowForReadOnlyCollection(this.items);
         }
 
-        int IList.Add(object value) => ThrowForReadOnlyCollection(this.items, 0);
+        int IList.Add(object value) => ThrowForReadOnlyCollection<int>(this.items);
         void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(this.items);
 
         void IList.Insert(int index, object value) => ThrowForReadOnlyCollection(this.items);
@@ -176,7 +176,7 @@ namespace Opportunity.MvvmUniverse.Collections
             CopyTo(a, index);
         }
 
-        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection(this.items, false);
+        bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(this.items);
         void IList.Remove(object value) => ThrowForReadOnlyCollection(this.items);
         void IList.RemoveAt(int index) => ThrowForReadOnlyCollection(this.items);
 

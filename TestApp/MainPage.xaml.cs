@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -29,15 +30,28 @@ namespace TestApp
 
         private void View_CurrentChanging(object sender, CurrentChangingEventArgs e)
         {
+            if (e.IsCancelable)
+            {
+                //e.Cancel = true;
+                Debug.WriteLine("IsCancelable");
+            }
+            else
+            {
+                Debug.WriteLine("IsNotCancelable");
+            }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
             if (Source != null)
+            {
+                Source.View.CurrentChanging -= this.View_CurrentChanging;
                 Source.View.CurrentChanged -= this.View_CurrentChanged;
+            }
             Source = (CollectionViewSource)e.Parameter ?? new CollectionViewSource { Source = Data };
             Source.View.CurrentChanged += this.View_CurrentChanged;
+            Source.View.CurrentChanging += this.View_CurrentChanging;
             Bindings.Update();
         }
 
@@ -67,7 +81,7 @@ namespace TestApp
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            Source.View.Add(null);
+            Data.LoadItemsAsync(Source.View.CurrentPosition, 10);
         }
     }
 }

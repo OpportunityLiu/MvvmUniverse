@@ -59,7 +59,7 @@ namespace Opportunity.MvvmUniverse.Storage
     /// <typeparam name="T">Type of value.</typeparam>
     [DebuggerDisplay(@"{Proxy.ToString(this),nq}")]
     [DebuggerTypeProxy(typeof(StorageProperty<>.Proxy))]
-    public sealed class StorageProperty<T> : StorageProperty, IStorageProperty
+    public sealed class StorageProperty<T> : ObservableObject, IStorageProperty
     {
         private class Proxy
         {

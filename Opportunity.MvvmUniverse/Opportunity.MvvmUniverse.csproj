@@ -57,6 +57,7 @@
     <Compile Include="Collections\Internal\DictionaryValueCollectionDebugView.cs" />
     <Compile Include="Collections\Internal\Helpers.cs" />
     <Compile Include="Collections\ObservableCollectionBase{T}.cs" />
+    <Compile Include="Collections\~Data\LoadItemsResult.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~.DictionaryEnumerator.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~View.cs" />
     <Compile Include="Collections\~ObservableDictionary{TKey, TValue}\~.Updater.cs" />
