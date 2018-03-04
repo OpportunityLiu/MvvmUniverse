@@ -179,9 +179,9 @@ namespace Opportunity.MvvmUniverse.Collections
             check();
             var index = KeySet[key];
             var oldValue = ValueItems[index];
-            ValueItems[index] = value;
             if (default(TValue) == null && ReferenceEquals(oldValue, value))
                 return;
+            ValueItems[index] = value;
             // Key collection will not change.
             if (this.values != null)
             {

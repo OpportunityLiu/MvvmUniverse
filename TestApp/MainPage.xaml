@@ -29,7 +29,7 @@
               ItemsSource="{x:Bind Source.View, Mode=OneWay}">
       <FlipView.ItemTemplate>
         <DataTemplate x:DataType="local:DataItem">
-          <TextBlock Text="{x:Bind Name, FallbackValue='Not loaded'}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          <TextBlock Text="{x:Bind Name, FallbackValue='Not loaded', Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </DataTemplate>
       </FlipView.ItemTemplate>
     </FlipView>

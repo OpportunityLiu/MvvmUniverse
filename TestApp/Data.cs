@@ -44,10 +44,13 @@ namespace TestApp
             return AsyncInfo.Run(async token =>
             {
                 await Task.Delay(1000);
-                await Task.Run(() => throw new Exception("Test"));
                 var s = index / 5 * 5;
                 Debug.WriteLine($"Loaded {s} to {s + 5}.");
-                return LoadItemsResult.Create(s, getData(s, 5));
+                for (int i = s; i < s + 5; i++)
+                {
+                    this[i].Name = this[i].Name.Split()[1];
+                }
+                return LoadItemsResult.Create(s, this.Skip(s).Take(5));
             });
         }
     }
