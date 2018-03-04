@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml.Data;
@@ -40,74 +41,82 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns>Loaded items.</returns>
         protected abstract IAsyncOperation<LoadItemsResult<T>> LoadItemsAsync(int count);
 
+        private int isLoading;
         /// <summary>
         /// Indicates <see cref="LoadMoreItemsAsync(uint)"/> is running.
         /// </summary>
-        public bool IsLoading { get; private set; }
+        public bool IsLoading => this.isLoading != 0;
 
         /// <inheritdoc/>
         public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
         {
-            if (IsLoading)
+            if (!this.HasMoreItems)
+                return AsyncOperation<LoadMoreItemsResult>.CreateCompleted(new LoadMoreItemsResult());
+            if (Interlocked.CompareExchange(ref this.isLoading, 1, 0) == 0)
+            {
+                OnPropertyChanged(nameof(IsLoading));
+                return Run(async token =>
+                {
+                    try
+                    {
+                        var lp = LoadItemsAsync((int)count);
+                        token.Register(lp.Cancel);
+                        var re = await lp;
+                        token.ThrowIfCancellationRequested();
+                        var lc = 0u;
+                        if (re.Items == null)
+                            return new LoadMoreItemsResult { Count = 0 };
+                        if (re.StartIndex > this.Count)
+                            throw new InvalidOperationException("Wrong range returned from implementation of LoadItemsAsync(int).");
+                        else if (re.StartIndex == this.Count)
+                        {
+                            foreach (var item in re.Items)
+                            {
+                                this.Add(item);
+                                lc++;
+                            }
+                        }
+                        else
+                        {
+                            var current = re.StartIndex;
+                            foreach (var item in re.Items)
+                            {
+                                if (current < Count)
+                                    this.SetItem(current, item);
+                                else
+                                {
+                                    this.Add(item);
+                                    lc++;
+                                }
+                                current++;
+                            }
+                        }
+                        return new LoadMoreItemsResult { Count = lc };
+                    }
+                    finally
+                    {
+                        Interlocked.Exchange(ref this.isLoading, 0);
+                        OnPropertyChanged(nameof(IsLoading), nameof(HasMoreItems));
+                    }
+                });
+            }
+            else
             {
                 return Run(async token =>
                 {
+                    var c = count;
                     while (!token.IsCancellationRequested)
                     {
-                        await Task.Delay(1000, token);
+                        await Task.Delay(500, token);
                         token.ThrowIfCancellationRequested();
-                        if (!IsLoading)
+                        if (this.isLoading == 0)
                             break;
                     }
-                    var load = LoadMoreItemsAsync(count);
+                    var load = LoadMoreItemsAsync(c);
                     token.Register(load.Cancel);
                     return await load;
                 });
             }
-            if (!this.HasMoreItems)
-                return AsyncOperation<LoadMoreItemsResult>.CreateCompleted(new LoadMoreItemsResult());
-            IsLoading = true;
-            OnPropertyChanged(nameof(IsLoading));
-            return Run(async token =>
-            {
-                try
-                {
-                    var lp = LoadItemsAsync((int)count);
-                    token.Register(lp.Cancel);
-                    var re = await lp;
-                    token.ThrowIfCancellationRequested();
-                    var lc = 0u;
-                    if (re.StartIndex > this.Count)
-                        throw new InvalidOperationException("Wrong range returned from implementation of LoadItemsAsync(int).");
-                    else if (re.StartIndex == this.Count)
-                    {
-                        foreach (var item in re.Items)
-                        {
-                            this.Add(item);
-                            lc++;
-                        }
-                    }
-                    else
-                    {
-                        var current = re.StartIndex;
-                        foreach (var item in re.Items)
-                        {
-                            if (current < Count)
-                                this.SetItem(current, item);
-                            else
-                                this.Add(item);
-                            lc++;
-                            current++;
-                        }
-                    }
-                    return new LoadMoreItemsResult { Count = lc };
-                }
-                finally
-                {
-                    IsLoading = false;
-                    OnPropertyChanged(nameof(IsLoading), nameof(HasMoreItems));
-                }
-            });
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using System.Threading;
 
 namespace TestApp
 {
@@ -40,10 +41,10 @@ namespace TestApp
         {
             return AsyncInfo.Run(async token =>
             {
-                await Task.Delay(200);
+                await Task.Delay(1000);
                 var s = index / 5 * 5;
                 Debug.WriteLine($"Loaded {s} to {s + 5}.");
-                return new LoadItemsResult<DataItem>(s, getData(s, 5));
+                return LoadItemsResult.Create(s, getData(s, 5));
             });
         }
     }

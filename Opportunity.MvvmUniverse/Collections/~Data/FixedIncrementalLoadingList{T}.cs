@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml.Data;
 using static System.Runtime.InteropServices.WindowsRuntime.AsyncInfo;
-using Windows.Foundation.Collections;
-using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 using Opportunity.Helpers.Universal.AsyncHelpers;
 using System.Threading;
 using System.Diagnostics;
@@ -22,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// An <see cref="IncrementalLoadingList{T}"/> with a previous known final length.
     /// </summary>
     /// <typeparam name="T">Type of record.</typeparam>
-    public abstract class FixedIncrementalLoadingList<T> : ObservableList<T>, IList, ICollectionViewFactory
+    public abstract partial class FixedIncrementalLoadingList<T> : ObservableList<T>, IList, ICollectionViewFactory
     {
         /// <summary>
         /// Create instance of <see cref="FixedIncrementalLoadingList{T}"/>.
@@ -42,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (recordCount < Count)
                 throw new ArgumentOutOfRangeException(nameof(recordCount));
-            this.LoadedItems = new BitArray(recordCount, false);
+            this.LoadedItems = new bool[recordCount];
             for (var i = 0; i < this.Count; i++)
             {
                 this.LoadedItems[i] = true;
@@ -53,7 +51,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <summary>
         /// Indicates the loaded status of <see cref="ObservableList{T}.Items"/>.
         /// </summary>
-        protected BitArray LoadedItems { get; }
+        protected bool[] LoadedItems { get; }
 
         bool IList.IsFixedSize => true;
 
@@ -126,11 +124,11 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns>Load result, must contains item at position <paramref name="index"/>.</returns>
         protected abstract IAsyncOperation<LoadItemsResult<T>> LoadItemAsync(int index);
 
-        private bool isLoading;
+        private int isLoading;
         /// <summary>
         /// Indicates <see cref="LoadItemsAsync(int,int)"/> is running.
         /// </summary>
-        public bool IsLoading { get => this.isLoading; set => Set(ref this.isLoading, value); }
+        public bool IsLoading => this.isLoading != 0;
 
         private void formatLoadRange(ref int start, ref int end)
         {
@@ -156,8 +154,10 @@ namespace Opportunity.MvvmUniverse.Collections
             var loadOp = this.LoadItemAsync(startIndex);
             token.Register(loadOp.Cancel);
             var loadR = await loadOp;
-            startIndex = loadR.StartIndex;
             token.ThrowIfCancellationRequested();
+            if (loadR.Items == null)
+                throw new InvalidOperationException("Wrong result of LoadItemAsync(int).");
+            startIndex = loadR.StartIndex;
             foreach (var item in loadR.Items)
             {
                 SetItem(startIndex, item);
@@ -166,7 +166,7 @@ namespace Opportunity.MvvmUniverse.Collections
             if (endIndex <= startIndex)
                 return;
             formatLoadRange(ref startIndex, ref endIndex);
-            if (startIndex == endIndex)
+            if (startIndex >= endIndex)
                 return;
             // Need load another page.
             var loadConOp = loadItemsCoreAsync(startIndex, endIndex, token);
@@ -183,40 +183,46 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <exception cref="ArgumentOutOfRangeException">The range out of the list.</exception>
         public IAsyncAction LoadItemsAsync(int startIndex, int count)
         {
-            if (this.isLoading)
-            {
-                return Run(async token =>
-                {
-                    while (!token.IsCancellationRequested)
-                    {
-                        await Task.Delay(1000, token);
-                        token.ThrowIfCancellationRequested();
-                        if (!IsLoading)
-                            break;
-                    }
-                    var load = LoadItemsAsync(startIndex, count);
-                    token.Register(load.Cancel);
-                    await load;
-                });
-            }
             if (startIndex < 0 || startIndex > Count) throw new ArgumentOutOfRangeException(nameof(startIndex));
             if (count < 0 || startIndex + count > Count) throw new ArgumentOutOfRangeException(nameof(count));
             var endIndex = startIndex + count;
             formatLoadRange(ref startIndex, ref endIndex);
-            if (startIndex == endIndex)
+            if (startIndex >= endIndex)
                 return AsyncAction.CreateCompleted();
-            IsLoading = true;
-            return Run(async token =>
+            if (Interlocked.CompareExchange(ref this.isLoading, 1, 0) == 0)
             {
-                try
+                OnPropertyChanged(nameof(IsLoading));
+                return Run(async token =>
                 {
-                    await this.loadItemsCoreAsync(startIndex, endIndex, token);
-                }
-                finally
+                    try
+                    {
+                        await this.loadItemsCoreAsync(startIndex, endIndex, token);
+                    }
+                    finally
+                    {
+                        Interlocked.Exchange(ref this.isLoading, 0);
+                        OnPropertyChanged(nameof(IsLoading));
+                    }
+                });
+            }
+            else
+            {
+                return Run(async token =>
                 {
-                    IsLoading = false;
-                }
-            });
+                    var s = startIndex;
+                    var c = endIndex - startIndex;
+                    while (!token.IsCancellationRequested)
+                    {
+                        await Task.Delay(500, token);
+                        token.ThrowIfCancellationRequested();
+                        if (this.isLoading == 0)
+                            break;
+                    }
+                    var load = LoadItemsAsync(s, c);
+                    token.Register(load.Cancel);
+                    await load;
+                });
+            }
         }
 
         /// <summary>
@@ -225,155 +231,5 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <returns>A view of this list.</returns>
         public ICollectionView CreateView() => new FixedCollectionView(this);
-
-        internal class FixedCollectionView : ObservableObject, ICollectionView, IDisposable, IItemsRangeInfo
-        {
-            private readonly FixedIncrementalLoadingList<T> parent;
-
-            public FixedCollectionView(FixedIncrementalLoadingList<T> fixedIncrementalLoadingList)
-            {
-                this.parent = fixedIncrementalLoadingList;
-                this.parent.VectorChanged += this.Parent_VectorChanged;
-            }
-
-            public event VectorChangedEventHandler<object> VectorChanged;
-            private void Parent_VectorChanged(Windows.UI.Xaml.Interop.IBindableObservableVector vector, object e)
-            {
-                var arg = (IVectorChangedEventArgs)e;
-                var i = (int)arg.Index;
-                if (i == this.currentPosition)
-                {
-                    ForceCurrnetChange(this.parent[i]);
-                }
-                var temp = this.VectorChanged;
-                if (temp != null)
-                    DispatcherHelper.BeginInvoke(() => temp(this, arg));
-            }
-
-            public void Dispose()
-            {
-                this.parent.VectorChanged -= this.Parent_VectorChanged;
-            }
-
-            public bool MoveCurrentTo(object item) => MoveCurrentToPosition(IndexOf(item));
-            public bool MoveCurrentToPosition(int index)
-            {
-                if (OnCurrentChanging())
-                    return false;
-                if (index < 0)
-                {
-                    CurrentPosition = -1;
-                    CurrentItem = null;
-                    OnCurrentChanged();
-                    return false;
-                }
-                else if (index >= Count)
-                {
-                    CurrentPosition = Count;
-                    CurrentItem = null;
-                    OnCurrentChanged();
-                    return false;
-                }
-                else
-                {
-                    CurrentPosition = index;
-                    CurrentItem = this.parent[index];
-                    CurrentItem = this.parent[index];
-                    OnCurrentChanged();
-                    var load = this.parent.LoadItemsAsync(index, 1);
-                    load.Completed += (s, e) => s.GetResults();
-                    return true;
-                }
-            }
-
-            public bool MoveCurrentToFirst() => MoveCurrentToPosition(0);
-            public bool MoveCurrentToLast() => MoveCurrentToPosition(this.Count - 1);
-            public bool MoveCurrentToNext() => MoveCurrentToPosition(this.currentPosition + 1);
-            public bool MoveCurrentToPrevious() => MoveCurrentToPosition(this.currentPosition - 1);
-
-            public bool HasMoreItems => false;
-            public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) => AsyncOperation<LoadMoreItemsResult>.CreateCompleted();
-
-            public IObservableVector<object> CollectionGroups => null;
-
-            public bool IsCurrentAfterLast => this.currentPosition >= this.Count;
-            public bool IsCurrentBeforeFirst => this.currentPosition < 0;
-
-            private int currentPosition;
-            public int CurrentPosition
-            {
-                get => this.currentPosition;
-                private set => Set(nameof(IsCurrentAfterLast), nameof(IsCurrentBeforeFirst), ref this.currentPosition, value);
-            }
-            private object currentItem;
-            public object CurrentItem { get => this.currentItem; private set => Set(ref this.currentItem, value); }
-
-            private void OnCurrentChanged()
-            {
-                var temp = CurrentChanged;
-                if (temp != null)
-                    DispatcherHelper.BeginInvoke(() => temp(this, EventArgs.Empty));
-            }
-
-            private void ForceCurrnetChange(object newCurrent)
-            {
-                var temp1 = CurrentChanging;
-                if (temp1 is null)
-                {
-                    CurrentItem = newCurrent;
-                    OnCurrentChanged();
-                    return;
-                }
-                var temp2 = CurrentChanged;
-                DispatcherHelper.BeginInvoke(() =>
-                {
-                    temp1(this, new CurrentChangingEventArgs(false));
-                    CurrentItem = newCurrent;
-                    temp2?.Invoke(this, EventArgs.Empty);
-                });
-            }
-            public event EventHandler<object> CurrentChanged;
-            private bool OnCurrentChanging()
-            {
-                var temp = CurrentChanging;
-                if (temp == null)
-                    return false;
-                var arg = new CurrentChangingEventArgs(true);
-                temp(this, arg);
-                return arg.Cancel;
-            }
-            public event CurrentChangingEventHandler CurrentChanging;
-
-            public int IndexOf(object item) => ((IList)this.parent).IndexOf(item);
-            public void Insert(int index, object item) => ThrowForFixedSizeCollection();
-            public void RemoveAt(int index) => ThrowForFixedSizeCollection();
-
-            public object this[int index]
-            {
-                get => this.parent[index];
-                set => ((IList)this.parent)[index] = value;
-            }
-
-            public void Add(object item) => ThrowForFixedSizeCollection();
-            public void Clear() => ThrowForFixedSizeCollection();
-            public bool Contains(object item) => ((IList)this.parent).Contains(item);
-
-            public void CopyTo(object[] array, int arrayIndex) => ((IList)this.parent).CopyTo(array, arrayIndex);
-
-            public bool Remove(object item) => ThrowForFixedSizeCollection<bool>();
-
-            public int Count => this.parent.Count;
-
-            public bool IsReadOnly => false;
-
-            public IEnumerator<object> GetEnumerator() => this.parent.Cast<object>().GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-            public async void RangesChanged(ItemIndexRange visibleRange, IReadOnlyList<ItemIndexRange> trackedItems)
-            {
-                await this.parent.LoadItemsAsync(visibleRange.FirstIndex, (int)visibleRange.Length);
-            }
-        }
     }
 }

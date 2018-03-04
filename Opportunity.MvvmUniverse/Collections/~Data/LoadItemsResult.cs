@@ -4,24 +4,45 @@ using System.Collections.Generic;
 namespace Opportunity.MvvmUniverse.Collections
 {
     /// <summary>
-    /// Load result of <see cref="FixedIncrementalLoadingList{T}.LoadItemAsync(int)"/>.
+    /// Factory methods for <see cref="LoadItemsResult{T}"/>/
     /// </summary>
-    /// <typeparam name="T">Type of items.</typeparam>
-    public struct LoadItemsResult<T>
+    public static class LoadItemsResult
     {
+        /// <summary>
+        /// Get an instance of <see cref="LoadItemsResult{T}"/> represents empty result.
+        /// </summary>
+        /// <typeparam name="T">Type of results.</typeparam>
+        /// <returns>An instance of <see cref="LoadItemsResult{T}"/> represents empty result.</returns>
+        public static LoadItemsResult<T> Empty<T>() => default;
+
         /// <summary>
         /// Create new instance of <see cref="LoadItemsResult{T}"/>.
         /// </summary>
         /// <param name="startIndex">Start index of loaded items.</param>
         /// <param name="items">Loaded items.</param>
+        /// <returns>An instance of <see cref="LoadItemsResult{T}"/>.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex"/> is negitive.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is <see langword="null"/>.</exception>
-        public LoadItemsResult(int startIndex, IEnumerable<T> items)
+        public static LoadItemsResult<T> Create<T>(int startIndex, IEnumerable<T> items)
         {
             if (startIndex < 0)
                 throw new ArgumentOutOfRangeException(nameof(startIndex));
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            return new LoadItemsResult<T>(startIndex, items);
+        }
+    }
+
+    /// <summary>
+    /// Load result of <see cref="FixedIncrementalLoadingList{T}.LoadItemAsync(int)"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of items.</typeparam>
+    public struct LoadItemsResult<T>
+    {
+        internal LoadItemsResult(int startIndex, IEnumerable<T> items)
+        {
             this.StartIndex = startIndex;
-            this.Items = items ?? throw new ArgumentNullException(nameof(items));
+            this.Items = items;
         }
 
         /// <summary>

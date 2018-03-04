@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Collections\~Cache\AutoFillCacheStorage.cs" />
     <Compile Include="Collections\~Cache\CacheStorage.cs" />
+    <Compile Include="Collections\~Data\FixedIncrementalLoadingList.FixedCollectionView.cs" />
     <Compile Include="Collections\~Data\IncrementalLoadingList{T}.cs" />
     <Compile Include="Collections\Internal\CollectionDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryDebugView.cs" />
