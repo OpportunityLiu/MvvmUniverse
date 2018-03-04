@@ -8,12 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using System.Threading;
+using Opportunity.MvvmUniverse;
 
 namespace TestApp
 {
-    public class DataItem
+    public class DataItem : ObservableObject
     {
-        public string Name { get; set; }
+        private string name;
+        public string Name { get => this.name; set => Set(ref this.name, value); }
 
         public int Index => GetHashCode();
     }
@@ -42,6 +44,7 @@ namespace TestApp
             return AsyncInfo.Run(async token =>
             {
                 await Task.Delay(1000);
+                await Task.Run(() => throw new Exception("Test"));
                 var s = index / 5 * 5;
                 Debug.WriteLine($"Loaded {s} to {s + 5}.");
                 return LoadItemsResult.Create(s, getData(s, 5));

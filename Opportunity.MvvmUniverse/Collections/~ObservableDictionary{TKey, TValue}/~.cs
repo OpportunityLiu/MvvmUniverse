@@ -180,6 +180,8 @@ namespace Opportunity.MvvmUniverse.Collections
             var index = KeySet[key];
             var oldValue = ValueItems[index];
             ValueItems[index] = value;
+            if (default(TValue) == null && ReferenceEquals(oldValue, value))
+                return;
             // Key collection will not change.
             if (this.values != null)
             {

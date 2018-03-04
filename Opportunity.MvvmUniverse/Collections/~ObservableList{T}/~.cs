@@ -83,7 +83,10 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </exception>
         protected virtual void SetItem(int index, T item)
         {
+            var old = Items[index];
             Items[index] = item;
+            if (default(T) == null && ReferenceEquals(old, item))
+                return;
             OnItemChanged(index);
         }
 
