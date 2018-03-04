@@ -158,10 +158,22 @@ namespace Opportunity.MvvmUniverse.Collections
             if (loadR.Items == null)
                 throw new InvalidOperationException("Wrong result of LoadItemAsync(int).");
             startIndex = loadR.StartIndex;
-            foreach (var item in loadR.Items)
+            if (loadR.ReplaceLoadedItems)
             {
-                SetItem(startIndex, item);
-                startIndex++;
+                foreach (var item in loadR.Items)
+                {
+                    SetItem(startIndex, item);
+                    startIndex++;
+                }
+            }
+            else
+            {
+                foreach (var item in loadR.Items)
+                {
+                    if (!this.LoadedItems[startIndex])
+                        SetItem(startIndex, item);
+                    startIndex++;
+                }
             }
             if (endIndex <= startIndex)
                 return;

@@ -82,7 +82,10 @@ namespace Opportunity.MvvmUniverse.Collections
                             foreach (var item in re.Items)
                             {
                                 if (current < Count)
-                                    this.SetItem(current, item);
+                                {
+                                    if (re.ReplaceLoadedItems)
+                                        this.SetItem(current, item);
+                                }
                                 else
                                 {
                                     this.Add(item);
