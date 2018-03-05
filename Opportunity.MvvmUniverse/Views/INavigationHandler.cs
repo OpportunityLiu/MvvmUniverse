@@ -5,11 +5,13 @@ namespace Opportunity.MvvmUniverse.Views
 {
     public interface INavigationHandler
     {
-        bool CanGoBack();
+        bool CanGoBack { get; }
         IAsyncOperation<bool> GoBackAsync();
-        bool CanGoForward();
+        bool CanGoForward { get; }
         IAsyncOperation<bool> GoForwardAsync();
         IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter);
+        void OnAdd(Navigator navigator);
+        void OnRemove();
     }
 
     public static class INavigationHandlerExtension

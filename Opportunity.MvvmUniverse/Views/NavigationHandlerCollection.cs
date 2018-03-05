@@ -47,6 +47,7 @@ namespace Opportunity.MvvmUniverse.Views
             {
                 foreach (var item in this)
                 {
+                    item.OnRemove();
                     NavigationHandlerDic.Remove(item);
                 }
             }
@@ -56,22 +57,30 @@ namespace Opportunity.MvvmUniverse.Views
 
         protected override void InsertItem(int index, INavigationHandler item)
         {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item));
             using (GetLock())
             {
                 NavigationHandlerDic.Add(item, this.navigator);
             }
             base.InsertItem(index, item);
+            item.OnAdd(this.navigator);
             this.navigator.UpdateAppViewBackButtonVisibility();
         }
 
         protected override void SetItem(int index, INavigationHandler item)
         {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item));
             using (GetLock())
             {
-                NavigationHandlerDic.Remove(this[index]);
+                var old = this[index];
+                old.OnRemove();
+                NavigationHandlerDic.Remove(old);
                 NavigationHandlerDic.Add(item, this.navigator);
             }
             base.SetItem(index, item);
+            item.OnAdd(this.navigator);
             this.navigator.UpdateAppViewBackButtonVisibility();
         }
 
@@ -79,7 +88,9 @@ namespace Opportunity.MvvmUniverse.Views
         {
             using (GetLock())
             {
-                NavigationHandlerDic.Remove(this[index]);
+                var old = this[index];
+                old.OnRemove();
+                NavigationHandlerDic.Remove(old);
             }
             base.RemoveItem(index);
             this.navigator.UpdateAppViewBackButtonVisibility();

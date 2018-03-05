@@ -29,7 +29,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         public Frame Frame { get; }
 
-        public bool CanGoBack() => Frame.CanGoBack;
+        public bool CanGoBack => Frame.CanGoBack;
 
         public IAsyncOperation<bool> GoBackAsync()
         {
@@ -40,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Views
             return AsyncOperation<bool>.CreateCompleted(true);
         }
 
-        public bool CanGoForward() => Frame.CanGoForward;
+        public bool CanGoForward => Frame.CanGoForward;
 
         public IAsyncOperation<bool> GoForwardAsync()
         {
@@ -58,5 +58,8 @@ namespace Opportunity.MvvmUniverse.Views
                 return AsyncOperation<bool>.CreateCompleted(false);
             return AsyncOperation<bool>.CreateCompleted(true);
         }
+
+        public void OnAdd(Navigator navigator) { }
+        public void OnRemove() { }
     }
 }

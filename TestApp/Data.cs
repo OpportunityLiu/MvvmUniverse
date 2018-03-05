@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using System.Threading;
 using Opportunity.MvvmUniverse;
+using Windows.UI.Xaml.Data;
 
 namespace TestApp
 {
@@ -22,6 +23,10 @@ namespace TestApp
 
     public class DataList : FixedIncrementalLoadingList<DataItem>
     {
+        public static DataList Instance { get; } = new DataList();
+
+        public static ICollectionView View { get; } = Instance.CreateView();
+
         public DataList() : base(500) { }
 
         private static IEnumerable<DataItem> getData(int start, int count)

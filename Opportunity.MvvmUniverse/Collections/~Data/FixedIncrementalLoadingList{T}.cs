@@ -70,15 +70,6 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="index"/> out of range of the list.
         /// </exception>
-        public void UnloadAt(int index) => UnloadItem(index);
-
-        /// <summary>
-        /// Set item of the <see cref="FixedIncrementalLoadingList{T}"/> to placeholder value and mark that item as unloaded.
-        /// </summary>
-        /// <param name="index">Index of item to set new value.</param>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="index"/> out of range of the list.
-        /// </exception>
         protected virtual void UnloadItem(int index)
         {
             SetItem(index, CreatePlaceholder(index));
@@ -115,6 +106,35 @@ namespace Opportunity.MvvmUniverse.Collections
         protected override void ClearItems()
         {
             throw new InvalidOperationException("The list is fixed size.");
+        }
+
+        /// <summary>
+        /// Set item of the <see cref="FixedIncrementalLoadingList{T}"/> to placeholder value and mark that item as unloaded.
+        /// </summary>
+        /// <param name="index">Index of item to set new value.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> out of range of the list.
+        /// </exception>
+        public void UnloadAt(int index) => UnloadItem(index);
+
+        /// <summary>
+        /// Get loading status of item at <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">Index of item.</param>
+        /// <returns>Item is loaded or not.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> out of range of the list.
+        /// </exception>
+        public bool IsLoaded(int index)
+        {
+            try
+            {
+                return this.LoadedItems[index];
+            }
+            catch (IndexOutOfRangeException ex)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), ex);
+            }
         }
 
         /// <summary>

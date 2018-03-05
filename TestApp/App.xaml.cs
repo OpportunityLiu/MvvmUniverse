@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Views;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -37,9 +38,9 @@ namespace TestApp
         /// 将在启动应用程序以打开特定文件等情况下使用。
         /// </summary>
         /// <param name="e">有关启动请求和过程的详细信息。</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected async override void OnLaunched(LaunchActivatedEventArgs e)
         {
-            Frame rootFrame = Window.Current.Content as Frame;
+            var rootFrame = Window.Current.Content as Frame;
 
             // 不要在窗口已包含内容时重复应用程序初始化，
             // 只需确保窗口处于活动状态
@@ -48,6 +49,7 @@ namespace TestApp
                 // 创建要充当导航上下文的框架，并导航到第一页
                 rootFrame = new Frame();
 
+                Navigator.GetOrCreateForCurrentView().Handlers.Add(rootFrame.AsNavigationHandler());
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
@@ -66,7 +68,7 @@ namespace TestApp
                     // 当导航堆栈尚未还原时，导航到第一页，
                     // 并通过将所需信息作为导航参数传入来配置
                     // 参数
-                    rootFrame.Navigate(typeof(MainPage));
+                    await Navigator.GetForCurrentView().NavigateAsync(typeof(MainPage));
                 }
                 // 确保当前窗口处于活动状态
                 Window.Current.Activate();

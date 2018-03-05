@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Opportunity.MvvmUniverse.Commands;
+using Opportunity.MvvmUniverse.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;

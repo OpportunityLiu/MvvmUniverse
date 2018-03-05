@@ -161,7 +161,7 @@ namespace Opportunity.MvvmUniverse.Views
                 return false;
             for (var i = Handlers.Count - 1; i >= 0; i--)
             {
-                if (Handlers[i].CanGoBack())
+                if (Handlers[i].CanGoBack)
                 {
                     return true;
                 }
@@ -215,7 +215,7 @@ namespace Opportunity.MvvmUniverse.Views
                 return false;
             for (var i = Handlers.Count - 1; i >= 0; i--)
             {
-                if (Handlers[i].CanGoForward())
+                if (Handlers[i].CanGoForward)
                 {
                     return true;
                 }
