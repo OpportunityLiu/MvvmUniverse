@@ -22,6 +22,8 @@ using Windows.UI.Xaml.Navigation;
 
 namespace TestApp
 {
+    public class VM : ViewModelBase { public string Id => GetHashCode().ToString(); }
+
     /// <summary>
     /// 可用于自身或导航至 Frame 内部的空白页。
     /// </summary>
@@ -30,6 +32,13 @@ namespace TestApp
         public MainPage()
         {
             this.InitializeComponent();
+        }
+
+        public new VM ViewModel { get => (VM)base.ViewModel; set => base.ViewModel = value; }
+
+        protected override void OnViewModelChanged(ViewModelBase oldValue, ViewModelBase newValue)
+        {
+
         }
 
         private Navigator navigator = Navigator.GetForCurrentView();
@@ -82,6 +91,7 @@ namespace TestApp
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
+            this.ViewModel = new VM();
             ApplicationView.GetForCurrentView().IsScreenCaptureEnabled = false;
             navigator.NavigateAsync(typeof(MainPage), new CollectionViewSource { Source = Data });
         }

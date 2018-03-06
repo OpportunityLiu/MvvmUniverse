@@ -60,7 +60,7 @@
     </StackPanel>
     <StackPanel Grid.Row="1"
                 Grid.Column="1">
-      <!--<TextBlock  Text="{x:Bind ((local:DataItem)Source.View.CurrentItem).Name, Mode=OneWay, FallbackValue='NULL'}" />-->
+      <TextBlock  Text="{x:Bind ViewModel.Id, Mode=OneWay, FallbackValue='NULL'}" />
       <TextBlock  Text="{x:Bind Source.View.CurrentPosition.ToString(), Mode=OneWay}" />
     </StackPanel>
   </Grid>
