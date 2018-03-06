@@ -34,7 +34,7 @@ namespace Opportunity.MvvmUniverse.Views
             }
         }
 
-        private static LockHelper GetLock() => new LockHelper(Navigator.NavigatorDictionary.Count > 1);
+        private static LockHelper GetLock() => new LockHelper(Navigator.Count > 1);
 
         internal NavigationHandlerCollection(Navigator navigator)
         {
@@ -43,57 +43,72 @@ namespace Opportunity.MvvmUniverse.Views
 
         protected override void ClearItems()
         {
-            using (GetLock())
+            try
             {
-                foreach (var item in this)
+                using (GetLock())
                 {
-                    item.OnRemove();
-                    NavigationHandlerDic.Remove(item);
+                    while (this.Count != 0)
+                    {
+                        var item = this[this.Count - 1];
+                        item.OnRemove();
+                        NavigationHandlerDic.Remove(item);
+                        base.RemoveItem(this.Count - 1);
+                    }
                 }
             }
-            base.ClearItems();
-            this.navigator.UpdateAppViewBackButtonVisibility();
+            finally
+            {
+                this.navigator.UpdateProperties();
+            }
         }
 
         protected override void InsertItem(int index, INavigationHandler item)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
+            item.OnAdd(this.navigator);
             using (GetLock())
             {
                 NavigationHandlerDic.Add(item, this.navigator);
             }
             base.InsertItem(index, item);
-            item.OnAdd(this.navigator);
-            this.navigator.UpdateAppViewBackButtonVisibility();
+            this.navigator.UpdateProperties();
         }
 
         protected override void SetItem(int index, INavigationHandler item)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
+            var old = this[index];
+            item.OnAdd(this.navigator);
+            try
+            {
+                old.OnRemove();
+            }
+            catch
+            {
+                item.OnRemove();
+                throw;
+            }
             using (GetLock())
             {
-                var old = this[index];
-                old.OnRemove();
                 NavigationHandlerDic.Remove(old);
                 NavigationHandlerDic.Add(item, this.navigator);
             }
             base.SetItem(index, item);
-            item.OnAdd(this.navigator);
-            this.navigator.UpdateAppViewBackButtonVisibility();
+            this.navigator.UpdateProperties();
         }
 
         protected override void RemoveItem(int index)
         {
+            var old = this[index];
+            old.OnRemove();
             using (GetLock())
             {
-                var old = this[index];
-                old.OnRemove();
                 NavigationHandlerDic.Remove(old);
             }
             base.RemoveItem(index);
-            this.navigator.UpdateAppViewBackButtonVisibility();
+            this.navigator.UpdateProperties();
         }
     }
 }

@@ -1,12 +1,14 @@
-﻿<Page x:Class="TestApp.MainPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:local="using:TestApp"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:c="using:Opportunity.MvvmUniverse.Collections"
-      NavigationCacheMode="Enabled"
-      mc:Ignorable="d">
+﻿<views:MvvmPage x:Class="TestApp.MainPage"
+                xmlns:views="using:Opportunity.MvvmUniverse.Views"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="using:TestApp"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                xmlns:c="using:Opportunity.MvvmUniverse.Collections"
+                NavigationCacheMode="Enabled"
+                mc:Ignorable="d"
+                Padding="{x:Bind VisibleBounds, Mode=OneWay}">
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Grid.RowDefinitions>
       <RowDefinition />
@@ -29,14 +31,16 @@
               ItemsSource="{x:Bind Source.View, Mode=OneWay}">
       <FlipView.ItemTemplate>
         <DataTemplate x:DataType="local:DataItem">
-          <TextBlock Text="{x:Bind Name, FallbackValue='Not loaded', Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          <TextBlock Text="{x:Bind Name, FallbackValue='Not loaded', Mode=OneWay}"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center" />
         </DataTemplate>
       </FlipView.ItemTemplate>
     </FlipView>
     <StackPanel Orientation="Horizontal"
                 Grid.Row="1">
       <Button Click="Button_Click"
-              IsEnabled="{x:Bind Frame.CanGoBack, Mode=OneWay}"
+              IsEnabled="{x:Bind navigator.CanGoBack, Mode=OneWay}"
               Content="&lt;-" />
       <Button Content="&lt;&lt;"
               Click="{x:Bind Source.View.MoveCurrentToFirst, Mode=OneWay}" />
@@ -47,7 +51,7 @@
       <Button Content="&gt;&gt;"
               Click="{x:Bind Source.View.MoveCurrentToLast, Mode=OneWay}" />
       <Button Click="Button_Click_1"
-              IsEnabled="{x:Bind Frame.CanGoForward, Mode=OneWay}"
+              IsEnabled="{x:Bind navigator.CanGoForward, Mode=OneWay}"
               Content="-&gt;" />
       <Button Click="Button_Click_2"
               Content="New" />
@@ -60,4 +64,4 @@
       <TextBlock  Text="{x:Bind Source.View.CurrentPosition.ToString(), Mode=OneWay}" />
     </StackPanel>
   </Grid>
-</Page>
+</views:MvvmPage>

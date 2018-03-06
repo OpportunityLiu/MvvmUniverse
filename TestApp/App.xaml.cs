@@ -8,6 +8,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -48,6 +49,9 @@ namespace TestApp
             {
                 // 创建要充当导航上下文的框架，并导航到第一页
                 rootFrame = new Frame();
+                rootFrame.Margin = new Thickness(10);
+                rootFrame.Padding = new Thickness(10);
+                ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseVisible);
 
                 Navigator.GetOrCreateForCurrentView().Handlers.Add(rootFrame.AsNavigationHandler());
                 rootFrame.NavigationFailed += OnNavigationFailed;

@@ -20,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Views
         public static INavigationHandler AsNavigationHandler(this Frame frame) => new FrameWrapper(frame);
     }
 
-    internal class FrameWrapper : INavigationHandler
+    internal sealed class FrameWrapper : INavigationHandler
     {
         public FrameWrapper(Frame frame)
         {
@@ -59,7 +59,7 @@ namespace Opportunity.MvvmUniverse.Views
             return AsyncOperation<bool>.CreateCompleted(true);
         }
 
-        public void OnAdd(Navigator navigator) { }
+        public void OnAdd(Navigator navigator) { if (Frame.Dispatcher != navigator.Dispatcher) throw new InvalidOperationException("Frame and Navigator belongs to different UI thread."); }
         public void OnRemove() { }
     }
 }

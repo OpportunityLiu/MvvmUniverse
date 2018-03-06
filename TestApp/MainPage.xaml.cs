@@ -1,11 +1,15 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Views;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -21,12 +25,14 @@ namespace TestApp
     /// <summary>
     /// 可用于自身或导航至 Frame 内部的空白页。
     /// </summary>
-    public sealed partial class MainPage : Page
+    public sealed partial class MainPage : MvvmPage
     {
         public MainPage()
         {
             this.InitializeComponent();
         }
+
+        private Navigator navigator = Navigator.GetForCurrentView();
 
         private void View_CurrentChanging(object sender, CurrentChangingEventArgs e)
         {
@@ -66,22 +72,24 @@ namespace TestApp
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Frame.GoBack();
+            navigator.GoBackAsync();
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            Frame.GoForward();
+            navigator.GoForwardAsync();
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(MainPage), new CollectionViewSource { Source = Data });
+            ApplicationView.GetForCurrentView().IsScreenCaptureEnabled = false;
+            navigator.NavigateAsync(typeof(MainPage), new CollectionViewSource { Source = Data });
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            Data.LoadItemsAsync(Source.View.CurrentPosition, 10);
+            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
+            Navigator.GetForCurrentView().NavigateAsync(this.GetType());
         }
     }
 }

@@ -12,100 +12,58 @@ using Windows.Foundation;
 using Opportunity.Helpers.Universal.AsyncHelpers;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Opportunity.MvvmUniverse.Commands;
+using System.Threading;
+using System.Diagnostics;
+using System.ComponentModel;
 
 namespace Opportunity.MvvmUniverse.Views
 {
-    public sealed class Navigator : ObservableObject
+    public sealed class Navigator : DependencyObject
     {
-        internal static readonly Dictionary<int, Navigator> NavigatorDictionary = new Dictionary<int, Navigator>();
-
-        private static Tuple<int, Navigator> cache;
+        internal static int Count;
+        [ThreadStatic]
+        private static Navigator navigator;
 
         public static Navigator GetOrCreateForCurrentView()
         {
-            var id = DispatcherHelper.GetCurrentViewId();
-            var cache = Navigator.cache;
-            if (cache != null && cache.Item1 == id)
-                return cache.Item2;
-            if (NavigatorDictionary.TryGetValue(id, out var r))
-                return r;
-            lock (NavigatorDictionary)
-            {
-                var nav = new Navigator();
-                NavigatorDictionary[id] = nav;
-                Navigator.cache = Tuple.Create(id, nav);
+            var nav = navigator;
+            if (nav != null)
                 return nav;
-            }
+            nav = new Navigator();
+            navigator = nav;
+            return nav;
         }
 
-        public static Navigator GetForCurrentView()
-        {
-            var id = DispatcherHelper.GetCurrentViewId();
-            var cache = Navigator.cache;
-            if (cache != null && cache.Item1 == id)
-                return cache.Item2;
-            if (NavigatorDictionary.TryGetValue(id, out var r))
-            {
-                Navigator.cache = Tuple.Create(id, r);
-                return r;
-            }
-            return null;
-        }
+        public static Navigator GetForCurrentView() => navigator;
 
         public static bool DestoryForCurrentView()
         {
-            var id = DispatcherHelper.GetCurrentViewId();
-            if (!NavigatorDictionary.TryGetValue(id, out var r))
+            var nav = Interlocked.Exchange(ref navigator, null);
+            if (nav == null)
                 return false;
-            lock (NavigatorDictionary)
-            {
-                var cache = Navigator.cache;
-                if (cache != null && cache.Item1 == id)
-                    Navigator.cache = null;
-                NavigatorDictionary.Remove(id);
-                r.destory();
-                return true;
-            }
+            nav.destory();
+            return true;
         }
 
         public NavigationHandlerCollection Handlers { get; private set; }
 
-        public SystemNavigationManager NavigationManager { get; private set; } = SystemNavigationManager.GetForCurrentView();
-
-        public AppViewBackButtonVisibility AppViewBackButtonVisibility
-        {
-            get
-            {
-                CheckAvailable();
-                return NavigationManager.AppViewBackButtonVisibility;
-            }
-            private set => NavigationManager.AppViewBackButtonVisibility = value;
-        }
+        public SystemNavigationManager SystemNavigationManager { get; private set; }
 
         private async void manager_BackRequested(object sender, BackRequestedEventArgs e)
         {
-            if (CanGoBack())
+            if (CanGoBack)
             {
                 e.Handled = true;
                 await GoBackAsync();
             }
         }
 
-        public void UpdateAppViewBackButtonVisibility()
-        {
-            var ov = AppViewBackButtonVisibility;
-            var nv = (CanGoBack() ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed);
-            if (ov != nv)
-            {
-                AppViewBackButtonVisibility = nv;
-                OnPropertyChanged(nameof(AppViewBackButtonVisibility));
-            }
-        }
-
         private Navigator()
         {
+            Interlocked.Increment(ref Count);
             this.Handlers = new NavigationHandlerCollection(this);
-            this.NavigationManager.BackRequested += this.manager_BackRequested;
+            this.SystemNavigationManager = SystemNavigationManager.GetForCurrentView();
+            this.SystemNavigationManager.BackRequested += this.manager_BackRequested;
         }
 
         private bool destoryed = false;
@@ -113,11 +71,12 @@ namespace Opportunity.MvvmUniverse.Views
         {
             if (!this.destoryed)
             {
-                this.NavigationManager.BackRequested -= this.manager_BackRequested;
+                this.SystemNavigationManager.BackRequested -= this.manager_BackRequested;
+                this.SystemNavigationManager = null;
                 this.Handlers.Clear();
                 this.Handlers = null;
-                this.NavigationManager = null;
                 this.destoryed = true;
+                Interlocked.Decrement(ref Count);
             }
         }
 
@@ -127,56 +86,223 @@ namespace Opportunity.MvvmUniverse.Views
                 throw new InvalidOperationException("This navigator has been destoryed.");
         }
 
-        private bool navigating;
-        public bool Navigating { get => this.navigating; private set => Set(ref this.navigating, value); }
-
-        private bool isEnabled = true;
-        public bool IsEnabled
-        {
-            get => this.isEnabled;
-            set
-            {
-                CheckAvailable();
-                if (Set(ref this.isEnabled, value))
-                    UpdateAppViewBackButtonVisibility();
-            }
-        }
-
-        private bool isGoBackEnabled = true;
-        public bool IsGoBackEnabled
-        {
-            get => this.isGoBackEnabled;
-            set
-            {
-                CheckAvailable();
-                if (Set(ref this.isGoBackEnabled, value))
-                    UpdateAppViewBackButtonVisibility();
-            }
-        }
-
-        public bool CanGoBack()
+        public void UpdateProperties()
         {
             CheckAvailable();
-            if (!this.isEnabled || !this.isGoBackEnabled)
-                return false;
-            for (var i = Handlers.Count - 1; i >= 0; i--)
+            var canBack = false;
+            var canForward = false;
+            if (this.IsEnabled)
             {
-                if (Handlers[i].CanGoBack)
+                var be = this.IsBackEnabled;
+                var fe = this.IsForwardEnabled;
+                if (be || fe)
                 {
-                    return true;
+                    for (var i = Handlers.Count - 1; i >= 0; i--)
+                    {
+                        if (be && !canBack && Handlers[i].CanGoBack)
+                            canBack = true;
+                        if (fe && !canForward && Handlers[i].CanGoForward)
+                            canForward = true;
+                        if (canBack && canForward)
+                            break;
+                    }
                 }
             }
-            return false;
+            this.CanGoBack = canBack;
+            this.CanGoForward = canForward;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private bool isNavigating = false;
+        public bool IsNavigating
+        {
+            get => (bool)GetValue(IsNavigatingProperty);
+            private set
+            {
+                if (this.isNavigating == value)
+                    return;
+                this.isNavigating = value;
+                SetValue(IsNavigatingProperty, value);
+            }
+        }
+
+        /// <summary>
+        /// Indentify <see cref="IsNavigating"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsNavigatingProperty =
+            DependencyProperty.Register(nameof(IsNavigating), typeof(bool), typeof(Navigator), new PropertyMetadata(false, IsNavigatingPropertyChanged));
+
+        private static void IsNavigatingPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (bool)e.OldValue;
+            var newValue = (bool)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (Navigator)dp;
+            if (sender.isNavigating != newValue)
+                throw new InvalidOperationException("This property is read only");
+        }
+
+        public bool IsEnabled
+        {
+            get => (bool)GetValue(IsEnabledProperty);
+            set => SetValue(IsEnabledProperty, value);
+        }
+
+        /// <summary>
+        /// Indentify <see cref="IsEnabled"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsEnabledProperty =
+            DependencyProperty.Register(nameof(IsEnabled), typeof(bool), typeof(Navigator), new PropertyMetadata(true, IsEnabledPropertyChanged));
+
+        private static void IsEnabledPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (bool)e.OldValue;
+            var newValue = (bool)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (Navigator)dp;
+            sender.UpdateProperties();
+        }
+
+        public bool IsBackEnabled
+        {
+            get => (bool)GetValue(IsBackEnabledProperty);
+            set => SetValue(IsBackEnabledProperty, value);
+        }
+
+        /// <summary>
+        /// Indentify <see cref="IsBackEnabled"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsBackEnabledProperty =
+            DependencyProperty.Register(nameof(IsBackEnabled), typeof(bool), typeof(Navigator), new PropertyMetadata(true, IsBackEnabledPropertyChanged));
+
+        private static void IsBackEnabledPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (bool)e.OldValue;
+            var newValue = (bool)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (Navigator)dp;
+            sender.UpdateProperties();
+        }
+
+        public bool IsForwardEnabled
+        {
+            get => (bool)GetValue(IsForwardEnabledProperty);
+            set => SetValue(IsForwardEnabledProperty, value);
+        }
+
+        /// <summary>
+        /// Indentify <see cref="IsForwardEnabled"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsForwardEnabledProperty =
+            DependencyProperty.Register(nameof(IsForwardEnabled), typeof(bool), typeof(Navigator), new PropertyMetadata(true, IsForwardEnabledPropertyChanged));
+
+        private static void IsForwardEnabledPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (bool)e.OldValue;
+            var newValue = (bool)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (Navigator)dp;
+            sender.UpdateProperties();
+        }
+
+        public bool IsNavigateEnabled
+        {
+            get => (bool)GetValue(IsNavigateEnabledProperty);
+            set => SetValue(IsNavigateEnabledProperty, value);
+        }
+
+        /// <summary>
+        /// Indentify <see cref="IsNavigateEnabled"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsNavigateEnabledProperty =
+            DependencyProperty.Register(nameof(IsNavigateEnabled), typeof(bool), typeof(Navigator), new PropertyMetadata(true, IsNavigateEnabledPropertyChanged));
+
+        private static void IsNavigateEnabledPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (bool)e.OldValue;
+            var newValue = (bool)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (Navigator)dp;
+
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private bool canGoBack = false;
+        public bool CanGoBack
+        {
+            get => (bool)GetValue(CanGoBackProperty);
+            private set
+            {
+                if (this.canGoBack == value)
+                    return;
+                this.canGoBack = value;
+                SetValue(CanGoBackProperty, value);
+            }
+        }
+
+        /// <summary>
+        /// Indentify <see cref="CanGoBack"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty CanGoBackProperty =
+            DependencyProperty.Register(nameof(CanGoBack), typeof(bool), typeof(Navigator), new PropertyMetadata(false, CanGoBackPropertyChanged));
+
+        private static void CanGoBackPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (bool)e.OldValue;
+            var newValue = (bool)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (Navigator)dp;
+            if (sender.canGoBack != newValue)
+                throw new InvalidOperationException("This property is read only");
+            sender.SystemNavigationManager.AppViewBackButtonVisibility
+                = newValue ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private bool canGoForward = false;
+        public bool CanGoForward
+        {
+            get => (bool)GetValue(CanGoForwardProperty);
+            private set
+            {
+                if (this.canGoForward == value)
+                    return;
+                this.canGoForward = value;
+                SetValue(CanGoForwardProperty, value);
+            }
+        }
+
+        /// <summary>
+        /// Indentify <see cref="CanGoForward"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty CanGoForwardProperty =
+            DependencyProperty.Register(nameof(CanGoForward), typeof(bool), typeof(Navigator), new PropertyMetadata(false, CanGoForwardPropertyChanged));
+
+        private static void CanGoForwardPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (bool)e.OldValue;
+            var newValue = (bool)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (Navigator)dp;
+            if (sender.canGoForward != newValue)
+                throw new InvalidOperationException("This property is read only");
         }
 
         public IAsyncOperation<bool> GoBackAsync()
         {
             CheckAvailable();
-            if (!this.isEnabled || !this.isGoBackEnabled || this.navigating)
+            if (!this.IsEnabled || !this.IsBackEnabled || this.isNavigating)
                 return AsyncOperation<bool>.CreateCompleted(false);
+            this.IsNavigating = true;
             return AsyncInfo.Run(async token =>
             {
-                this.Navigating = true;
                 try
                 {
                     for (var i = Handlers.Count - 1; i >= 0; i--)
@@ -191,46 +317,20 @@ namespace Opportunity.MvvmUniverse.Views
                 }
                 finally
                 {
-                    UpdateAppViewBackButtonVisibility();
-                    this.Navigating = false;
+                    UpdateProperties();
+                    this.IsNavigating = false;
                 }
             });
-        }
-
-        private bool isGoForwardEnabled = true;
-        public bool IsGoForwardEnabled
-        {
-            get => this.isGoForwardEnabled;
-            set
-            {
-                CheckAvailable();
-                Set(ref this.isGoForwardEnabled, value);
-            }
-        }
-
-        public bool CanGoForward()
-        {
-            CheckAvailable();
-            if (!this.isEnabled || !this.isGoForwardEnabled)
-                return false;
-            for (var i = Handlers.Count - 1; i >= 0; i--)
-            {
-                if (Handlers[i].CanGoForward)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         public IAsyncOperation<bool> GoForwardAsync()
         {
             CheckAvailable();
-            if (!this.isEnabled || !this.isGoForwardEnabled || this.navigating)
+            if (!this.IsEnabled || !this.IsForwardEnabled || this.isNavigating)
                 return AsyncOperation<bool>.CreateCompleted(false);
+            this.IsNavigating = true;
             return AsyncInfo.Run(async token =>
             {
-                this.Navigating = true;
                 try
                 {
                     for (var i = Handlers.Count - 1; i >= 0; i--)
@@ -245,21 +345,10 @@ namespace Opportunity.MvvmUniverse.Views
                 }
                 finally
                 {
-                    UpdateAppViewBackButtonVisibility();
-                    this.Navigating = false;
+                    UpdateProperties();
+                    this.IsNavigating = false;
                 }
             });
-        }
-
-        private bool isNavigateEnabled = true;
-        public bool IsNavigateEnabled
-        {
-            get => this.isNavigateEnabled;
-            set
-            {
-                CheckAvailable();
-                Set(ref this.isNavigateEnabled, value);
-            }
         }
 
         public IAsyncOperation<bool> NavigateAsync(Type sourcePageType) => this.NavigateAsync(sourcePageType, null);
@@ -269,11 +358,11 @@ namespace Opportunity.MvvmUniverse.Views
             CheckAvailable();
             if (sourcePageType == null)
                 throw new ArgumentNullException(nameof(sourcePageType));
-            if (!this.isEnabled || !this.isNavigateEnabled || this.navigating)
+            if (!this.IsEnabled || !this.IsNavigateEnabled || this.isNavigating)
                 return AsyncOperation<bool>.CreateCompleted(false);
+            this.IsNavigating = true;
             return AsyncInfo.Run(async token =>
             {
-                this.Navigating = true;
                 try
                 {
                     for (var i = Handlers.Count - 1; i >= 0; i--)
@@ -288,8 +377,8 @@ namespace Opportunity.MvvmUniverse.Views
                 }
                 finally
                 {
-                    UpdateAppViewBackButtonVisibility();
-                    this.Navigating = false;
+                    UpdateProperties();
+                    this.IsNavigating = false;
                 }
             });
         }

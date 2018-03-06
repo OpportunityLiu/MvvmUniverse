@@ -17,9 +17,9 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void NonUI()
         {
-            Assert.ThrowsException<InvalidOperationException>(() => Navigator.GetForCurrentView());
-            Assert.ThrowsException<InvalidOperationException>(() => Navigator.GetOrCreateForCurrentView());
-            Assert.ThrowsException<InvalidOperationException>(() => Navigator.DestoryForCurrentView());
+            Assert.IsNull(Navigator.GetForCurrentView());
+            Assert.ThrowsException<Exception>(() => Navigator.GetOrCreateForCurrentView());
+            Assert.IsFalse(Navigator.DestoryForCurrentView());
         }
 
         [UITestMethod]
@@ -31,10 +31,11 @@ namespace Opportunity.MvvmUniverse.Test
             Assert.AreSame(navigator, Navigator.GetForCurrentView());
             Assert.AreSame(navigator, Navigator.GetOrCreateForCurrentView());
             Navigator.DestoryForCurrentView();
-            Assert.ThrowsException<InvalidOperationException>(() => navigator.CanGoBack());
+
+            Assert.IsFalse(navigator.CanGoBack);
             Assert.IsNull(Navigator.GetForCurrentView());
             Assert.IsNotNull(Navigator.GetOrCreateForCurrentView());
-            Assert.ThrowsException<InvalidOperationException>(() => navigator.CanGoBack());
+            Assert.IsFalse(navigator.CanGoBack);
             Assert.AreNotSame(navigator, Navigator.GetForCurrentView());
         }
     }
