@@ -67,12 +67,13 @@ namespace Opportunity.MvvmUniverse.Views
             InputPane.GetForCurrentView().Showing += this.MvvmPage_InputPaneChanging;
             InputPane.GetForCurrentView().Hiding += this.MvvmPage_InputPaneChanging;
             ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.MvvmPage_VisibleBoundsChanged;
-            CoreApplication.GetCurrentView().TitleBar.IsVisibleChanged += this.TitleBar_IsVisibleChanged;
+            CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
+            this.SizeChanged += this.MvvmPage_SizeChanged;
         }
 
-        private void TitleBar_IsVisibleChanged(CoreApplicationViewTitleBar sender, object args)
+        private void TitleBar_LayoutMetricsChanged(CoreApplicationViewTitleBar sender, object args)
         {
-            InvalidateMeasure();
+            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
         }
 
         private void MvvmPage_Unloaded(object sender, RoutedEventArgs e)
@@ -80,29 +81,36 @@ namespace Opportunity.MvvmUniverse.Views
             InputPane.GetForCurrentView().Showing -= this.MvvmPage_InputPaneChanging;
             InputPane.GetForCurrentView().Hiding -= this.MvvmPage_InputPaneChanging;
             ApplicationView.GetForCurrentView().VisibleBoundsChanged -= this.MvvmPage_VisibleBoundsChanged;
-            CoreApplication.GetCurrentView().TitleBar.IsVisibleChanged -= this.TitleBar_IsVisibleChanged;
+            CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged -= this.TitleBar_LayoutMetricsChanged;
+            this.SizeChanged -= this.MvvmPage_SizeChanged;
         }
 
         private void MvvmPage_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)
         {
             args.EnsuredFocusedElementInView = true;
-            InvalidateMeasure();
+            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
         }
 
         private void MvvmPage_VisibleBoundsChanged(ApplicationView sender, object args)
         {
-            InvalidateMeasure();
+            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
+        }
+
+        private void MvvmPage_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            caculateVisibleBoundsThickness(e.NewSize);
         }
 
         private void caculateVisibleBoundsThickness(Size size)
         {
-            var tb = CoreApplication.GetCurrentView().TitleBar;
-            var tbh = tb.ExtendViewIntoTitleBar ? tb.Height : 0;
-
             var paneRect = InputPane.GetForCurrentView().OccludedRect;
             if (paneRect.Width == 0 || paneRect.Height == 0)
                 paneRect = Rect.Empty;
+
+            var coreView = CoreApplication.GetCurrentView();
             var applicationView = ApplicationView.GetForCurrentView();
+            var tb = coreView.TitleBar;
+            var tbh = (tb.ExtendViewIntoTitleBar && !applicationView.IsFullScreenMode) ? tb.Height : 0;
             var vb = applicationView.VisibleBounds;
             var wb = CoreWindow.GetForCurrentThread().Bounds;
 
@@ -118,12 +126,9 @@ namespace Opportunity.MvvmUniverse.Views
 
             var usedView = new Rect(left, top, width, height);
 
-            var topElement = Window.Current.Content.Parent<UIElement>();
-            var transedView = this.TransformToVisual(topElement).Inverse.TransformBounds(usedView);
+            var transedView = this.TransformToVisual(null).Inverse.TransformBounds(usedView);
 
             VisibleBounds = new Thickness(bound(transedView.Left), bound(transedView.Top), bound(size.Width - transedView.Right), bound(size.Height - transedView.Bottom));
-
-            double bound(double v) => v < 0 ? 0 : v;
         }
 
         private Thickness visibleBounds = new Thickness();
@@ -165,7 +170,7 @@ namespace Opportunity.MvvmUniverse.Views
             if (this.Content == null)
                 return new Size();
             var pad = this.Padding;
-            this.Content.Measure(new Size(availableSize.Width - pad.Left - pad.Right, availableSize.Height - pad.Top - pad.Bottom));
+            this.Content.Measure(new Size(bound(availableSize.Width - pad.Left - pad.Right), bound(availableSize.Height - pad.Top - pad.Bottom)));
             var ns = this.Content.DesiredSize;
             return new Size(ns.Width + pad.Left + pad.Right, ns.Height + pad.Top + pad.Bottom);
 
@@ -173,11 +178,14 @@ namespace Opportunity.MvvmUniverse.Views
 
         protected override Size ArrangeOverride(Size finalSize)
         {
+            caculateVisibleBoundsThickness(finalSize);
             if (this.Content == null)
                 return new Size();
             var pad = this.Padding;
-            this.Content.Arrange(new Rect(new Point(pad.Left, pad.Top), new Size(finalSize.Width - pad.Left - pad.Right, finalSize.Height - pad.Top - pad.Bottom)));
+            this.Content.Arrange(new Rect(new Point(pad.Left, pad.Top), new Size(bound(finalSize.Width - pad.Left - pad.Right), bound(finalSize.Height - pad.Top - pad.Bottom))));
             return finalSize;
         }
+
+        private static double bound(double v) => v < 0 ? 0 : v;
     }
 }

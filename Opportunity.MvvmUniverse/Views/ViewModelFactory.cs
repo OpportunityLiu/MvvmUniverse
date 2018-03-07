@@ -15,6 +15,18 @@ namespace Opportunity.MvvmUniverse.Views
             where T : ViewModelBase
             => TypedStorage<T>.CacheStorage;
 
+        public static T Get<T>(string parameter)
+            where T : ViewModelBase
+        {
+            return TypedStorage<T>.CacheStorage.GetOrCreateAsync(parameter).GetResults();
+        }
+
+        public static T Set<T>(string parameter, T viewModel)
+            where T : ViewModelBase
+        {
+            return TypedStorage<T>.CacheStorage[parameter] = viewModel;
+        }
+
         public static void Register<T>(Func<string, T> activator, int capacity)
             where T : ViewModelBase
         {

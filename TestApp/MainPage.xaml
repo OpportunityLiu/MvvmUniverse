@@ -18,6 +18,13 @@
       <ColumnDefinition />
       <ColumnDefinition />
     </Grid.ColumnDefinitions>
+    <Grid x:Name="vp">
+      <Grid x:Name="c" Height="20000">
+        <TextBlock>123
+        213
+        234</TextBlock>
+      </Grid>
+    </Grid>
     <!--<ListView x:Name="ItemView"
               ItemsSource="{x:Bind Source.View, Mode=OneWay}">
       <ListView.ItemTemplate>
@@ -26,7 +33,7 @@
         </DataTemplate>
       </ListView.ItemTemplate>
     </ListView>-->
-    <FlipView x:Name="ItemView2"
+    <!--<FlipView x:Name="ItemView2"
               Grid.Column="1"
               ItemsSource="{x:Bind Source.View, Mode=OneWay}">
       <FlipView.ItemTemplate>
@@ -36,7 +43,10 @@
                      VerticalAlignment="Center" />
         </DataTemplate>
       </FlipView.ItemTemplate>
-    </FlipView>
+    </FlipView>-->
+    <views:MvvmPage x:Name="xp" Grid.Column="1" Padding="{x:Bind xp.VisibleBounds, Mode=OneWay}">
+      <Grid  Background="AliceBlue"  />
+    </views:MvvmPage>
     <StackPanel Orientation="Horizontal"
                 Grid.Row="1">
       <Button Click="Button_Click"

@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Composition;
+using Windows.UI.Composition.Interactions;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -38,7 +41,8 @@ namespace TestApp
 
         protected override void OnViewModelChanged(ViewModelBase oldValue, ViewModelBase newValue)
         {
-
+            var o = (VM)oldValue;
+            var n = (VM)newValue;
         }
 
         private Navigator navigator = Navigator.GetForCurrentView();
@@ -93,13 +97,13 @@ namespace TestApp
         {
             this.ViewModel = new VM();
             ApplicationView.GetForCurrentView().IsScreenCaptureEnabled = false;
-            navigator.NavigateAsync(typeof(MainPage), new CollectionViewSource { Source = Data });
+            Grid.SetColumn(xp, 0);
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
-            Navigator.GetForCurrentView().NavigateAsync(this.GetType());
+            Grid.SetColumn(xp, 1);
         }
     }
 }
