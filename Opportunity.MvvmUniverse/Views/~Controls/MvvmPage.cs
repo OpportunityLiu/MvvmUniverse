@@ -64,23 +64,26 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void MvvmPage_Loading(FrameworkElement sender, object e)
         {
-            InputPane.GetForCurrentView().Showing += this.MvvmPage_InputPaneChanging;
-            InputPane.GetForCurrentView().Hiding += this.MvvmPage_InputPaneChanging;
-            ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.MvvmPage_VisibleBoundsChanged;
+            InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneChanging;
+            InputPane.GetForCurrentView().Hiding += this.InputPane_InputPaneChanging;
+            Window.Current.SizeChanged += this.Window_SizeChanged;
+            ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.ApplicationView_VisibleBoundsChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
             this.SizeChanged += this.MvvmPage_SizeChanged;
         }
 
         private void MvvmPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            InputPane.GetForCurrentView().Showing -= this.MvvmPage_InputPaneChanging;
-            InputPane.GetForCurrentView().Hiding -= this.MvvmPage_InputPaneChanging;
-            ApplicationView.GetForCurrentView().VisibleBoundsChanged -= this.MvvmPage_VisibleBoundsChanged;
+            InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneChanging;
+            InputPane.GetForCurrentView().Hiding -= this.InputPane_InputPaneChanging;
+            ApplicationView.GetForCurrentView().VisibleBoundsChanged -= this.ApplicationView_VisibleBoundsChanged;
+            Window.Current.SizeChanged += this.Window_SizeChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged -= this.TitleBar_LayoutMetricsChanged;
             this.SizeChanged -= this.MvvmPage_SizeChanged;
+            this.windowSizeChanging = false;
         }
 
-        private void MvvmPage_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)
+        private void InputPane_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)
         {
             args.EnsuredFocusedElementInView = true;
             caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
@@ -91,9 +94,19 @@ namespace Opportunity.MvvmUniverse.Views
             caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
         }
 
-        private void MvvmPage_VisibleBoundsChanged(ApplicationView sender, object args)
+        private void Window_SizeChanged(object sender, WindowSizeChangedEventArgs e)
         {
-            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
+            this.windowSizeChanging = true;
+        }
+
+        private bool windowSizeChanging = false;
+
+        private void ApplicationView_VisibleBoundsChanged(ApplicationView sender, object args)
+        {
+            if (this.windowSizeChanging)
+                this.windowSizeChanging = false;
+            else
+                caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
         }
 
         private void MvvmPage_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -137,7 +150,7 @@ namespace Opportunity.MvvmUniverse.Views
         /// </summary>
         public Thickness VisibleBounds
         {
-            get => (Thickness)GetValue(VisibleBoundsProperty);
+            get => this.visibleBounds;
             private set
             {
                 if (this.visibleBounds == value)

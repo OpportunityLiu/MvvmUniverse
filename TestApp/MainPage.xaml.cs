@@ -35,7 +35,10 @@ namespace TestApp
         public MainPage()
         {
             this.InitializeComponent();
+            this.xp.RegisterPropertyChangedCallback(VisibleBoundsProperty, VBC);
         }
+
+        private void VBC(DependencyObject sender, DependencyProperty dp) => Debug.WriteLine(this.xp.VisibleBounds);
 
         public new VM ViewModel { get => (VM)base.ViewModel; set => base.ViewModel = value; }
 
@@ -93,16 +96,19 @@ namespace TestApp
             navigator.GoForwardAsync();
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
+
+            await ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.Default);
+            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
             this.ViewModel = new VM();
             ApplicationView.GetForCurrentView().IsScreenCaptureEnabled = false;
-            Grid.SetColumn(xp, 0);
+            // Grid.SetColumn(xp, 0);
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
+            ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay);
             Grid.SetColumn(xp, 1);
         }
     }
