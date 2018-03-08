@@ -17,14 +17,15 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
         public sealed class ObservableValueCollection : ObservableKeyValueCollectionBase<TValue>
-            , IReadOnlyList<TValue>
-            , ICollection<TValue>, IReadOnlyCollection<TValue>
+            , IList<TValue>, IReadOnlyList<TValue>, IList
+            , ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
             , IEnumerable<TValue>
         {
             internal ObservableValueCollection(ObservableDictionary<TKey, TValue> parent) : base(parent) { }
 
             /// <inheritdoc/>
             public TValue this[int index] => this.Parent.ValueItems[index];
+            TValue IList<TValue>.this[int index] { get => this[index]; set => ThrowForReadOnlyCollection(Parent); }
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool ICollection<TValue>.IsReadOnly => false;
@@ -57,16 +58,17 @@ namespace Opportunity.MvvmUniverse.Collections
             void ICollection<TValue>.Add(TValue item) => ThrowForReadOnlyCollection(Parent);
             void ICollection<TValue>.Clear() => ThrowForReadOnlyCollection(Parent);
             bool ICollection<TValue>.Remove(TValue item) => ThrowForReadOnlyCollection<bool>(Parent);
+            void IList<TValue>.Insert(int index, TValue item) => ThrowForReadOnlyCollection(Parent);
+            void IList<TValue>.RemoveAt(int index) => ThrowForReadOnlyCollection(Parent);
 
             /// <inheritdoc/>
-            public bool Contains(TValue value) => this.Parent.ContainsValue(value);
+            public bool Contains(TValue value) => this.Parent.ValueItems.Contains(value);
 
             /// <inheritdoc/>
             public void CopyTo(TValue[] array, int arrayIndex) => this.Parent.ValueItems.CopyTo(array, arrayIndex);
 
             /// <inheritdoc/>
             public int IndexOf(TValue value) => this.Parent.ValueItems.IndexOf(value);
-
         }
     }
 }

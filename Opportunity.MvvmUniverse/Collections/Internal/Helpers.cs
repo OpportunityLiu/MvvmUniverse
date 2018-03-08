@@ -44,29 +44,29 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
             return new KeyValuePair<TKey, TValue>(key, value);
         }
 
-        public static void ThrowForReadOnlyCollection()
-        {
-            throw new InvalidOperationException($"This collection is read only.");
-        }
-
         public static void ThrowForFixedSizeCollection()
         {
-            throw new InvalidOperationException($"This collection is fixed size.");
+            throw new NotSupportedException($"This collection is fixed size.");
         }
 
         public static T ThrowForFixedSizeCollection<T>()
         {
-            throw new InvalidOperationException($"This collection is fixed size.");
+            throw new NotSupportedException($"This collection is fixed size.");
+        }
+
+        public static void ThrowForReadOnlyCollection()
+        {
+            throw new NotSupportedException($"This collection is read only.");
         }
 
         public static void ThrowForReadOnlyCollection(object parent)
         {
-            throw new InvalidOperationException($"This collection is a read only view of \"{parent}\".");
+            throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
         }
 
         public static T ThrowForReadOnlyCollection<T>(object parent)
         {
-            throw new InvalidOperationException($"This collection is a read only view of \"{parent}\".");
+            throw new NotSupportedException($"This collection is a read only view of \"{parent}\".");
         }
     }
 }

@@ -17,8 +17,8 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
         public sealed class ObservableKeyCollection : ObservableKeyValueCollectionBase<TKey>
-            , IReadOnlyList<TKey>
-            , ICollection<TKey>, IReadOnlyCollection<TKey>
+            , IList<TKey>, IReadOnlyList<TKey>, IList
+            , ICollection<TKey>, IReadOnlyCollection<TKey>, ICollection
             , IEnumerable<TKey>
 
         {
@@ -26,6 +26,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             /// <inheritdoc/>
             public TKey this[int index] => this.Parent.KeyItems[index];
+            TKey IList<TKey>.this[int index] { get => this.Parent.KeyItems[index]; set => ThrowForReadOnlyCollection(Parent); }
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool ICollection<TKey>.IsReadOnly => true;
@@ -58,6 +59,8 @@ namespace Opportunity.MvvmUniverse.Collections
             void ICollection<TKey>.Add(TKey item) => ThrowForReadOnlyCollection(Parent);
             void ICollection<TKey>.Clear() => ThrowForReadOnlyCollection(Parent);
             bool ICollection<TKey>.Remove(TKey item) => ThrowForReadOnlyCollection<bool>(Parent);
+            void IList<TKey>.Insert(int index, TKey item) => ThrowForReadOnlyCollection(Parent);
+            void IList<TKey>.RemoveAt(int index) => ThrowForReadOnlyCollection(Parent);
 
             /// <inheritdoc/>
             public bool Contains(TKey key) => this.Parent.ContainsKey(key);
@@ -72,7 +75,6 @@ namespace Opportunity.MvvmUniverse.Collections
                     return index;
                 return -1;
             }
-
         }
     }
 }

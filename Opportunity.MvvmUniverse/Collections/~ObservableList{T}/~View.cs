@@ -22,9 +22,9 @@ namespace Opportunity.MvvmUniverse.Collections
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     public class ObservableListView<T> : ObservableCollectionBase<T>
-        , IReadOnlyList<T>
+        , IList<T>, IReadOnlyList<T>, IList
         , ICollection<T>, IReadOnlyCollection<T>, ICollection
-        , IEnumerable<T>
+        , IEnumerable<T>, IEnumerable
         , IDisposable
     {
         private ObservableList<T> list;
@@ -98,6 +98,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
         /// <inheritdoc />
         public T this[int index] => List[index];
+        T IList<T>.this[int index] { get => this[index]; set => ThrowForReadOnlyCollection(List); }
 
         /// <inheritdoc />
         public int Count => List.Count;
@@ -119,6 +120,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc />
         public bool Contains(T item) => List.Contains(item);
 
+        /// <inheritdoc />
+        public int IndexOf(T item) => this.List.IndexOf(item);
+
         /// <summary>
         /// Iterate all items in the list.
         /// </summary>
@@ -131,8 +135,10 @@ namespace Opportunity.MvvmUniverse.Collections
         public void ForEach(Action<int, T> action) => List.ForEach(action);
 
         bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(List);
+        void IList<T>.RemoveAt(int index) => ThrowForReadOnlyCollection(List);
         void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(List);
         void ICollection<T>.Clear() => ThrowForReadOnlyCollection(List);
+        void IList<T>.Insert(int index, T item) => ThrowForReadOnlyCollection(List);
     }
 
     internal class UndisposableObservableListView<T> : ObservableListView<T>

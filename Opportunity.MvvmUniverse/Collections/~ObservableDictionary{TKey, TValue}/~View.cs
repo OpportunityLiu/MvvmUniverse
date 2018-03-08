@@ -24,9 +24,9 @@ namespace Opportunity.MvvmUniverse.Collections
     [DebuggerDisplay("Count = {Count}")]
     public class ObservableDictionaryView<TKey, TValue> : ObservableCollectionBase<KeyValuePair<TKey, TValue>>
         , IReadOnlyDictionary<TKey, TValue>, IOrderedDictionary
-        , IReadOnlyList<KeyValuePair<TKey, TValue>>
+        , IList<KeyValuePair<TKey, TValue>>, IReadOnlyList<KeyValuePair<TKey, TValue>>, IList
         , ICollection<KeyValuePair<TKey, TValue>>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>, ICollection
-        , IEnumerable<KeyValuePair<TKey, TValue>>
+        , IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable
         , IDisposable
     {
         private ObservableDictionary<TKey, TValue> dictionary;
@@ -110,6 +110,11 @@ namespace Opportunity.MvvmUniverse.Collections
 
         KeyValuePair<TKey, TValue> IReadOnlyList<KeyValuePair<TKey, TValue>>.this[int index]
             => ((IList<KeyValuePair<TKey, TValue>>)Dictionary)[index];
+        KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[int index]
+        {
+            get => ((IList<KeyValuePair<TKey, TValue>>)this.Dictionary)[index];
+            set => ThrowForReadOnlyCollection(Dictionary);
+        }
 
         object IDictionary.this[object key]
         {
@@ -154,11 +159,11 @@ namespace Opportunity.MvvmUniverse.Collections
 
         /// <inheritdoc/>
         public bool ContainsKey(TKey key) => Dictionary.ContainsKey(key);
-        /// <inheritdoc/>
-        public bool ConatinsValue(TValue value) => Dictionary.ContainsValue(value);
         bool IDictionary.Contains(object key) => ((IDictionary)Dictionary).Contains(key);
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
             => ((ICollection<KeyValuePair<TKey, TValue>>)Dictionary).Contains(item);
+
+        int IList<KeyValuePair<TKey, TValue>>.IndexOf(KeyValuePair<TKey, TValue> item) => ((IList<KeyValuePair<TKey, TValue>>)this.Dictionary).IndexOf(item);
 
         /// <inheritdoc/>
         public bool TryGetValue(TKey key, out TValue value) => Dictionary.TryGetValue(key, out value);
@@ -167,6 +172,7 @@ namespace Opportunity.MvvmUniverse.Collections
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection(Dictionary);
 
         void IOrderedDictionary.Insert(int index, object key, object value) => ThrowForReadOnlyCollection(Dictionary);
+        void IList<KeyValuePair<TKey, TValue>>.Insert(int index, KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection(Dictionary);
 
         void IDictionary.Clear() => ThrowForReadOnlyCollection(Dictionary);
         void ICollection<KeyValuePair<TKey, TValue>>.Clear() => ThrowForReadOnlyCollection(Dictionary);
@@ -177,6 +183,7 @@ namespace Opportunity.MvvmUniverse.Collections
         void IDictionary.Remove(object key) => ThrowForReadOnlyCollection(Dictionary);
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => ThrowForReadOnlyCollection<bool>(Dictionary);
         void IOrderedDictionary.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary);
+        void IList<KeyValuePair<TKey, TValue>>.RemoveAt(int index) => ThrowForReadOnlyCollection(Dictionary);
 
         /// <inheritdoc/>
         public ObservableDictionary<TKey, TValue>.DictionaryEnumerator GetEnumerator() => Dictionary.GetEnumerator();

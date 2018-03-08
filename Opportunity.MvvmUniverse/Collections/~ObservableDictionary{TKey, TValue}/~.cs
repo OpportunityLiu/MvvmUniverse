@@ -347,8 +347,6 @@ namespace Opportunity.MvvmUniverse.Collections
 
         /// <inheritdoc/>
         public bool ContainsKey(TKey key) => KeySet.ContainsKey(key);
-        /// <inheritdoc/>
-        public bool ContainsValue(TValue value) => ValueItems.Contains(value);
         bool IDictionary.Contains(object key) => ((IDictionary)KeySet).Contains(key);
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
         {
@@ -357,6 +355,16 @@ namespace Opportunity.MvvmUniverse.Collections
                 return EqualityComparer<TValue>.Default.Equals(item.Value, value);
             }
             return false;
+        }
+
+        int IList<KeyValuePair<TKey, TValue>>.IndexOf(KeyValuePair<TKey, TValue> item)
+        {
+            if (!KeySet.TryGetValue(item.Key, out var index))
+                return -1;
+            var v = ValueItems[index];
+            if (EqualityComparer<TValue>.Default.Equals(v, item.Value))
+                return index;
+            return -1;
         }
 
         /// <summary>
@@ -468,16 +476,6 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 array[arrayIndex++] = item;
             }
-        }
-
-        int IList<KeyValuePair<TKey, TValue>>.IndexOf(KeyValuePair<TKey, TValue> item)
-        {
-            if (!KeySet.TryGetValue(item.Key, out var index))
-                return -1;
-            var v = ValueItems[index];
-            if (EqualityComparer<TValue>.Default.Equals(v, item.Value))
-                return index;
-            return -1;
         }
 
         /// <summary>
