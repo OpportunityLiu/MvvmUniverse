@@ -8,6 +8,7 @@
                 xmlns:c="using:Opportunity.MvvmUniverse.Collections"
                 NavigationCacheMode="Enabled"
                 mc:Ignorable="d"
+                MinHeight="{local:TestME Value=12}"
                 Padding="{x:Bind VisibleBounds, Mode=OneWay}">
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Grid.RowDefinitions>

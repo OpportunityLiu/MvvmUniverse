@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Markup;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
@@ -25,6 +26,22 @@ using Windows.UI.Xaml.Navigation;
 
 namespace TestApp
 {
+    [MarkupExtensionReturnType(ReturnType = typeof(string))]
+    public sealed class TestME : MarkupExtension
+    {
+        public TestME()
+        {
+        }
+        public TestME(string value) { this.Value = value; }
+
+        public string Value { get; set; }
+
+        protected override object ProvideValue()
+        {
+            return Value;
+        }
+    }
+
     public class VM : ViewModelBase { public string Id => GetHashCode().ToString(); }
 
     /// <summary>
