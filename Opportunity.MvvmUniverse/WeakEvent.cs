@@ -37,7 +37,6 @@ namespace Opportunity.MvvmUniverse
     /// <typeparam name="TEventArgs">Type of event args</typeparam>
     public sealed class WeakEvent<TDelegate, TSender, TEventArgs>
         where TDelegate : class
-        where TEventArgs : EventArgs
     {
         private struct EventEntry
         {

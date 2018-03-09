@@ -37,7 +37,7 @@ namespace Opportunity.MvvmUniverse
 
         public override IEnumerator<PropertyChangedEventArgs> GetEnumerator()
         {
-            yield return args;
+            yield return this.args;
         }
     }
 

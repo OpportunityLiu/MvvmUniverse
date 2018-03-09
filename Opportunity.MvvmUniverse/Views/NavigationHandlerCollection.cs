@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Views
 {
+    /// <summary>
+    /// Collection of <see cref="INavigationHandler"/>.
+    /// </summary>
     public sealed class NavigationHandlerCollection : ObservableList<INavigationHandler>
     {
+
         internal static readonly Dictionary<INavigationHandler, Navigator> NavigationHandlerDic
             = new Dictionary<INavigationHandler, Navigator>();
-
-        private readonly Navigator navigator;
 
         private struct LockHelper : IDisposable
         {
@@ -36,11 +38,14 @@ namespace Opportunity.MvvmUniverse.Views
 
         private static LockHelper GetLock() => new LockHelper(Navigator.Count > 1);
 
+        private readonly Navigator navigator;
+
         internal NavigationHandlerCollection(Navigator navigator)
         {
             this.navigator = navigator;
         }
 
+        /// <inheritdoc/>
         protected override void ClearItems()
         {
             try
@@ -62,6 +67,7 @@ namespace Opportunity.MvvmUniverse.Views
             }
         }
 
+        /// <inheritdoc/>
         protected override void InsertItem(int index, INavigationHandler item)
         {
             if (item == null)
@@ -75,6 +81,7 @@ namespace Opportunity.MvvmUniverse.Views
             this.navigator.UpdateProperties();
         }
 
+        /// <inheritdoc/>
         protected override void SetItem(int index, INavigationHandler item)
         {
             if (item == null)
@@ -99,6 +106,7 @@ namespace Opportunity.MvvmUniverse.Views
             this.navigator.UpdateProperties();
         }
 
+        /// <inheritdoc/>
         protected override void RemoveItem(int index)
         {
             var old = this[index];

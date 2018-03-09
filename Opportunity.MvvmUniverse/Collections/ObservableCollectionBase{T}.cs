@@ -15,7 +15,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// <summary>
     /// Base class for observable collections. Derived class must implement <see cref="IList{T}"/> or <see cref="IReadOnlyList{T}"/>.
     /// </summary>
-    /// <typeparam name="T">type of objects store in the collection</typeparam>
+    /// <typeparam name="T">Type of objects store in the collection</typeparam>
     public abstract class ObservableCollectionBase<T> : ObservableObject
         , IBindableObservableVector, IList, ICollection, IEnumerable
     {
@@ -106,9 +106,12 @@ namespace Opportunity.MvvmUniverse.Collections
         bool IList.IsReadOnly => IsReadOnly;
 
         private bool IsFixedSize => ((IList)this).IsFixedSize;
+        // Derived class can override this value.
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IList.IsFixedSize => false;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private int Count => ((ICollection)this).Count;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         int ICollection.Count
         {

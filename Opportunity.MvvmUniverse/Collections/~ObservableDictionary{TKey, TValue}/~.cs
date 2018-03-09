@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation.Collections;
+using System.ComponentModel;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -120,16 +121,6 @@ namespace Opportunity.MvvmUniverse.Collections
             KeyItems.Insert(index, key);
             ValueItems.Insert(index, value);
             updateIndex(index + 1, KeyItems.Count - index - 1);
-            if (this.keys != null)
-            {
-                this.keys.RaiseCountChangedInternal();
-                this.keys.RaiseItemInsertedInternal(KeyItems.Count - 1);
-            }
-            if (this.values != null)
-            {
-                this.values.RaiseCountChangedInternal();
-                this.values.RaiseItemInsertedInternal(ValueItems.Count - 1);
-            }
             OnPropertyChanged(nameof(Count));
             OnItemInserted(KeySet.Count - 1);
             check();
@@ -151,16 +142,6 @@ namespace Opportunity.MvvmUniverse.Collections
             KeyItems.RemoveAt(removedIndex);
             ValueItems.RemoveAt(removedIndex);
             updateIndex(removedIndex, KeyItems.Count - removedIndex);
-            if (this.keys != null)
-            {
-                this.keys.RaiseCountChangedInternal();
-                this.keys.RaiseItemRemovedInternal(removedIndex);
-            }
-            if (this.values != null)
-            {
-                this.values.RaiseCountChangedInternal();
-                this.values.RaiseItemRemovedInternal(removedIndex);
-            }
             OnPropertyChanged(nameof(Count));
             OnItemRemoved(removedIndex);
             check();
@@ -181,12 +162,8 @@ namespace Opportunity.MvvmUniverse.Collections
             var oldValue = ValueItems[index];
             if (default(TValue) == null && ReferenceEquals(oldValue, value))
                 return;
+            KeyItems[index] = key;
             ValueItems[index] = value;
-            // Key collection will not change.
-            if (this.values != null)
-            {
-                this.values.RaiseItemChangedInternal(index);
-            }
             OnItemChanged(index);
             check();
         }
@@ -199,20 +176,38 @@ namespace Opportunity.MvvmUniverse.Collections
             check();
             this.KeyItems.Clear();
             this.ValueItems.Clear();
-            KeySet.Clear();
-            if (this.keys != null)
-            {
-                this.keys.RaiseCountChangedInternal();
-                this.keys.RaiseVectorResetInternal();
-            }
-            if (this.values != null)
-            {
-                this.values.RaiseCountChangedInternal();
-                this.values.RaiseVectorResetInternal();
-            }
+            this.KeySet.Clear();
             OnPropertyChanged(nameof(Count));
             OnVectorReset();
             check();
+        }
+
+        /// <summary>
+        /// Raise <see cref="ObservableObject.PropertyChanged"/> for this collection, <see cref="Keys"/> and <see cref="Values"/>.
+        /// </summary>
+        /// <param name="args">event args</param>
+        /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
+        /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
+        /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
+        protected override void OnPropertyChanged(IEnumerable<PropertyChangedEventArgs> args)
+        {
+            base.OnPropertyChanged(args);
+            this.keys?.RaisePropertyChangedInternal(args);
+            this.values?.RaisePropertyChangedInternal(args);
+        }
+
+        /// <summary>
+        /// Raise <see cref="ObservableCollectionBase{T}.VectorChanged"/> for this collection, <see cref="Keys"/> and <see cref="Values"/>.
+        /// </summary>
+        /// <param name="args">Event args.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
+        /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
+        /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
+        protected override void OnVectorChanged(IVectorChangedEventArgs args)
+        {
+            base.OnVectorChanged(args);
+            this.keys?.RaiseVectorChangedInternal(args);
+            this.values?.RaiseVectorChangedInternal(args);
         }
 
         private void setOrAdd(TKey key, TValue value)

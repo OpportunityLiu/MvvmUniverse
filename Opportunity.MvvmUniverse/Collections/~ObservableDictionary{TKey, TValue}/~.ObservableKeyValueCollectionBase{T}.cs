@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Collections.Specialized;
 using Windows.Foundation.Collections;
+using System.ComponentModel;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -29,23 +30,11 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.Parent = parent;
             }
 
-            internal void RaiseCountChangedInternal()
-                => this.OnPropertyChanged(nameof(Count));
+            internal void RaisePropertyChangedInternal(IEnumerable<PropertyChangedEventArgs> args)
+                => this.OnPropertyChanged(args);
 
             internal void RaiseVectorChangedInternal(IVectorChangedEventArgs e)
                 => OnVectorChanged(e);
-
-            internal void RaiseVectorResetInternal()
-                => OnVectorReset();
-
-            internal void RaiseItemInsertedInternal(int index)
-                => OnItemInserted(index);
-
-            internal void RaiseItemRemovedInternal(int index)
-                => OnItemRemoved(index);
-
-            internal void RaiseItemChangedInternal(int index)
-                => OnItemChanged(index);
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool ICollection.IsSynchronized => false;
