@@ -26,6 +26,7 @@ namespace Opportunity.MvvmUniverse.Views
         /// </summary>
         public MvvmPage()
         {
+            Windows.UI.ViewManagement.ApplicationViewScaling.TrySetDisableLayoutScaling(true);
             this.Unloaded += this.MvvmPage_Unloaded;
             this.Loading += this.MvvmPage_Loading;
         }
@@ -66,7 +67,6 @@ namespace Opportunity.MvvmUniverse.Views
         {
             InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneChanging;
             InputPane.GetForCurrentView().Hiding += this.InputPane_InputPaneChanging;
-            Window.Current.SizeChanged += this.Window_SizeChanged;
             ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.ApplicationView_VisibleBoundsChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
             this.SizeChanged += this.MvvmPage_SizeChanged;
@@ -77,10 +77,8 @@ namespace Opportunity.MvvmUniverse.Views
             InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneChanging;
             InputPane.GetForCurrentView().Hiding -= this.InputPane_InputPaneChanging;
             ApplicationView.GetForCurrentView().VisibleBoundsChanged -= this.ApplicationView_VisibleBoundsChanged;
-            Window.Current.SizeChanged += this.Window_SizeChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged -= this.TitleBar_LayoutMetricsChanged;
             this.SizeChanged -= this.MvvmPage_SizeChanged;
-            this.windowSizeChanging = false;
         }
 
         private void InputPane_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)
@@ -94,19 +92,9 @@ namespace Opportunity.MvvmUniverse.Views
             caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
         }
 
-        private void Window_SizeChanged(object sender, WindowSizeChangedEventArgs e)
-        {
-            this.windowSizeChanging = true;
-        }
-
-        private bool windowSizeChanging = false;
-
         private void ApplicationView_VisibleBoundsChanged(ApplicationView sender, object args)
         {
-            if (this.windowSizeChanging)
-                this.windowSizeChanging = false;
-            else
-                caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
+            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
         }
 
         private void MvvmPage_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -122,10 +110,11 @@ namespace Opportunity.MvvmUniverse.Views
 
             var coreView = CoreApplication.GetCurrentView();
             var applicationView = ApplicationView.GetForCurrentView();
+            var isFullScreen = applicationView.IsFullScreenMode;
             var tb = coreView.TitleBar;
-            var tbh = (tb.ExtendViewIntoTitleBar && !applicationView.IsFullScreenMode) ? tb.Height : 0;
-            var vb = applicationView.VisibleBounds;
+            var tbh = (tb.ExtendViewIntoTitleBar && !isFullScreen) ? tb.Height : 0;
             var wb = CoreWindow.GetForCurrentThread().Bounds;
+            var vb = isFullScreen ? wb : applicationView.VisibleBounds;
 
             var left = 0d;
             var top = 0d;

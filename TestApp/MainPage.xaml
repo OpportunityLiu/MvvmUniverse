@@ -8,7 +8,6 @@
                 xmlns:c="using:Opportunity.MvvmUniverse.Collections"
                 NavigationCacheMode="Enabled"
                 mc:Ignorable="d"
-                MinHeight="{local:TestME Value=12}"
                 Padding="{x:Bind VisibleBounds, Mode=OneWay}">
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Grid.RowDefinitions>
@@ -20,10 +19,8 @@
       <ColumnDefinition />
     </Grid.ColumnDefinitions>
     <Grid x:Name="vp">
-      <Grid x:Name="c" Height="20000">
-        <TextBlock>123
-        213
-        234</TextBlock>
+      <Grid x:Name="c">
+        <TextBox />
       </Grid>
     </Grid>
     <!--<ListView x:Name="ItemView"
@@ -45,30 +42,33 @@
         </DataTemplate>
       </FlipView.ItemTemplate>
     </FlipView>-->
-    <views:MvvmPage x:Name="xp" Grid.Column="1" Padding="{x:Bind xp.VisibleBounds, Mode=OneWay}">
-      <Grid  Background="AliceBlue"  />
+    <views:MvvmPage x:Name="xp"
+                    Grid.Column="1"
+                    Padding="{x:Bind xp.VisibleBounds, Mode=OneWay}">
+      <Grid  Background="AliceBlue" />
     </views:MvvmPage>
-    <StackPanel Orientation="Horizontal"
-                Grid.Row="1">
-      <Button Click="Button_Click"
-              IsEnabled="{x:Bind navigator.CanGoBack, Mode=OneWay}"
-              Content="&lt;-" />
-      <Button Content="&lt;&lt;"
-              Click="{x:Bind Source.View.MoveCurrentToFirst, Mode=OneWay}" />
-      <Button Content="&lt;"
-              Click="{x:Bind Source.View.MoveCurrentToPrevious, Mode=OneWay}" />
-      <Button Content="&gt;"
-              Click="{x:Bind Source.View.MoveCurrentToNext, Mode=OneWay}" />
-      <Button Content="&gt;&gt;"
-              Click="{x:Bind Source.View.MoveCurrentToLast, Mode=OneWay}" />
-      <Button Click="Button_Click_1"
-              IsEnabled="{x:Bind navigator.CanGoForward, Mode=OneWay}"
-              Content="-&gt;" />
-      <Button Click="Button_Click_2"
-              Content="New" />
-      <Button Click="Button_Click_3"
-              Content="Test" />
-    </StackPanel>
+    <ScrollViewer Grid.Row="1" HorizontalScrollMode="Auto">
+      <StackPanel Orientation="Horizontal">
+        <!--<Button Click="Button_Click"
+                IsEnabled="{x:Bind navigator.CanGoBack, Mode=OneWay}"
+                Content="&lt;-" />
+        <Button Content="&lt;&lt;"
+                Click="{x:Bind Source.View.MoveCurrentToFirst, Mode=OneWay}" />
+        <Button Content="&lt;"
+                Click="{x:Bind Source.View.MoveCurrentToPrevious, Mode=OneWay}" />
+        <Button Content="&gt;"
+                Click="{x:Bind Source.View.MoveCurrentToNext, Mode=OneWay}" />
+        <Button Content="&gt;&gt;"
+                Click="{x:Bind Source.View.MoveCurrentToLast, Mode=OneWay}" />
+        <Button Click="Button_Click_1"
+                IsEnabled="{x:Bind navigator.CanGoForward, Mode=OneWay}"
+                Content="-&gt;" />-->
+        <Button Click="Button_Click_2"
+                Content="New" />
+        <Button Click="Button_Click_3"
+                Content="Test" />
+      </StackPanel>
+    </ScrollViewer>
     <StackPanel Grid.Row="1"
                 Grid.Column="1">
       <TextBlock  Text="{x:Bind ViewModel.Id, Mode=OneWay, FallbackValue='NULL'}" />

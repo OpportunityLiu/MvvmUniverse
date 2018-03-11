@@ -115,7 +115,7 @@ namespace TestApp
 
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-
+            ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
             await ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.Default);
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
             this.ViewModel = new VM();
@@ -125,6 +125,7 @@ namespace TestApp
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
+            ApplicationView.GetForCurrentView().ExitFullScreenMode();
             ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay);
             Grid.SetColumn(xp, 1);
         }
