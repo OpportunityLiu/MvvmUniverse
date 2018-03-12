@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -37,12 +38,12 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Call <see cref="AsyncCommand.OnFinished(Task)"/> and
+        /// Call <see cref="AsyncCommand.OnFinished(IAsyncAction)"/> and
         /// set <see cref="Progress"/> to default value,
-        /// set <see cref="NormalizedProgress"/> to <c><see cref="ProgressMapper"/>(default)</c>.
+        /// set <see cref="NormalizedProgress"/> to <c><see cref="ProgressMapper"/>(default).</c>.
         /// </summary>
-        /// <param name="execution">result of <see cref="CommandBase.StartExecutionAsync()"/></param>
-        protected override void OnFinished(Task execution)
+        /// <param name="execution">Result of <see cref="CommandBase.StartExecutionAsync()"/>.</param>
+        protected override void OnFinished(IAsyncAction execution)
         {
             try { base.OnFinished(execution); }
             finally { setProgress(default); }

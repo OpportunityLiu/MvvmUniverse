@@ -86,6 +86,9 @@ namespace Opportunity.MvvmUniverse.Views
                 throw new InvalidOperationException("This navigator has been destoryed.");
         }
 
+        /// <summary>
+        /// Manually caculates and updates values of <see cref="CanGoBack"/> and <see cref="CanGoForward"/>.
+        /// </summary>
         public void UpdateProperties()
         {
             CheckAvailable();
@@ -116,7 +119,7 @@ namespace Opportunity.MvvmUniverse.Views
         private bool isNavigating = false;
         public bool IsNavigating
         {
-            get => (bool)GetValue(IsNavigatingProperty);
+            get => this.isNavigating;
             private set
             {
                 if (this.isNavigating == value)
@@ -235,7 +238,7 @@ namespace Opportunity.MvvmUniverse.Views
         private bool canGoBack = false;
         public bool CanGoBack
         {
-            get => (bool)GetValue(CanGoBackProperty);
+            get => this.canGoBack;
             private set
             {
                 if (this.canGoBack == value)
@@ -268,7 +271,7 @@ namespace Opportunity.MvvmUniverse.Views
         private bool canGoForward = false;
         public bool CanGoForward
         {
-            get => (bool)GetValue(CanGoForwardProperty);
+            get => this.canGoForward;
             private set
             {
                 if (this.canGoForward == value)

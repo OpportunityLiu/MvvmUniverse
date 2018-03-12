@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -78,11 +79,11 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Call <see cref="CommandBase{T}.OnFinished(Task, T)"/> and set <see cref="IsExecuting"/> to <see langword="false"/>.
+        /// Call <see cref="CommandBase{T}.OnFinished(IAsyncAction, T)"/> and set <see cref="IsExecuting"/> to <see langword="false"/>.
         /// </summary>
-        /// <param name="parameter">Parameter of <see cref="CommandBase{T}.Execute(T)"/></param>
-        /// <param name="execution">result of <see cref="CommandBase{T}.StartExecutionAsync(T)"/></param>
-        protected override void OnFinished(Task execution, T parameter)
+        /// <param name="parameter">Parameter of <see cref="CommandBase{T}.Execute(T)"/>.</param>
+        /// <param name="execution">Result of <see cref="CommandBase{T}.StartExecutionAsync(T)"/>.</param>
+        protected override void OnFinished(IAsyncAction execution, T parameter)
         {
             IsExecuting = false;
             base.OnFinished(execution, parameter);

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -31,8 +33,8 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Check with <see cref="CanExecuteDelegate"/>.
         /// </summary>
-        /// <param name="parameter">Parameter of execution</param>
-        /// <returns>Whether the command can execute or not</returns>
+        /// <param name="parameter">Parameter of execution.</param>
+        /// <returns>Whether the command can execute or not.</returns>
         protected override bool CanExecuteOverride(T parameter)
         {
             if (this.CanExecuteDelegate == null)
@@ -41,20 +43,20 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Returns <see cref="Task.CompletedTask"/> or <see cref="Task.FromException(Exception)"/>.
+        /// Returns <see cref="AsyncAction.CreateCompleted()"/> or <see cref="AsyncAction.CreateFault(Exception)"/>.
         /// </summary>
-        /// <param name="parameter">parameter of execution</param>
-        /// <returns>A completed <see cref="Task"/></returns>
-        protected override Task StartExecutionAsync(T parameter)
+        /// <param name="parameter">Parameter of execution.</param>
+        /// <returns>A completed <see cref="IAsyncAction"/>.</returns>
+        protected override IAsyncAction StartExecutionAsync(T parameter)
         {
             try
             {
                 this.ExecuteDelegate.Invoke(this, parameter);
-                return Task.CompletedTask;
+                return AsyncAction.CreateCompleted();
             }
             catch (Exception ex)
             {
-                return Task.FromException(ex);
+                return AsyncAction.CreateFault(ex);
             }
         }
     }

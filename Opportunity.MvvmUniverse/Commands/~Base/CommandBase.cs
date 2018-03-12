@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -55,18 +57,18 @@ namespace Opportunity.MvvmUniverse.Commands
             if (!OnStarting())
                 return false;
 
-            var t = StartExecutionAsync() ?? Task.CompletedTask;
-            if (t.IsCompleted)
+            var t = StartExecutionAsync() ?? AsyncAction.CreateCompleted();
+            if (t.Status != AsyncStatus.Started)
                 OnFinished(t);
             else
-                t.ContinueWith(OnFinished);
+                t.Completed = (s, _) => OnFinished(s);
             return true;
         }
 
         /// <summary>
         /// Start execution.
         /// </summary>
-        protected abstract Task StartExecutionAsync();
+        protected abstract IAsyncAction StartExecutionAsync();
 
         /// <summary>
         /// Raise <see cref="Executing"/> event.
@@ -85,14 +87,19 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Raise <see cref="ICommand.Executed"/> event.
         /// </summary>
-        /// <param name="execution">result of <see cref="StartExecutionAsync()"/></param>
-        protected virtual void OnFinished(Task execution)
+        /// <param name="execution">Result of <see cref="StartExecutionAsync()"/></param>
+        protected virtual void OnFinished(IAsyncAction execution)
         {
             var error = default(Exception);
-            if (execution.IsCanceled)
-                error = new TaskCanceledException(execution);
-            else if (execution.IsFaulted)
-                error = execution.Exception;
+            switch (execution.Status)
+            {
+            case AsyncStatus.Canceled:
+                error = new OperationCanceledException();
+                break;
+            case AsyncStatus.Error:
+                error = execution.ErrorCode;
+                break;
+            }
             var executed = Executed;
             if (executed == null)
             {

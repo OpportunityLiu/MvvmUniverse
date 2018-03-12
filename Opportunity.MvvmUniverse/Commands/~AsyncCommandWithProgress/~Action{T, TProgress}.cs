@@ -27,12 +27,12 @@ namespace Opportunity.MvvmUniverse.Commands
 
         private readonly AsyncActionWithProgressExecutor<T, TProgress> execute;
 
-        protected override Task StartExecutionAsync(T parameter)
+        protected override IAsyncAction StartExecutionAsync(T parameter)
         {
             var p = this.execute.Invoke(this, parameter);
             var e = ProgressChangedEventArgs<T, TProgress>.Create(parameter, default);
             p.Progress = (sender, pg) => { e.Progress = pg; OnProgress(e.EventArgs); };
-            return p.AsTask();
+            return p.AsTask().AsAsyncAction();
         }
     }
 }

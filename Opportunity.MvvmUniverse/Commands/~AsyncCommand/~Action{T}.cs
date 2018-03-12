@@ -24,9 +24,9 @@ namespace Opportunity.MvvmUniverse.Commands
 
         private readonly AsyncActionExecutor<T> execute;
 
-        protected override Task StartExecutionAsync(T parameter)
+        protected override IAsyncAction StartExecutionAsync(T parameter)
         {
-            return this.execute.Invoke(this, parameter).AsTask();
+            return this.execute.Invoke(this, parameter);
         }
     }
 }

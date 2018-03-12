@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -71,11 +73,11 @@ namespace Opportunity.MvvmUniverse.Commands
             if (!OnStarting(parameter))
                 return false;
 
-            var t = StartExecutionAsync(parameter) ?? Task.CompletedTask;
-            if (t.IsCompleted)
+            var t = StartExecutionAsync(parameter) ?? AsyncAction.CreateCompleted();
+            if (t.Status != AsyncStatus.Started)
                 OnFinished(t, parameter);
             else
-                t.ContinueWith((execution, param) => OnFinished(execution, (T)param), parameter);
+                t.Completed = (s, _) => OnFinished(s, parameter);
             return true;
         }
 
@@ -84,7 +86,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// Start execution with given <paramref name="parameter"/>.
         /// </summary>
         /// <param name="parameter">parameter of execution</param>
-        protected abstract Task StartExecutionAsync(T parameter);
+        protected abstract IAsyncAction StartExecutionAsync(T parameter);
 
         /// <summary>
         /// Raise <see cref="Executing"/> event.
@@ -105,14 +107,19 @@ namespace Opportunity.MvvmUniverse.Commands
         /// Raise <see cref="Executed"/> event.
         /// </summary>
         /// <param name="parameter">Parameter of <see cref="Execute(T)"/></param>
-        /// <param name="execution">result of <see cref="StartExecutionAsync(T)"/></param>
-        protected virtual void OnFinished(Task execution, T parameter)
+        /// <param name="execution">Result of <see cref="StartExecutionAsync(T)"/></param>
+        protected virtual void OnFinished(IAsyncAction execution, T parameter)
         {
             var error = default(Exception);
-            if (execution.IsCanceled)
-                error = new TaskCanceledException(execution);
-            else if (execution.IsFaulted)
-                error = execution.Exception;
+            switch (execution.Status)
+            {
+            case AsyncStatus.Canceled:
+                error = new OperationCanceledException();
+                break;
+            case AsyncStatus.Error:
+                error = execution.ErrorCode;
+                break;
+            }
             var executed = Executed;
             if (executed == null)
             {

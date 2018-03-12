@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -37,13 +38,13 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Call <see cref="AsyncCommand.OnFinished(Task)"/> and
+        /// Call <see cref="AsyncCommand.OnFinished(IAsyncAction)"/> and
         /// set <see cref="Progress"/> to default value,
         /// set <see cref="NormalizedProgress"/> to <c><see cref="ProgressMapper"/>(default)</c>.
         /// </summary>
-        /// <param name="parameter">Parameter of <see cref="CommandBase{T}.Execute(T)"/></param>
-        /// <param name="execution">result of <see cref="CommandBase{T}.StartExecutionAsync(T)"/></param>
-        protected override void OnFinished(Task execution, T parameter)
+        /// <param name="parameter">Parameter of <see cref="CommandBase{T}.Execute(T)"/>.</param>
+        /// <param name="execution">Result of <see cref="CommandBase{T}.StartExecutionAsync(T)"/>.</param>
+        protected override void OnFinished(IAsyncAction execution, T parameter)
         {
             try { base.OnFinished(execution, parameter); }
             finally { setProgress(parameter, default); }
@@ -63,6 +64,9 @@ namespace Opportunity.MvvmUniverse.Commands
             DispatcherHelper.BeginInvoke(() => p.Invoke(this, e));
         }
 
+        /// <summary>
+        /// Will be raised when <see cref="Progress"/> changed during execution.
+        /// </summary>
         public event ProgressChangedEventHandler<T, TProgress> ProgressChanged;
     }
 }

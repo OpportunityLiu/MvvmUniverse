@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -45,19 +47,19 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Returns <see cref="Task.CompletedTask"/> or <see cref="Task.FromException(Exception)"/>.
+        /// Returns <see cref="AsyncAction.CreateCompleted()"/> or <see cref="AsyncAction.CreateFault(Exception)"/>.
         /// </summary>
-        /// <returns>A completed <see cref="Task"/></returns>
-        protected override Task StartExecutionAsync()
+        /// <returns>A completed <see cref="IAsyncAction"/></returns>
+        protected override IAsyncAction StartExecutionAsync()
         {
             try
             {
                 this.ExecuteDelegate.Invoke(this);
-                return Task.CompletedTask;
+                return AsyncAction.CreateCompleted();
             }
             catch (Exception ex)
             {
-                return Task.FromException(ex);
+                return AsyncAction.CreateFault(ex);
             }
         }
     }

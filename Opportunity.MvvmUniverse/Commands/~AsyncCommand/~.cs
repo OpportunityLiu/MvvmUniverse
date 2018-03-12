@@ -96,10 +96,10 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Call <see cref="CommandBase.OnFinished(Task)"/> and set <see cref="IsExecuting"/> to <see langword="false"/>.
+        /// Call <see cref="CommandBase.OnFinished(IAsyncAction)"/> and set <see cref="IsExecuting"/> to <see langword="false"/>.
         /// </summary>
-        /// <param name="execution">result of <see cref="CommandBase.StartExecutionAsync()"/></param>
-        protected override void OnFinished(Task execution)
+        /// <param name="execution">Result of <see cref="CommandBase.StartExecutionAsync()"/>.</param>
+        protected override void OnFinished(IAsyncAction execution)
         {
             IsExecuting = false;
             base.OnFinished(execution);

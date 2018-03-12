@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -22,9 +23,9 @@ namespace Opportunity.MvvmUniverse.Commands
 
         private readonly AsyncTaskExecutor execute;
 
-        protected override Task StartExecutionAsync()
+        protected override IAsyncAction StartExecutionAsync()
         {
-            return this.execute.Invoke(this);
+            return this.execute.Invoke(this).AsAsyncAction();
         }
     }
 }
