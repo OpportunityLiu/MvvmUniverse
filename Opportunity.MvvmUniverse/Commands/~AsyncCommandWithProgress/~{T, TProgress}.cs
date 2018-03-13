@@ -7,8 +7,18 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
+    /// <summary>
+    /// Base class for commands implements <see cref="IAsyncCommandWithProgress{T,TProgress}"/>.
+    /// </summary>
+    /// <typeparam name="TProgress">Type of progress.</typeparam>
+    /// <typeparam name="T">Type of parameter.</typeparam>
     public abstract class AsyncCommandWithProgress<T, TProgress> : AsyncCommand<T>, IAsyncCommandWithProgress<T, TProgress>
     {
+        /// <summary>
+        /// Create new instance of <see cref="AsyncCommandWithProgress{T,TProgress}"/>.
+        /// </summary>
+        /// <param name="progressMapper">Value for <see cref="ProgressMapper"/>.</param>
+        /// <param name="canExecute">Value for <see cref="AsyncCommand{T}.CanExecuteDelegate"/>.</param>
         protected AsyncCommandWithProgress(ProgressMapper<T, TProgress> progressMapper, AsyncPredicate<T> canExecute)
             : base(canExecute)
         {

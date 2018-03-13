@@ -4,6 +4,9 @@ using Windows.Storage;
 
 namespace Opportunity.MvvmUniverse.Storage
 {
+    /// <summary>
+    /// Factory methods for <see cref="StorageProperty{T}"/>.
+    /// </summary>
     public static class StorageProperty
     {
         public static StorageProperty<T> CreateLocal<T>(

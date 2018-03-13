@@ -45,8 +45,17 @@ namespace Opportunity.MvvmUniverse.Views
             return true;
         }
 
+        /// <summary>
+        /// Handlers handles navigation methods.
+        /// </summary>
+        /// <remarks>
+        /// Handlers with greater index will be used first.
+        /// </remarks>
         public NavigationHandlerCollection Handlers { get; private set; }
 
+        /// <summary>
+        /// <see cref="Windows.UI.Core.SystemNavigationManager"/> of this instance.
+        /// </summary>
         public SystemNavigationManager SystemNavigationManager { get; private set; }
 
         private async void manager_BackRequested(object sender, BackRequestedEventArgs e)

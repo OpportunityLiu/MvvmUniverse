@@ -166,6 +166,7 @@ namespace Opportunity.MvvmUniverse.Views
                 throw new InvalidOperationException("This property is read only");
         }
 
+        /// <inheritdoc/>
         protected override Size MeasureOverride(Size availableSize)
         {
             if (this.Content == null)
@@ -176,6 +177,7 @@ namespace Opportunity.MvvmUniverse.Views
             return new Size(ns.Width + pad.Left + pad.Right, ns.Height + pad.Top + pad.Bottom);
         }
 
+        /// <inheritdoc/>
         protected override Size ArrangeOverride(Size finalSize)
         {
             if (this.Content == null)

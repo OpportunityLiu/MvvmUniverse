@@ -8,11 +8,23 @@ using Windows.Storage.Streams;
 
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
+    /// <summary>
+    /// <see cref="ISerializer{T}"/> based on <see cref="System.Xml.Serialization.XmlSerializer"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of elements.</typeparam>
     public sealed class XmlSerializer<T> : ISerializer<T>
     {
+        /// <summary>
+        /// Create new instance of <see cref="XmlSerializer{T}"/>.
+        /// </summary>
         public XmlSerializer()
             : this(new System.Xml.Serialization.XmlSerializer(typeof(T))) { }
 
+        /// <summary>
+        /// Create new instance of <see cref="XmlSerializer{T}"/>.
+        /// </summary>
+        /// <param name="xmlSerializer"><see cref="System.Xml.Serialization.XmlSerializer"/> used for this instance.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="xmlSerializer"/> is <see langword="null"/>.</exception>
         public XmlSerializer(System.Xml.Serialization.XmlSerializer xmlSerializer)
         {
             this.xmlSerializer = xmlSerializer ?? throw new ArgumentNullException(nameof(xmlSerializer));
@@ -20,6 +32,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
 
         private System.Xml.Serialization.XmlSerializer xmlSerializer;
 
+        /// <inheritdoc/>
         public void Serialize(in T value, DataWriter storage)
         {
             if (value == null)
@@ -37,6 +50,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             }
         }
 
+        /// <inheritdoc/>
         public void Deserialize(DataReader storage, ref T value)
         {
             var length = storage.ReadUInt32();

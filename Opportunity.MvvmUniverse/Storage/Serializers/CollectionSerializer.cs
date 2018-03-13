@@ -8,16 +8,33 @@ using Windows.Storage.Streams;
 
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
+    /// <summary>
+    /// <see cref="ISerializer{T}"/> for <see cref="ICollection{T}"/>.
+    /// </summary>
+    /// <typeparam name="TCollection">Type of collection.</typeparam>
+    /// <typeparam name="TElement">Type of elements of the array.</typeparam>
     public class CollectionSerializer<TCollection, TElement> : CollectionSerializerBase<TElement>, ISerializer<TCollection>
         where TCollection : ICollection<TElement>
     {
+        /// <summary>
+        /// Create new instance of <see cref="CollectionSerializer{TCollection, TElement}"/>.
+        /// </summary>
         public CollectionSerializer() { }
 
+        /// <summary>
+        /// Create new instance of <see cref="CollectionSerializer{TCollection, TElement}"/>.
+        /// </summary>
+        /// <param name="elementSerializer"><see cref="ISerializer{T}"/> for elements in the collection.</param>
         public CollectionSerializer(ISerializer<TElement> elementSerializer)
             : base(elementSerializer) { }
 
+        /// <summary>
+        /// Create new instance of <typeparamref name="TCollection"/>.
+        /// </summary>
+        /// <returns>New instance of <typeparamref name="TCollection"/>.</returns>
         protected virtual TCollection CreateInstance() => Activator.CreateInstance<TCollection>();
 
+        /// <inheritdoc/>
         public void Serialize(in TCollection value, DataWriter storage)
         {
             if (value == null)
@@ -32,6 +49,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             }
         }
 
+        /// <inheritdoc/>
         public void Deserialize(DataReader storage, ref TCollection value)
         {
             var length = storage.ReadInt32();
