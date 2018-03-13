@@ -40,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Factory for <see cref="ProgressChangedEventArgs{TProgress}"/>, enables modification of <see cref="ProgressChangedEventArgs{TProgress}.Progress"/>.
         /// </summary>
-        public struct Factory
+        public readonly struct Factory
         {
             internal Factory(TProgress progress)
             {
@@ -93,7 +93,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Factory for <see cref="ProgressChangedEventArgs{T,TProgress}"/>, enables modification of <see cref="ProgressChangedEventArgs{T,TProgress}.Progress"/>.
         /// </summary>
-        public struct Factory
+        public readonly struct Factory
         {
             internal Factory(T parameter, TProgress progress)
             {

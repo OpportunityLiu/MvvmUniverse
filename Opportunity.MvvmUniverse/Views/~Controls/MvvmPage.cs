@@ -26,7 +26,6 @@ namespace Opportunity.MvvmUniverse.Views
         /// </summary>
         public MvvmPage()
         {
-            Windows.UI.ViewManagement.ApplicationViewScaling.TrySetDisableLayoutScaling(true);
             this.Unloaded += this.MvvmPage_Unloaded;
             this.Loading += this.MvvmPage_Loading;
         }
