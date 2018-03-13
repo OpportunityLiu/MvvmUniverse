@@ -11,9 +11,8 @@ namespace Opportunity.MvvmUniverse.Views
     /// <summary>
     /// Collection of <see cref="INavigationHandler"/>.
     /// </summary>
-    public sealed class NavigationHandlerCollection : ObservableList<INavigationHandler>
+    internal sealed class NavigationHandlerCollection : ObservableList<INavigationHandler>
     {
-
         internal static readonly Dictionary<INavigationHandler, Navigator> NavigationHandlerDic
             = new Dictionary<INavigationHandler, Navigator>();
 
@@ -38,16 +37,16 @@ namespace Opportunity.MvvmUniverse.Views
 
         private static LockHelper GetLock() => new LockHelper(Navigator.Count > 1);
 
-        private readonly Navigator navigator;
+        private Navigator navigator;
 
         internal NavigationHandlerCollection(Navigator navigator)
         {
             this.navigator = navigator;
         }
 
-        /// <inheritdoc/>
         protected override void ClearItems()
         {
+            CheckAvailable();
             try
             {
                 using (GetLock())
@@ -67,9 +66,9 @@ namespace Opportunity.MvvmUniverse.Views
             }
         }
 
-        /// <inheritdoc/>
         protected override void InsertItem(int index, INavigationHandler item)
         {
+            CheckAvailable();
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
             item.OnAdd(this.navigator);
@@ -81,9 +80,9 @@ namespace Opportunity.MvvmUniverse.Views
             this.navigator.UpdateProperties();
         }
 
-        /// <inheritdoc/>
         protected override void SetItem(int index, INavigationHandler item)
         {
+            CheckAvailable();
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
             var old = this[index];
@@ -106,9 +105,9 @@ namespace Opportunity.MvvmUniverse.Views
             this.navigator.UpdateProperties();
         }
 
-        /// <inheritdoc/>
         protected override void RemoveItem(int index)
         {
+            CheckAvailable();
             var old = this[index];
             old.OnRemove();
             using (GetLock())
@@ -117,6 +116,21 @@ namespace Opportunity.MvvmUniverse.Views
             }
             base.RemoveItem(index);
             this.navigator.UpdateProperties();
+        }
+
+        internal void Destory()
+        {
+            if (this.navigator != null)
+            {
+                Clear();
+                this.navigator = null;
+            }
+        }
+
+        private void CheckAvailable()
+        {
+            if (this.navigator is null)
+                throw new InvalidOperationException("The navigator of this collection has been destoryed.");
         }
     }
 }

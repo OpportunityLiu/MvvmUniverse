@@ -18,12 +18,19 @@ using System.ComponentModel;
 
 namespace Opportunity.MvvmUniverse.Views
 {
+    /// <summary>
+    /// Provides view level navigation service.
+    /// </summary>
     public sealed class Navigator : DependencyObject
     {
         internal static int Count;
         [ThreadStatic]
         private static Navigator navigator;
 
+        /// <summary>
+        /// Create or get <see cref="Navigator"/> of current view.
+        /// </summary>
+        /// <returns><see cref="Navigator"/> of current view.</returns>
         public static Navigator GetOrCreateForCurrentView()
         {
             var nav = navigator;
@@ -34,8 +41,16 @@ namespace Opportunity.MvvmUniverse.Views
             return nav;
         }
 
+        /// <summary>
+        /// Get <see cref="Navigator"/> of current view.
+        /// </summary>
+        /// <returns><see cref="Navigator"/> of current view, or <see langword="null"/>, if not created.</returns>
         public static Navigator GetForCurrentView() => navigator;
 
+        /// <summary>
+        /// Destory <see cref="Navigator"/> of current view.
+        /// </summary>
+        /// <returns>Whether the <see cref="Navigator"/> is found and destoryed.</returns>
         public static bool DestoryForCurrentView()
         {
             var nav = Interlocked.Exchange(ref navigator, null);
@@ -45,13 +60,14 @@ namespace Opportunity.MvvmUniverse.Views
             return true;
         }
 
+        private NavigationHandlerCollection handlers;
         /// <summary>
         /// Handlers handles navigation methods.
         /// </summary>
         /// <remarks>
         /// Handlers with greater index will be used first.
         /// </remarks>
-        public NavigationHandlerCollection Handlers { get; private set; }
+        public IList<INavigationHandler> Handlers => this.handlers;
 
         /// <summary>
         /// <see cref="Windows.UI.Core.SystemNavigationManager"/> of this instance.
@@ -70,28 +86,26 @@ namespace Opportunity.MvvmUniverse.Views
         private Navigator()
         {
             Interlocked.Increment(ref Count);
-            this.Handlers = new NavigationHandlerCollection(this);
+            this.handlers = new NavigationHandlerCollection(this);
             this.SystemNavigationManager = SystemNavigationManager.GetForCurrentView();
             this.SystemNavigationManager.BackRequested += this.manager_BackRequested;
         }
 
-        private bool destoryed = false;
         private void destory()
         {
-            if (!this.destoryed)
+            if (this.handlers != null)
             {
                 this.SystemNavigationManager.BackRequested -= this.manager_BackRequested;
                 this.SystemNavigationManager = null;
-                this.Handlers.Clear();
-                this.Handlers = null;
-                this.destoryed = true;
+                this.handlers.Destory();
+                this.handlers = null;
                 Interlocked.Decrement(ref Count);
             }
         }
 
         private void CheckAvailable()
         {
-            if (this.destoryed)
+            if (this.handlers is null)
                 throw new InvalidOperationException("This navigator has been destoryed.");
         }
 
@@ -126,6 +140,9 @@ namespace Opportunity.MvvmUniverse.Views
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private bool isNavigating = false;
+        /// <summary>
+        /// Indicates if <see cref="GoBackAsync()"/>, <see cref="GoForwardAsync()"/> or <see cref="NavigateAsync(Type, object)"/> is running.
+        /// </summary>
         public bool IsNavigating
         {
             get => this.isNavigating;
@@ -155,6 +172,9 @@ namespace Opportunity.MvvmUniverse.Views
                 throw new InvalidOperationException("This property is read only");
         }
 
+        /// <summary>
+        /// Global switch of this <see cref="Navigator"/>.
+        /// </summary>
         public bool IsEnabled
         {
             get => (bool)GetValue(IsEnabledProperty);
@@ -177,6 +197,9 @@ namespace Opportunity.MvvmUniverse.Views
             sender.UpdateProperties();
         }
 
+        /// <summary>
+        /// Indicates whether <see cref="GoBackAsync()"/> is enabled.
+        /// </summary>
         public bool IsBackEnabled
         {
             get => (bool)GetValue(IsBackEnabledProperty);
@@ -199,6 +222,9 @@ namespace Opportunity.MvvmUniverse.Views
             sender.UpdateProperties();
         }
 
+        /// <summary>
+        /// Indicates whether <see cref="GoForwardAsync()"/> is enabled.
+        /// </summary>
         public bool IsForwardEnabled
         {
             get => (bool)GetValue(IsForwardEnabledProperty);
@@ -221,6 +247,9 @@ namespace Opportunity.MvvmUniverse.Views
             sender.UpdateProperties();
         }
 
+        /// <summary>
+        /// Indicates whether <see cref="NavigateAsync(Type, object)"/> is enabled.
+        /// </summary>
         public bool IsNavigateEnabled
         {
             get => (bool)GetValue(IsNavigateEnabledProperty);

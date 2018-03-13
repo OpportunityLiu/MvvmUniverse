@@ -7,6 +7,9 @@ using Windows.Storage;
 
 namespace Opportunity.MvvmUniverse.Storage
 {
+    /// <summary>
+    /// Tracks all roaming <see cref="StorageProperty{T}"/> and notifies when data syncing from cloud.
+    /// </summary>
     public static class RoamingStoragePropertyManager
     {
         static RoamingStoragePropertyManager()
@@ -25,6 +28,9 @@ namespace Opportunity.MvvmUniverse.Storage
         internal static readonly List<WeakReference<IStorageProperty>> RoamingProperties
             = new List<WeakReference<IStorageProperty>>();
 
+        /// <summary>
+        /// Tracked roaming <see cref="StorageProperty{T}"/>.
+        /// </summary>
         public static IEnumerable<IStorageProperty> TrackingRoamingStorageProperties => get();
 
         private static IEnumerable<IStorageProperty> get()
