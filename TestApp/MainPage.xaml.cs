@@ -1,4 +1,5 @@
 ﻿using Opportunity.MvvmUniverse.Commands;
+using Opportunity.MvvmUniverse.Commands.Predefined;
 using Opportunity.MvvmUniverse.Services.Navigation;
 using Opportunity.MvvmUniverse.Views;
 using System;
@@ -135,7 +136,7 @@ namespace TestApp
             c.Closed += (s, args) =>
             {
             };
-           
+
 
             //ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
             //await ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.Default);
@@ -147,6 +148,7 @@ namespace TestApp
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
+            DataTransferCommands.Share.Execute(new Uri("http://baidu.com"));
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
             //ApplicationView.GetForCurrentView().ExitFullScreenMode();
             //ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay);
