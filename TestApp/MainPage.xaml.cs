@@ -128,6 +128,15 @@ namespace TestApp
                 FullSizeDesired = true,
             };
             var r = c.ShowAsync();
+            c.Closing += (s, args) =>
+            {
+                args.Cancel = true;
+            };
+            c.Closed += (s, args) =>
+            {
+            };
+           
+
             //ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
             //await ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.Default);
 

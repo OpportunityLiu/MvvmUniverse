@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Windows.Foundation;
 using Windows.UI.Xaml;
 
@@ -47,51 +48,42 @@ namespace Opportunity.MvvmUniverse.Services.Notification
 
         void IService<INotificationHandler>.UpdateProperties() { }
 
-        public bool Notify(string category, object data)
+        /// <summary>
+        /// Send notification and returns immediately.
+        /// </summary>
+        /// <param name="data">Data of notificaiton.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is <see langword="null"/>.</exception>
+        public void Notify(object data)
         {
-            for (var i = Handlers.Count - 1; i >= 0; i--)
-            {
-                if (Handlers[i].Notify(category, data))
-                    return true;
-            }
-            return false;
+            var ignore = NotifyAsync(data);
         }
 
-        public IAsyncOperation<NotificationResult> NotifyAsync(string category, object data)
+        /// <summary>
+        /// Send notification and wait for results.
+        /// </summary>
+        /// <param name="data">Data of notificaiton.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is <see langword="null"/>.</exception>
+        /// <returns>Whether the notification was handled by any of <see cref="Handlers"/>.</returns>
+        public IAsyncOperation<bool> NotifyAsync(object data)
         {
+            if (data is null)
+                throw new ArgumentNullException(nameof(data));
             if (Handlers.Count == 0)
-                return AsyncOperation<NotificationResult>.CreateCompleted();
+                return AsyncOperation<bool>.CreateCompleted();
             return AsyncInfo.Run(async token =>
             {
-                var t = default(IAsyncOperation<NotificationResult>);
+                var t = default(IAsyncOperation<bool>);
                 token.Register(() => t?.Cancel());
                 for (var i = Handlers.Count - 1; i >= 0; i--)
                 {
-                    t = Handlers[i].NotifyAsync(category, data);
+                    t = Handlers[i].NotifyAsync(data);
                     var r = await t;
-                    if (r != NotificationResult.Unhandled)
-                        return r;
+                    if (await t)
+                        return true;
                     token.ThrowIfCancellationRequested();
                 }
-                return NotificationResult.Unhandled;
+                return false;
             });
         }
-    }
-
-    /// <summary>
-    /// Handler for <see cref="Notificator"/>.
-    /// </summary>
-    public interface INotificationHandler : IServiceHandler<Notificator>
-    {
-        bool Notify(string category, object data);
-
-        IAsyncOperation<NotificationResult> NotifyAsync(string category, object data);
-    }
-
-    public enum NotificationResult
-    {
-        Unhandled = 0,
-        Positive = 1,
-        Negetive = -1,
     }
 }
