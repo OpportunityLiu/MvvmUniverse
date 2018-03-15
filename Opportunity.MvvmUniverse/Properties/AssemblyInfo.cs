@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("An Mvvm lib for UWP apps.")]
 [assembly: AssemblyCompany("Opportunity")]
 [assembly: AssemblyProduct("Opportunity.MvvmUniverse")]
-[assembly: AssemblyCopyright("Copyright © Opportunity 2017")]
+[assembly: AssemblyCopyright("Copyright © Opportunity 2018")]
 [assembly: AssemblyTrademark("Opportunity")]
 [assembly: AssemblyVersion(Opportunity.MvvmUniverse.AssemblyInfo.Version)]
 [assembly: AssemblyFileVersion(Opportunity.MvvmUniverse.AssemblyInfo.Version)]
@@ -20,6 +20,6 @@ namespace Opportunity.MvvmUniverse
 {
     internal static class AssemblyInfo
     {
-        public const string Version = "2.4.8.0";
+        public const string Version = "2.4.9.0";
     }
 }

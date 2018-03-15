@@ -1,4 +1,5 @@
-﻿using Opportunity.MvvmUniverse.Views;
+﻿using Opportunity.MvvmUniverse.Services.Navigation;
+using Opportunity.MvvmUniverse.Views;
 using System;
 using System.Collections.Generic;
 using System.IO;

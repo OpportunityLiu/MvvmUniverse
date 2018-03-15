@@ -101,6 +101,10 @@
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangedEventArgsSource.cs" />
+    <Compile Include="Services\IServiceHandler{TService}.cs" />
+    <Compile Include="Services\IService{THandler}.cs" />
+    <Compile Include="Services\INavigationHandlerExtension.cs" />
+    <Compile Include="Services\ServiceHandlerCollection.cs" />
     <Compile Include="Storage\RoamingStoragePropertyManager.cs" />
     <Compile Include="Storage\Serializers\BasicSerializer.cs" />
     <Compile Include="Storage\Serializers\CollectionSerializerBase.cs" />
@@ -118,13 +122,15 @@
     <Compile Include="Storage\Serializer{T}.cs" />
     <Compile Include="Storage\StorageProperty.cs" />
     <Compile Include="Storage\StorageProperty{T}.cs" />
+    <Compile Include="Services\Notification\Notificator.cs" />
     <Compile Include="Views\ViewModelFactory.cs" />
+    <Compile Include="Services\ViewIndependentSingleton{T}.cs" />
+    <Compile Include="Views\~Controls\MvvmContentDialog.cs" />
     <Compile Include="Views\~Controls\MvvmPage.cs" />
     <Compile Include="Views\ViewModelBase.cs" />
-    <Compile Include="Views\FrameWrapper.cs" />
-    <Compile Include="Views\INavigationHandler.cs" />
-    <Compile Include="Views\NavigationHandlerCollection.cs" />
-    <Compile Include="Views\Navigator.cs" />
+    <Compile Include="Services\Navigation\FrameWrapper.cs" />
+    <Compile Include="Services\Navigation\INavigationHandler.cs" />
+    <Compile Include="Services\Navigation\Navigator.cs" />
     <Compile Include="WeakEvent.cs" />
     <EmbeddedResource Include="Properties\Opportunity.MvvmUniverse.rd.xml" />
   </ItemGroup>

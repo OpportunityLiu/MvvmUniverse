@@ -6,15 +6,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Opportunity.MvvmUniverse.Views
+namespace Opportunity.MvvmUniverse.Services
 {
     /// <summary>
-    /// Collection of <see cref="INavigationHandler"/>.
+    /// Collection of <typeparamref name="THandler"/>.
     /// </summary>
-    internal sealed class NavigationHandlerCollection : ObservableList<INavigationHandler>
+    /// <typeparam name="TService">Service type.</typeparam>
+    /// <typeparam name="THandler">Handler type.</typeparam>
+    internal sealed class ServiceHandlerCollection<TService, THandler> : ObservableList<THandler>
+        where TService : class, IService<THandler>
+        where THandler : IServiceHandler<TService>
     {
-        internal static readonly Dictionary<INavigationHandler, Navigator> NavigationHandlerDic
-            = new Dictionary<INavigationHandler, Navigator>();
+        public static readonly Dictionary<THandler, TService> HandlerDic
+            = new Dictionary<THandler, TService>();
 
         private struct LockHelper : IDisposable
         {
@@ -24,24 +28,30 @@ namespace Opportunity.MvvmUniverse.Views
             {
                 this = new LockHelper();
                 if (needLock)
-                    Monitor.Enter(NavigationHandlerDic, ref this.locked);
+                    Monitor.Enter(HandlerDic, ref this.locked);
             }
 
             public void Dispose()
             {
                 if (this.locked)
-                    Monitor.Exit(NavigationHandlerDic);
+                    Monitor.Exit(HandlerDic);
                 this.locked = false;
             }
         }
 
-        private static LockHelper GetLock() => new LockHelper(Navigator.Count > 1);
+        private static LockHelper GetLock() => new LockHelper(ViewIndependentSingleton<TService>.Count > 1);
 
-        private Navigator navigator;
+        public TService Service { get; private set; }
 
-        internal NavigationHandlerCollection(Navigator navigator)
+        internal ServiceHandlerCollection(TService service)
         {
-            this.navigator = navigator;
+            this.Service = service;
+        }
+
+        private void CheckAvailable()
+        {
+            if (this.Service is null)
+                throw new InvalidOperationException("The service of this collection has been destoryed.");
         }
 
         protected override void ClearItems()
@@ -54,83 +64,77 @@ namespace Opportunity.MvvmUniverse.Views
                     while (this.Count != 0)
                     {
                         var item = this[this.Count - 1];
-                        item.OnRemove();
-                        NavigationHandlerDic.Remove(item);
+                        item.OnRemove(this.Service);
+                        HandlerDic.Remove(item);
                         base.RemoveItem(this.Count - 1);
                     }
                 }
             }
             finally
             {
-                this.navigator.UpdateProperties();
+                Service.UpdateProperties();
             }
         }
 
-        protected override void InsertItem(int index, INavigationHandler item)
+        protected override void InsertItem(int index, THandler item)
         {
             CheckAvailable();
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
-            item.OnAdd(this.navigator);
+            item.OnAdd(this.Service);
             using (GetLock())
             {
-                NavigationHandlerDic.Add(item, this.navigator);
+                HandlerDic.Add(item, this.Service);
             }
             base.InsertItem(index, item);
-            this.navigator.UpdateProperties();
+            Service.UpdateProperties();
         }
 
-        protected override void SetItem(int index, INavigationHandler item)
+        protected override void SetItem(int index, THandler item)
         {
             CheckAvailable();
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
             var old = this[index];
-            item.OnAdd(this.navigator);
+            item.OnAdd(this.Service);
             try
             {
-                old.OnRemove();
+                old.OnRemove(this.Service);
             }
             catch
             {
-                item.OnRemove();
+                item.OnRemove(this.Service);
                 throw;
             }
             using (GetLock())
             {
-                NavigationHandlerDic.Remove(old);
-                NavigationHandlerDic.Add(item, this.navigator);
+                HandlerDic.Remove(old);
+                HandlerDic.Add(item, this.Service);
             }
             base.SetItem(index, item);
-            this.navigator.UpdateProperties();
+            Service.UpdateProperties();
         }
 
         protected override void RemoveItem(int index)
         {
             CheckAvailable();
             var old = this[index];
-            old.OnRemove();
+            old.OnRemove(this.Service);
             using (GetLock())
             {
-                NavigationHandlerDic.Remove(old);
+                HandlerDic.Remove(old);
             }
             base.RemoveItem(index);
-            this.navigator.UpdateProperties();
+            Service.UpdateProperties();
         }
 
-        internal void Destory()
+        public void Destory()
         {
-            if (this.navigator != null)
+            if (this.Service != null)
             {
                 Clear();
-                this.navigator = null;
+                this.Service = null;
             }
-        }
-
-        private void CheckAvailable()
-        {
-            if (this.navigator is null)
-                throw new InvalidOperationException("The navigator of this collection has been destoryed.");
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Opportunity.MvvmUniverse.Views;
+﻿using Opportunity.MvvmUniverse.Commands;
+using Opportunity.MvvmUniverse.Services.Navigation;
+using Opportunity.MvvmUniverse.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -115,19 +117,31 @@ namespace TestApp
 
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
-            await ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.Default);
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
-            this.ViewModel = new VM();
-            ApplicationView.GetForCurrentView().IsScreenCaptureEnabled = false;
+            var c = new MvvmContentDialog
+            {
+                Title = "TITLE",
+                CloseButtonText = "Close",
+                CloseButtonCommand = Command.Create(a =>
+                {
+                    Debug.WriteLine("Closed");
+                }),
+                FullSizeDesired = true,
+            };
+            var r = c.ShowAsync();
+            //ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
+            //await ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.Default);
+
+            //this.ViewModel = new VM();
+            //ApplicationView.GetForCurrentView().IsScreenCaptureEnabled = false;
             // Grid.SetColumn(xp, 0);
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            ApplicationView.GetForCurrentView().ExitFullScreenMode();
-            ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay);
-            Grid.SetColumn(xp, 1);
+            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
+            //ApplicationView.GetForCurrentView().ExitFullScreenMode();
+            //ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay);
+            //Grid.SetColumn(xp, 1);
         }
     }
 }

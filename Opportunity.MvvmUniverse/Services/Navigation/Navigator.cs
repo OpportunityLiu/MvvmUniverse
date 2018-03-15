@@ -16,28 +16,24 @@ using System.Threading;
 using System.Diagnostics;
 using System.ComponentModel;
 
-namespace Opportunity.MvvmUniverse.Views
+namespace Opportunity.MvvmUniverse.Services.Navigation
 {
     /// <summary>
     /// Provides view level navigation service.
     /// </summary>
-    public sealed class Navigator : DependencyObject
+    public sealed class Navigator : DependencyObject, IService<INavigationHandler>
     {
-        internal static int Count;
-        [ThreadStatic]
-        private static Navigator navigator;
-
         /// <summary>
         /// Create or get <see cref="Navigator"/> of current view.
         /// </summary>
         /// <returns><see cref="Navigator"/> of current view.</returns>
         public static Navigator GetOrCreateForCurrentView()
         {
-            var nav = navigator;
+            var nav = ViewIndependentSingleton<Navigator>.Value;
             if (nav != null)
                 return nav;
             nav = new Navigator();
-            navigator = nav;
+            ViewIndependentSingleton<Navigator>.Value = nav;
             return nav;
         }
 
@@ -45,7 +41,7 @@ namespace Opportunity.MvvmUniverse.Views
         /// Get <see cref="Navigator"/> of current view.
         /// </summary>
         /// <returns><see cref="Navigator"/> of current view, or <see langword="null"/>, if not created.</returns>
-        public static Navigator GetForCurrentView() => navigator;
+        public static Navigator GetForCurrentView() => ViewIndependentSingleton<Navigator>.Value;
 
         /// <summary>
         /// Destory <see cref="Navigator"/> of current view.
@@ -53,14 +49,33 @@ namespace Opportunity.MvvmUniverse.Views
         /// <returns>Whether the <see cref="Navigator"/> is found and destoryed.</returns>
         public static bool DestoryForCurrentView()
         {
-            var nav = Interlocked.Exchange(ref navigator, null);
+            var nav = ViewIndependentSingleton<Navigator>.Value;
             if (nav == null)
                 return false;
+            ViewIndependentSingleton<Navigator>.Value = null;
             nav.destory();
             return true;
         }
 
-        private NavigationHandlerCollection handlers;
+        private Navigator()
+        {
+            this.handlers = new ServiceHandlerCollection<Navigator, INavigationHandler>(this);
+            this.SystemNavigationManager = SystemNavigationManager.GetForCurrentView();
+            this.SystemNavigationManager.BackRequested += this.manager_BackRequested;
+        }
+
+        private void destory()
+        {
+            if (this.handlers != null)
+            {
+                this.SystemNavigationManager.BackRequested -= this.manager_BackRequested;
+                this.SystemNavigationManager = null;
+                this.handlers.Destory();
+                this.handlers = null;
+            }
+        }
+
+        private ServiceHandlerCollection<Navigator, INavigationHandler> handlers;
         /// <summary>
         /// Handlers handles navigation methods.
         /// </summary>
@@ -76,30 +91,12 @@ namespace Opportunity.MvvmUniverse.Views
 
         private async void manager_BackRequested(object sender, BackRequestedEventArgs e)
         {
+            if (e.Handled)
+                return;
             if (CanGoBack)
             {
                 e.Handled = true;
                 await GoBackAsync();
-            }
-        }
-
-        private Navigator()
-        {
-            Interlocked.Increment(ref Count);
-            this.handlers = new NavigationHandlerCollection(this);
-            this.SystemNavigationManager = SystemNavigationManager.GetForCurrentView();
-            this.SystemNavigationManager.BackRequested += this.manager_BackRequested;
-        }
-
-        private void destory()
-        {
-            if (this.handlers != null)
-            {
-                this.SystemNavigationManager.BackRequested -= this.manager_BackRequested;
-                this.SystemNavigationManager = null;
-                this.handlers.Destory();
-                this.handlers = null;
-                Interlocked.Decrement(ref Count);
             }
         }
 

@@ -5,7 +5,7 @@ using Windows.Foundation;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 
-namespace Opportunity.MvvmUniverse.Views
+namespace Opportunity.MvvmUniverse.Services.Navigation
 {
     /// <summary>
     /// Extension methods for <see cref="Frame"/>.
@@ -59,7 +59,11 @@ namespace Opportunity.MvvmUniverse.Views
             return AsyncOperation<bool>.CreateCompleted(true);
         }
 
-        public void OnAdd(Navigator navigator) { if (Frame.Dispatcher != navigator.Dispatcher) throw new InvalidOperationException("Frame and Navigator belongs to different UI thread."); }
-        public void OnRemove() { }
+        void IServiceHandler<Navigator>.OnAdd(Navigator navigator)
+        {
+            if (Frame.Dispatcher != navigator.Dispatcher)
+                throw new InvalidOperationException("Frame and Navigator belongs to different UI thread.");
+        }
+        void IServiceHandler<Navigator>.OnRemove(Navigator navigator) { }
     }
 }
