@@ -28,7 +28,8 @@ namespace Opportunity.MvvmUniverse.Commands.Predefined
                         Title = Package.Current.DisplayName,
                         ApplicationName = Package.Current.DisplayName,
                         PackageFamilyName = Package.Current.Id.FamilyName,
-                    }
+                    },
+                    RequestedOperation = DataPackageOperation.Copy,
                 };
                 switch (data)
                 {

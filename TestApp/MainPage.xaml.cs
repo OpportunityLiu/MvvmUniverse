@@ -121,22 +121,28 @@ namespace TestApp
             var c = new MvvmContentDialog
             {
                 Title = "TITLE",
+                PrimaryButtonText = "Re",
                 CloseButtonText = "Close",
                 CloseButtonCommand = Command.Create(a =>
                 {
                     Debug.WriteLine("Closed");
                 }),
-                FullSizeDesired = true,
+                Content = new TextBox
+                {
+                    AcceptsReturn = true
+                },
             };
             var r = c.ShowAsync();
             c.Closing += (s, args) =>
-            {
-                args.Cancel = true;
-            };
+                {
+                };
             c.Closed += (s, args) =>
-            {
-            };
-
+                    {
+                    };
+            c.PrimaryButtonClick += (s, args) =>
+             {
+                 args.Cancel = true;
+             };
 
             //ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
             //await ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.Default);

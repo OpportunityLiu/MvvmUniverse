@@ -22,8 +22,8 @@ namespace Opportunity.MvvmUniverse.Views
         /// </summary>
         public MvvmContentDialog()
         {
-            this.Unloaded += this.MvvmContentDialog_Unloaded;
-            this.Loading += this.MvvmContentDialog_Loading;
+            this.Opened += this.MvvmContentDialog_Opened;
+            this.Closed += this.MvvmContentDialog_Closed;
         }
 
         private Border BackgroundElement;
@@ -41,21 +41,19 @@ namespace Opportunity.MvvmUniverse.Views
             caculateVisibleBoundsThickness();
         }
 
-        private void MvvmContentDialog_Loading(FrameworkElement sender, object e)
+        private void MvvmContentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
         {
             InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneChanging;
             InputPane.GetForCurrentView().Hiding += this.InputPane_InputPaneChanging;
-            ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.ApplicationView_VisibleBoundsChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
         }
 
-        private void MvvmContentDialog_Unloaded(object sender, RoutedEventArgs e)
+        private void MvvmContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
         {
             InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneChanging;
             InputPane.GetForCurrentView().Hiding -= this.InputPane_InputPaneChanging;
-            ApplicationView.GetForCurrentView().VisibleBoundsChanged -= this.ApplicationView_VisibleBoundsChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged -= this.TitleBar_LayoutMetricsChanged;
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged -= this.BackgroundElement_SizeChanged;
@@ -63,16 +61,10 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void InputPane_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)
         {
-            args.EnsuredFocusedElementInView = true;
-            caculateVisibleBoundsThickness();
+            args.EnsuredFocusedElementInView = false;
         }
 
         private void TitleBar_LayoutMetricsChanged(CoreApplicationViewTitleBar sender, object args)
-        {
-            caculateVisibleBoundsThickness();
-        }
-
-        private void ApplicationView_VisibleBoundsChanged(ApplicationView sender, object args)
         {
             caculateVisibleBoundsThickness();
         }
@@ -113,8 +105,8 @@ namespace Opportunity.MvvmUniverse.Views
                 var size = new Size(this.BackgroundElement.ActualWidth, this.BackgroundElement.ActualHeight);
                 var transedView = this.BackgroundElement.TransformToVisual(null).Inverse.TransformBounds(usedView);
                 var innerBound = this.DialogSpace.Padding;
-
-                this.BackgroundElement.Padding = new Thickness(bound(transedView.Left - innerBound.Left), bound(transedView.Top - innerBound.Top), bound(size.Width - transedView.Right - innerBound.Right), bound(size.Height - transedView.Bottom - innerBound.Bottom));
+                var padding = new Thickness(bound(transedView.Left - innerBound.Left), bound(transedView.Top - innerBound.Top), bound(size.Width - transedView.Right - innerBound.Right), bound(size.Height - transedView.Bottom - innerBound.Bottom));
+                this.BackgroundElement.Padding = padding;
             }
         }
 
