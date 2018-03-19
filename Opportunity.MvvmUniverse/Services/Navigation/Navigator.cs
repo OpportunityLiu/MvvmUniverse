@@ -271,6 +271,9 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private bool canGoBack = false;
+        /// <summary>
+        /// Indicates if can navigate back.
+        /// </summary>
         public bool CanGoBack
         {
             get => this.canGoBack;
@@ -304,6 +307,9 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private bool canGoForward = false;
+        /// <summary>
+        /// Indicates if can navigate forward.
+        /// </summary>
         public bool CanGoForward
         {
             get => this.canGoForward;
@@ -333,6 +339,10 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
                 throw new InvalidOperationException("This property is read only");
         }
 
+        /// <summary>
+        /// Navagate back.
+        /// </summary>
+        /// <returns>Navigation succeed or not.</returns>
         public IAsyncOperation<bool> GoBackAsync()
         {
             CheckAvailable();
@@ -361,6 +371,10 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
             });
         }
 
+        /// <summary>
+        /// Navagate forward.
+        /// </summary>
+        /// <returns>Navigation succeed or not.</returns>
         public IAsyncOperation<bool> GoForwardAsync()
         {
             CheckAvailable();
@@ -389,8 +403,19 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
             });
         }
 
+        /// <summary>
+        /// Navagate to new page.
+        /// </summary>
+        /// <param name="sourcePageType">Type of new page.</param>
+        /// <returns>Navigation succeed or not.</returns>
         public IAsyncOperation<bool> NavigateAsync(Type sourcePageType) => this.NavigateAsync(sourcePageType, null);
 
+        /// <summary>
+        /// Navagate to new page.
+        /// </summary>
+        /// <param name="sourcePageType">Type of new page.</param>
+        /// <param name="parameter">Parameter of navigation.</param>
+        /// <returns>Navigation succeed or not.</returns>
         public IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter)
         {
             CheckAvailable();

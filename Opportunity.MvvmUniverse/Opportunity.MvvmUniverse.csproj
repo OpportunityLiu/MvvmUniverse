@@ -102,6 +102,8 @@
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangedEventArgsSource.cs" />
+    <Compile Include="Services\Activation\Activator.cs" />
+    <Compile Include="Services\Activation\IActivationHandler.cs" />
     <Compile Include="Services\IServiceHandler{TService}.cs" />
     <Compile Include="Services\IService{THandler}.cs" />
     <Compile Include="Services\Notification\INotificationHandler.cs" />

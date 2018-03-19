@@ -64,8 +64,8 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void MvvmPage_Loading(FrameworkElement sender, object e)
         {
-            InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneChanging;
-            InputPane.GetForCurrentView().Hiding += this.InputPane_InputPaneChanging;
+            InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneShowing;
+            InputPane.GetForCurrentView().Hiding += this.InputPane_InputPaneHiding;
             ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.ApplicationView_VisibleBoundsChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
             this.SizeChanged += this.MvvmPage_SizeChanged;
@@ -73,16 +73,21 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void MvvmPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneChanging;
-            InputPane.GetForCurrentView().Hiding -= this.InputPane_InputPaneChanging;
+            InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneShowing;
+            InputPane.GetForCurrentView().Hiding -= this.InputPane_InputPaneHiding;
             ApplicationView.GetForCurrentView().VisibleBoundsChanged -= this.ApplicationView_VisibleBoundsChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged -= this.TitleBar_LayoutMetricsChanged;
             this.SizeChanged -= this.MvvmPage_SizeChanged;
         }
 
-        private void InputPane_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)
+        private void InputPane_InputPaneShowing(InputPane sender, InputPaneVisibilityEventArgs args)
         {
             args.EnsuredFocusedElementInView = true;
+            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
+        }
+
+        private void InputPane_InputPaneHiding(InputPane sender, InputPaneVisibilityEventArgs args)
+        {
             caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
         }
 
