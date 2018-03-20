@@ -103,5 +103,21 @@ namespace Opportunity.MvvmUniverse.Commands.Predefined
         {
             return DataTransferManager.GetForCurrentView().ShareAsync(pack(o));
         }, (c, o) => DataTransferManager.IsSupported() ? o != null : false);
+        /// <summary>
+        /// Use share UI to share contents.
+        /// </summary>
+        public static AsyncCommand<Func<DataPackage>> ShareWithProvider { get; }
+            = AsyncCommand.Create<Func<DataPackage>>((c, o) =>
+        {
+            return DataTransferManager.GetForCurrentView().ShareAsync(o);
+        }, (c, o) => DataTransferManager.IsSupported() ? o != null : false);
+        /// <summary>
+        /// Use share UI to share contents.
+        /// </summary>
+        public static AsyncCommand<Func<IAsyncOperation<DataPackage>>> ShareWithAsyncProvider { get; }
+            = AsyncCommand.Create<Func<IAsyncOperation<DataPackage>>>((c, o) =>
+        {
+            return DataTransferManager.GetForCurrentView().ShareAsync(o);
+        }, (c, o) => DataTransferManager.IsSupported() ? o != null : false);
     }
 }
