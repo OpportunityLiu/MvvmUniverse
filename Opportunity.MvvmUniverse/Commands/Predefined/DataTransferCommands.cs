@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using ShareEventHandler = Windows.Foundation.TypedEventHandler<Windows.ApplicationModel.DataTransfer.DataTransferManager, Windows.ApplicationModel.DataTransfer.DataRequestedEventArgs>;
 
 namespace Opportunity.MvvmUniverse.Commands.Predefined
 {
@@ -72,7 +74,7 @@ namespace Opportunity.MvvmUniverse.Commands.Predefined
 
         /// <summary>
         /// Set data to clipboard,
-        /// accepted type: <see cref="DataPackage"/>, <see cref="string"/>, <see cref="System.Uri"/>, <see cref="IStorageItem"/>, <see cref="IEnumerable"/>&lt;<see cref="IStorageItem"/>&gt; and <see cref="RandomAccessStreamReference"/>,
+        /// accepted type: <see cref="DataPackage"/>, <see cref="string"/>, <see cref="System.Uri"/>, <see cref="IStorageItem"/>, <see cref="IEnumerable"/>&lt;<see cref="IStorageItem"/>&gt; and <see cref="RandomAccessStreamReference"/> of bitmap,
         /// other items will be converted to <see cref="string"/>.
         /// </summary>
         public static Command<object> SetClipboard { get; } = Command.Create<object>((c, o) =>
@@ -94,47 +96,12 @@ namespace Opportunity.MvvmUniverse.Commands.Predefined
 
         /// <summary>
         /// Use share UI to share contents,
-        /// accepted type: <see cref="DataPackage"/>, <see cref="string"/>, <see cref="System.Uri"/>, <see cref="IStorageItem"/>, <see cref="IEnumerable"/>&lt;<see cref="IStorageItem"/>&gt; and <see cref="RandomAccessStreamReference"/>,
+        /// accepted type: <see cref="DataPackage"/>, <see cref="string"/>, <see cref="System.Uri"/>, <see cref="IStorageItem"/>, <see cref="IEnumerable"/>&lt;<see cref="IStorageItem"/>&gt; and <see cref="RandomAccessStreamReference"/> of bitmap,
         /// other items will be converted to <see cref="string"/>.
         /// </summary>
-        public static Command<object> Share { get; } = Command.Create<object>((c, o) =>
+        public static AsyncCommand<object> Share { get; } = AsyncCommand.Create<object>((c, o) =>
         {
-            var dp = pack(o);
-            ShareHandler.Share((s, e) =>
-            {
-                e.Request.Data = dp;
-            });
-        }, (c, o) => ShareHandler.IsShareSupported ? o != null : false);
-
-        private static class ShareHandler
-        {
-            public static bool IsShareSupported => DataTransferManager.IsSupported();
-
-            public static void Share(TypedEventHandler<DataTransferManager, DataRequestedEventArgs> handler)
-            {
-                if (!IsShareSupported)
-                    return;
-                new ShareHandlerStorage(handler);
-                DataTransferManager.ShowShareUI();
-            }
-
-            private class ShareHandlerStorage
-            {
-                public ShareHandlerStorage(TypedEventHandler<DataTransferManager, DataRequestedEventArgs> handler)
-                {
-                    this.handler = handler;
-                    var t = DataTransferManager.GetForCurrentView();
-                    t.DataRequested += this.T_DataRequested;
-                }
-
-                private TypedEventHandler<DataTransferManager, DataRequestedEventArgs> handler;
-
-                private void T_DataRequested(DataTransferManager sender, DataRequestedEventArgs args)
-                {
-                    sender.DataRequested -= this.T_DataRequested;
-                    this.handler?.Invoke(sender, args);
-                }
-            }
-        }
+            return DataTransferManager.GetForCurrentView().ShareAsync(pack(o));
+        }, (c, o) => DataTransferManager.IsSupported() ? o != null : false);
     }
 }

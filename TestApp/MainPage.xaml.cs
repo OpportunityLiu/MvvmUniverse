@@ -56,6 +56,8 @@ namespace TestApp
         {
             this.InitializeComponent();
             this.xp.RegisterPropertyChangedCallback(VisibleBoundsProperty, VBC);
+            this.btnTest.Command = DataTransferCommands.Share;
+            this.btnTest.CommandParameter = "123";
         }
 
         private void VBC(DependencyObject sender, DependencyProperty dp) => Debug.WriteLine(this.xp.VisibleBounds);
@@ -154,8 +156,8 @@ namespace TestApp
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            DataTransferCommands.Share.Execute(new Uri("http://baidu.com"));
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
+            //DataTransferCommands.Share.Execute(new Uri("http://baidu.com"));
+            //CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
             //ApplicationView.GetForCurrentView().ExitFullScreenMode();
             //ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay);
             //Grid.SetColumn(xp, 1);

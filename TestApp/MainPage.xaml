@@ -47,7 +47,8 @@
                     Padding="{x:Bind xp.VisibleBounds, Mode=OneWay}">
       <Grid  Background="AliceBlue" />
     </views:MvvmPage>
-    <ScrollViewer Grid.Row="1" HorizontalScrollMode="Auto">
+    <ScrollViewer Grid.Row="1"
+                  HorizontalScrollMode="Auto">
       <StackPanel Orientation="Horizontal">
         <!--<Button Click="Button_Click"
                 IsEnabled="{x:Bind navigator.CanGoBack, Mode=OneWay}"
@@ -65,7 +66,8 @@
                 Content="-&gt;" />-->
         <Button Click="Button_Click_2"
                 Content="New" />
-        <Button Click="Button_Click_3"
+        <Button x:Name="btnTest"
+                Click="Button_Click_3"
                 Content="Test" />
       </StackPanel>
     </ScrollViewer>
