@@ -56,8 +56,15 @@ namespace Opportunity.MvvmUniverse.Commands
                 return false;
             if (!OnStarting())
                 return false;
-
-            var t = StartExecutionAsync() ?? AsyncAction.CreateCompleted();
+            var t = default(IAsyncAction);
+            try
+            {
+                t = StartExecutionAsync() ?? AsyncAction.CreateCompleted();
+            }
+            catch (Exception ex)
+            {
+                t = AsyncAction.CreateFault(ex);
+            }
             if (t.Status != AsyncStatus.Started)
                 OnFinished(t);
             else

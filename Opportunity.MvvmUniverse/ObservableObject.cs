@@ -154,7 +154,7 @@ namespace Opportunity.MvvmUniverse
         /// Raise <see cref="PropertyChanged"/> event.
         /// </summary>
         /// <param name="propertyName">name of changed property</param>
-        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        public void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
             if (!NeedRaisePropertyChanged)
                 return;
@@ -165,7 +165,7 @@ namespace Opportunity.MvvmUniverse
         /// </summary>
         /// <param name="propertyName0">first name of changed property</param>
         /// <param name="propertyName1">second name of changed property</param>
-        protected void OnPropertyChanged(string propertyName0, string propertyName1)
+        public void OnPropertyChanged(string propertyName0, string propertyName1)
         {
             if (!NeedRaisePropertyChanged)
                 return;
@@ -182,7 +182,7 @@ namespace Opportunity.MvvmUniverse
         /// <param name="propertyName0">first name of changed property</param>
         /// <param name="propertyName1">second name of changed property</param>
         /// <param name="propertyName2">third name of changed property</param>
-        protected void OnPropertyChanged(string propertyName0, string propertyName1, string propertyName2)
+        public void OnPropertyChanged(string propertyName0, string propertyName1, string propertyName2)
         {
             if (!NeedRaisePropertyChanged)
                 return;
@@ -200,7 +200,7 @@ namespace Opportunity.MvvmUniverse
         /// <param name="propertyName">first name of changed property</param>
         /// <param name="propertyNamesRest">rest names of changed property</param>
         /// <exception cref="ArgumentNullException"><paramref name="propertyNamesRest"/> is <see langword="null"/></exception>
-        protected void OnPropertyChanged(string propertyName, IEnumerable<string> propertyNamesRest)
+        public void OnPropertyChanged(string propertyName, IEnumerable<string> propertyNamesRest)
         {
             if (propertyNamesRest == null)
                 throw new ArgumentNullException(nameof(propertyNamesRest));
@@ -221,7 +221,7 @@ namespace Opportunity.MvvmUniverse
         /// </summary>
         /// <param name="propertyNames">names of changed property</param>
         /// <exception cref="ArgumentNullException"><paramref name="propertyNames"/> is <see langword="null"/></exception>
-        protected void OnPropertyChanged(params string[] propertyNames)
+        public void OnPropertyChanged(params string[] propertyNames)
         {
             if (propertyNames == null)
                 throw new ArgumentNullException(nameof(propertyNames));
@@ -241,7 +241,7 @@ namespace Opportunity.MvvmUniverse
         /// </summary>
         /// <param name="propertyNames">names of changed property</param>
         /// <exception cref="ArgumentNullException"><paramref name="propertyNames"/> is <see langword="null"/></exception>
-        protected void OnPropertyChanged(IEnumerable<string> propertyNames)
+        public void OnPropertyChanged(IEnumerable<string> propertyNames)
         {
             if (propertyNames == null)
                 throw new ArgumentNullException(nameof(propertyNames));

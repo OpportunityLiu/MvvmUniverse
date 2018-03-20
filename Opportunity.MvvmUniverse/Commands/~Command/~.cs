@@ -7,32 +7,31 @@ using Windows.Foundation;
 namespace Opportunity.MvvmUniverse.Commands
 {
     /// <summary>
-    /// Execution body of <see cref="Command"/>.
-    /// </summary>
-    /// <param name="command">Current command of execution.</param>
-    public delegate void Executor(Command command);
-    /// <summary>
     /// Predicate of <see cref="Command"/>.
     /// </summary>
     /// <param name="command">Current command of can execute testing.</param>
     public delegate bool Predicate(Command command);
 
-    public class Command : CommandBase
+    /// <summary>
+    /// Base class for sync command without parameter.
+    /// </summary>
+    public abstract class Command : CommandBase
     {
         #region Factory methods
-        public static Command Create(Executor execute) => new Command(execute, null);
-        public static Command Create(Executor execute, Predicate canExecute) => new Command(execute, canExecute);
-        public static Command<T> Create<T>(Executor<T> execute) => new Command<T>(execute, null);
-        public static Command<T> Create<T>(Executor<T> execute, Predicate<T> canExecute) => new Command<T>(execute, canExecute);
+        public static Command Create(Executor execute) => new CommandImpl(execute, null);
+        public static Command Create(Executor execute, Predicate canExecute) => new CommandImpl(execute, canExecute);
+        public static Command<T> Create<T>(Executor<T> execute) => new CommandImpl<T>(execute, null);
+        public static Command<T> Create<T>(Executor<T> execute, Predicate<T> canExecute) => new CommandImpl<T>(execute, canExecute);
         #endregion Factory methods
 
-        protected internal Command(Executor execute, Predicate canExecute)
-        {
-            this.ExecuteDelegate = execute ?? throw new ArgumentNullException(nameof(execute));
-            this.CanExecuteDelegate = canExecute;
-        }
-
-        protected Executor ExecuteDelegate { get; }
+        /// <summary>
+        /// Create new instance of <see cref="Command"/>.
+        /// </summary>
+        /// <param name="canExecute">Value for <see cref="CanExecuteDelegate"/></param>
+        protected Command(Predicate canExecute) { }
+        /// <summary>
+        /// Delegate for <see cref="CanExecuteOverride()"/>.
+        /// </summary>
         protected Predicate CanExecuteDelegate { get; }
 
         /// <summary>
@@ -47,14 +46,20 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Returns <see cref="AsyncAction.CreateCompleted()"/> or <see cref="AsyncAction.CreateFault(Exception)"/>.
+        /// Execution body of <see cref="Command"/>.
+        /// </summary>
+        protected abstract void ExecuteOverride();
+
+        /// <summary>
+        /// Call <see cref="ExecuteOverride()"/>,
+        /// returns <see cref="AsyncAction.CreateCompleted()"/> or <see cref="AsyncAction.CreateFault(Exception)"/>.
         /// </summary>
         /// <returns>A completed <see cref="IAsyncAction"/></returns>
-        protected override IAsyncAction StartExecutionAsync()
+        protected sealed override IAsyncAction StartExecutionAsync()
         {
             try
             {
-                this.ExecuteDelegate.Invoke(this);
+                this.ExecuteOverride();
                 return AsyncAction.CreateCompleted();
             }
             catch (Exception ex)

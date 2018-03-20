@@ -11,6 +11,7 @@ using System.Numerics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Composition;
@@ -56,8 +57,12 @@ namespace TestApp
         {
             this.InitializeComponent();
             this.xp.RegisterPropertyChangedCallback(VisibleBoundsProperty, VBC);
-            this.btnTest.Command = DataTransferCommands.Share;
-            this.btnTest.CommandParameter = "123";
+            this.btnTest.Command = DataTransferCommands.ShareWithAsyncProvider;
+            this.btnTest.CommandParameter = new Func<IAsyncOperation<DataPackage>>(() => AsyncInfo.Run(async token =>
+            {
+                await Task.Delay(200);
+                return "123".ToDataPackage();
+            }));
         }
 
         private void VBC(DependencyObject sender, DependencyProperty dp) => Debug.WriteLine(this.xp.VisibleBounds);
