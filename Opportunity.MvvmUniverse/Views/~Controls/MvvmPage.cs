@@ -65,74 +65,35 @@ namespace Opportunity.MvvmUniverse.Views
         private void MvvmPage_Loading(FrameworkElement sender, object e)
         {
             InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneShowing;
-            InputPane.GetForCurrentView().Hiding += this.InputPane_InputPaneHiding;
-            ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.ApplicationView_VisibleBoundsChanged;
-            CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
+            VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged += this.MvvmPage_VisibleBoundsChanged;
             this.SizeChanged += this.MvvmPage_SizeChanged;
         }
 
         private void MvvmPage_Unloaded(object sender, RoutedEventArgs e)
         {
             InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneShowing;
-            InputPane.GetForCurrentView().Hiding -= this.InputPane_InputPaneHiding;
-            ApplicationView.GetForCurrentView().VisibleBoundsChanged -= this.ApplicationView_VisibleBoundsChanged;
-            CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged -= this.TitleBar_LayoutMetricsChanged;
+            VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged -= this.MvvmPage_VisibleBoundsChanged;
             this.SizeChanged -= this.MvvmPage_SizeChanged;
+        }
+
+        private void MvvmPage_VisibleBoundsChanged(object sender, Rect e)
+        {
+            caculateVisibleBoundsThickness(e, new Size(this.ActualWidth, this.ActualHeight));
         }
 
         private void InputPane_InputPaneShowing(InputPane sender, InputPaneVisibilityEventArgs args)
         {
             args.EnsuredFocusedElementInView = true;
-            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
-        }
-
-        private void InputPane_InputPaneHiding(InputPane sender, InputPaneVisibilityEventArgs args)
-        {
-            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
-        }
-
-        private void TitleBar_LayoutMetricsChanged(CoreApplicationViewTitleBar sender, object args)
-        {
-            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
-        }
-
-        private void ApplicationView_VisibleBoundsChanged(ApplicationView sender, object args)
-        {
-            caculateVisibleBoundsThickness(new Size(this.ActualWidth, this.ActualHeight));
         }
 
         private void MvvmPage_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            caculateVisibleBoundsThickness(e.NewSize);
+            caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds, e.NewSize);
         }
 
-        private void caculateVisibleBoundsThickness(Size size)
+        private void caculateVisibleBoundsThickness(Rect vb, Size size)
         {
-            var paneRect = InputPane.GetForCurrentView().OccludedRect;
-            if (paneRect.Width == 0 || paneRect.Height == 0)
-                paneRect = Rect.Empty;
-
-            var coreView = CoreApplication.GetCurrentView();
-            var applicationView = ApplicationView.GetForCurrentView();
-            var isFullScreen = applicationView.IsFullScreenMode;
-            var tb = coreView.TitleBar;
-            var tbh = (tb.ExtendViewIntoTitleBar && !isFullScreen) ? tb.Height : 0;
-            var wb = CoreWindow.GetForCurrentThread().Bounds;
-            var vb = isFullScreen ? wb : applicationView.VisibleBounds;
-
-            var left = 0d;
-            var top = 0d;
-            var width = 0d;
-            var height = 0d;
-
-            left = vb.Left - wb.Left;
-            top = vb.Top + tbh - wb.Top;
-            width = vb.Width;
-            height = paneRect.IsEmpty ? (vb.Height - tbh) : (paneRect.Top - top);
-
-            var usedView = new Rect(left, top, width, height);
-
-            var transedView = this.TransformToVisual(null).Inverse.TransformBounds(usedView);
+            var transedView = this.TransformToVisual(null).Inverse.TransformBounds(vb);
 
             VisibleBounds = new Thickness(bound(transedView.Left), bound(transedView.Top), bound(size.Width - transedView.Right), bound(size.Height - transedView.Bottom));
         }

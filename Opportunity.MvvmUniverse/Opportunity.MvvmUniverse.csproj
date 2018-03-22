@@ -136,6 +136,7 @@
     <Compile Include="Services\Navigation\FrameWrapper.cs" />
     <Compile Include="Services\Navigation\INavigationHandler.cs" />
     <Compile Include="Services\Navigation\Navigator.cs" />
+    <Compile Include="Views\~Controls\VisibleBoundsHelper.cs" />
     <Compile Include="WeakEvent.cs" />
     <EmbeddedResource Include="Properties\Opportunity.MvvmUniverse.rd.xml" />
   </ItemGroup>

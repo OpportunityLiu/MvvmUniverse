@@ -122,10 +122,10 @@ namespace TestApp
         {
             navigator.GoForwardAsync();
         }
-
+        MvvmContentDialog cd;
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            var c = new MvvmContentDialog
+            if (cd is null) cd = new MvvmContentDialog
             {
                 Title = "TITLE",
                 PrimaryButtonText = "Re",
@@ -139,14 +139,14 @@ namespace TestApp
                     AcceptsReturn = true
                 },
             };
-            var r = c.ShowAsync();
-            c.Closing += (s, args) =>
+            var r = cd.ShowAsync();
+            cd.Closing += (s, args) =>
                 {
                 };
-            c.Closed += (s, args) =>
+            cd.Closed += (s, args) =>
                     {
                     };
-            c.PrimaryButtonClick += (s, args) =>
+            cd.PrimaryButtonClick += (s, args) =>
              {
                  args.Cancel = true;
              };
@@ -162,7 +162,7 @@ namespace TestApp
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             //DataTransferCommands.Share.Execute(new Uri("http://baidu.com"));
-            //CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
+            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
             //ApplicationView.GetForCurrentView().ExitFullScreenMode();
             //ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay);
             //Grid.SetColumn(xp, 1);

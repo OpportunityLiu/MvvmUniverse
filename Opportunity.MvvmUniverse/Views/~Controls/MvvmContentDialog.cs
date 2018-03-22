@@ -38,14 +38,13 @@ namespace Opportunity.MvvmUniverse.Views
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
             this.DialogSpace = (Grid)GetTemplateChild(nameof(this.DialogSpace));
-            caculateVisibleBoundsThickness();
+            caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
         private void MvvmContentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
         {
             InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneChanging;
-            InputPane.GetForCurrentView().Hiding += this.InputPane_InputPaneChanging;
-            CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
+            VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged += this.MvvmContentDialog_VisibleBoundsChanged;
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
         }
@@ -53,10 +52,11 @@ namespace Opportunity.MvvmUniverse.Views
         private void MvvmContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
         {
             InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneChanging;
-            InputPane.GetForCurrentView().Hiding -= this.InputPane_InputPaneChanging;
-            CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged -= this.TitleBar_LayoutMetricsChanged;
+            VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged -= this.MvvmContentDialog_VisibleBoundsChanged;
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged -= this.BackgroundElement_SizeChanged;
+            this.ClearValue(WidthProperty);
+            this.ClearValue(HeightProperty);
         }
 
         private void InputPane_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)
@@ -64,46 +64,22 @@ namespace Opportunity.MvvmUniverse.Views
             args.EnsuredFocusedElementInView = false;
         }
 
-        private void TitleBar_LayoutMetricsChanged(CoreApplicationViewTitleBar sender, object args)
-        {
-            caculateVisibleBoundsThickness();
-        }
-
         private void BackgroundElement_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            caculateVisibleBoundsThickness();
+            caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
-        private void caculateVisibleBoundsThickness()
+        private void MvvmContentDialog_VisibleBoundsChanged(object sender, Rect e)
         {
-            var paneRect = InputPane.GetForCurrentView().OccludedRect;
-            if (paneRect.Width == 0 || paneRect.Height == 0)
-                paneRect = Rect.Empty;
+            caculateVisibleBoundsThickness(e);
+        }
 
-            var coreView = CoreApplication.GetCurrentView();
-            var applicationView = ApplicationView.GetForCurrentView();
-            var isFullScreen = applicationView.IsFullScreenMode;
-            var tb = coreView.TitleBar;
-            var tbh = (tb.ExtendViewIntoTitleBar && !isFullScreen) ? tb.Height : 0;
-            var wb = CoreWindow.GetForCurrentThread().Bounds;
-            var vb = isFullScreen ? wb : applicationView.VisibleBounds;
-
-            var left = 0d;
-            var top = 0d;
-            var width = 0d;
-            var height = 0d;
-
-            left = vb.Left - wb.Left;
-            top = vb.Top + tbh - wb.Top;
-            width = vb.Width;
-            height = paneRect.IsEmpty ? (vb.Height - tbh) : (paneRect.Top - top);
-
-            var usedView = new Rect(left, top, width, height);
-
+        private void caculateVisibleBoundsThickness(Rect vb)
+        {
             if (this.BackgroundElement != null)
             {
                 var size = new Size(this.BackgroundElement.ActualWidth, this.BackgroundElement.ActualHeight);
-                var transedView = this.BackgroundElement.TransformToVisual(null).Inverse.TransformBounds(usedView);
+                var transedView = this.BackgroundElement.TransformToVisual(null).Inverse.TransformBounds(vb);
                 var innerBound = this.DialogSpace.Padding;
                 var padding = new Thickness(bound(transedView.Left - innerBound.Left), bound(transedView.Top - innerBound.Top), bound(size.Width - transedView.Right - innerBound.Right), bound(size.Height - transedView.Bottom - innerBound.Bottom));
                 this.BackgroundElement.Padding = padding;
