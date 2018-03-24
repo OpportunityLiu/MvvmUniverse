@@ -34,7 +34,8 @@ namespace Opportunity.MvvmUniverse.Services.Activation
             this.handlers = new ServiceHandlerCollection<Activator, IActivationHandler>(this);
         }
 
-        private ServiceHandlerCollection<Activator, IActivationHandler> handlers;
+        private readonly ServiceHandlerCollection<Activator, IActivationHandler> handlers;
+        /// <inheritdoc />
         /// <summary>
         /// Handlers handles navigation methods.
         /// </summary>
@@ -60,11 +61,11 @@ namespace Opportunity.MvvmUniverse.Services.Activation
                     var handler = Handlers[i];
                     if (!handled)
                     {
-                        handled = await Handlers[i].ActivateAsync(args, handled);
+                        handled = await Handlers[i].ActivateAsync(args, false);
                     }
-                    else if (handled && handler.HandledToo)
+                    else if (handler.HandledToo)
                     {
-                        await Handlers[i].ActivateAsync(args, handled);
+                        await Handlers[i].ActivateAsync(args, true);
                     }
                 }
                 return handled;

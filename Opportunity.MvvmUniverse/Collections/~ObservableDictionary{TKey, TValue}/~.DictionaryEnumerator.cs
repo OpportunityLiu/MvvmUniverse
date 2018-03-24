@@ -16,7 +16,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             private List<TKey>.Enumerator keyEnumerator;
             private List<TValue>.Enumerator valueEnumerator;
-            private Type type;
+            private readonly Type type;
 
             internal DictionaryEnumerator(ObservableDictionary<TKey, TValue> parent, Type type)
             {
@@ -64,7 +64,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 var vr = this.valueEnumerator.MoveNext();
                 if (kr == vr)
                     return kr;
-                this.Dispose();
+                Dispose();
                 throw new InvalidOperationException("Dictionary has been changed.");
             }
 

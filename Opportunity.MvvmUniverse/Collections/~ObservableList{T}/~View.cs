@@ -20,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// </summary>
     /// <typeparam name="T">Type of elements.</typeparam>
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
-    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class ObservableListView<T> : ObservableCollectionBase<T>
         , IList<T>, IReadOnlyList<T>, IList
         , ICollection<T>, IReadOnlyCollection<T>, ICollection
@@ -54,7 +54,7 @@ namespace Opportunity.MvvmUniverse.Collections
             list.PropertyChanged += this.onListPropertyChanged;
         }
 
-        private void onListPropertyChanged(object dictionary, PropertyChangedEventArgs e)
+        private void onListPropertyChanged(object _, PropertyChangedEventArgs e)
         {
             OnListPropertyChanged(e);
         }
@@ -69,7 +69,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e));
         }
 
-        private void onListVectorChanged(IBindableObservableVector dictionary, object e)
+        private void onListVectorChanged(IBindableObservableVector _, object e)
         {
             OnListVectorChanged((IVectorChangedEventArgs)e);
         }
@@ -141,7 +141,7 @@ namespace Opportunity.MvvmUniverse.Collections
         void IList<T>.Insert(int index, T item) => ThrowForReadOnlyCollection(List);
     }
 
-    internal class UndisposableObservableListView<T> : ObservableListView<T>
+    internal sealed class UndisposableObservableListView<T> : ObservableListView<T>
     {
         public UndisposableObservableListView(ObservableList<T> list)
             : base(list) { }

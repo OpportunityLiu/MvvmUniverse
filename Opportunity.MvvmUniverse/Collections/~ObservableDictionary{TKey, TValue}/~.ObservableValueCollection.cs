@@ -15,7 +15,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// Value collection of <see cref="ObservableDictionary{TKey, TValue}"/>.
         /// </summary>
         [DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<,>))]
-        [DebuggerDisplay("Count = {Count}")]
+        [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
         public sealed class ObservableValueCollection : ObservableKeyValueCollectionBase<TValue>
             , IList<TValue>, IReadOnlyList<TValue>, IList
             , ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
@@ -62,13 +62,13 @@ namespace Opportunity.MvvmUniverse.Collections
             void IList<TValue>.RemoveAt(int index) => ThrowForReadOnlyCollection(Parent);
 
             /// <inheritdoc/>
-            public bool Contains(TValue value) => this.Parent.ValueItems.Contains(value);
+            public bool Contains(TValue value) => Parent.ValueItems.Contains(value);
 
             /// <inheritdoc/>
-            public void CopyTo(TValue[] array, int arrayIndex) => this.Parent.ValueItems.CopyTo(array, arrayIndex);
+            public void CopyTo(TValue[] array, int arrayIndex) => Parent.ValueItems.CopyTo(array, arrayIndex);
 
             /// <inheritdoc/>
-            public int IndexOf(TValue value) => this.Parent.ValueItems.IndexOf(value);
+            public int IndexOf(TValue value) => Parent.ValueItems.IndexOf(value);
         }
     }
 }

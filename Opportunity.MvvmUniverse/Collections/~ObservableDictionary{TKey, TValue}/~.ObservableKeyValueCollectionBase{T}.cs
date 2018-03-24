@@ -17,7 +17,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// Base class for observable collections used in <see cref="ObservableDictionary{TKey, TValue}"/>.
         /// </summary>
         /// <typeparam name="T">type of elements</typeparam>
-        [DebuggerDisplay("Count = {Count}")]
+        [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
         public abstract class ObservableKeyValueCollectionBase<T> : ObservableCollectionBase<T>, ICollection
         {
             internal ObservableDictionary<TKey, TValue> Parent { get; }
@@ -27,11 +27,11 @@ namespace Opportunity.MvvmUniverse.Collections
 
             internal ObservableKeyValueCollectionBase(ObservableDictionary<TKey, TValue> parent)
             {
-                this.Parent = parent;
+                Parent = parent;
             }
 
             internal void RaisePropertyChangedInternal(IEnumerable<PropertyChangedEventArgs> args)
-                => this.OnPropertyChanged(args);
+                => OnPropertyChanged(args);
 
             internal void RaiseVectorChangedInternal(IVectorChangedEventArgs e)
                 => OnVectorChanged(e);
@@ -40,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Collections
             bool ICollection.IsSynchronized => false;
 
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            object ICollection.SyncRoot => ((ICollection)this.Parent).SyncRoot;
+            object ICollection.SyncRoot => ((ICollection)Parent).SyncRoot;
         }
     }
 }

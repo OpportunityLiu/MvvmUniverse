@@ -25,7 +25,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         private VisibleBoundsHelper() { }
 
-        private EventHandler<Rect> visibleBoundsChanged;
+        private event EventHandler<Rect> visibleBoundsChanged;
         public event EventHandler<Rect> VisibleBoundsChanged
         {
             add
@@ -64,7 +64,7 @@ namespace Opportunity.MvvmUniverse.Views
             this.timer.Stop();
         }
 
-        private DispatcherTimer timer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 1) };
+        private readonly DispatcherTimer timer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 1) };
 
         private void Timer_Tick(object sender, object e)
         {
@@ -100,21 +100,15 @@ namespace Opportunity.MvvmUniverse.Views
             var coreView = CoreApplication.GetCurrentView();
             var applicationView = ApplicationView.GetForCurrentView();
             var isFullScreen = applicationView.IsFullScreenMode;
-            var isTablet = UIViewSettings.GetForCurrentView().UserInteractionMode == UserInteractionMode.Touch;
             var tb = coreView.TitleBar;
-            var tbh = (tb.ExtendViewIntoTitleBar && !(isFullScreen || isTablet)) ? tb.Height : 0;
+            var tbh = (tb.ExtendViewIntoTitleBar && !isFullScreen) ? tb.Height : 0;
             var wb = CoreWindow.GetForCurrentThread().Bounds;
             var vb = isFullScreen ? wb : applicationView.VisibleBounds;
 
-            var left = 0d;
-            var top = 0d;
-            var width = 0d;
-            var height = 0d;
-
-            left = vb.Left - wb.Left;
-            top = vb.Top + tbh - wb.Top;
-            width = vb.Width;
-            height = paneRect.IsEmpty ? (vb.Height - tbh) : (paneRect.Top - top);
+            var left = vb.Left - wb.Left;
+            var top = vb.Top + tbh - wb.Top;
+            var width = vb.Width;
+            var height = paneRect.IsEmpty ? (vb.Height - tbh) : (paneRect.Top - top);
 
             VisibleBounds = new Rect(left, top, width, height);
         }
@@ -132,7 +126,5 @@ namespace Opportunity.MvvmUniverse.Views
                 this.visibleBoundsChanged?.Invoke(this, value);
             }
         }
-
-        private static double bound(double v) => v < 0 ? 0 : v;
     }
 }

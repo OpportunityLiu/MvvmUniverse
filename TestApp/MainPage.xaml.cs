@@ -125,7 +125,7 @@ namespace TestApp
         MvvmContentDialog cd;
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            if (cd is null) cd = new MvvmContentDialog
+            this.cd = this.cd ?? new MvvmContentDialog
             {
                 Title = "TITLE",
                 PrimaryButtonText = "Re",

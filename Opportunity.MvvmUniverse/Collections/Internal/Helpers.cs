@@ -14,11 +14,11 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
             {
                 if (default(T) == null)
                     return default;
-                throw new ArgumentNullException(nameof(paramName));
+                throw new ArgumentNullException(paramName);
             }
             if (value is T v)
                 return v;
-            throw new ArgumentException($"Wrong type of value, {typeof(T)} expected.", nameof(paramName));
+            throw new ArgumentException($"Wrong type of value, {typeof(T)} expected.", paramName);
         }
 
         public static KeyValuePair<TKey, TValue> CastKVP<TKey, TValue>(object value)
@@ -46,17 +46,17 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 
         public static void ThrowForFixedSizeCollection()
         {
-            throw new NotSupportedException($"This collection is fixed size.");
+            throw new NotSupportedException("This collection is fixed size.");
         }
 
         public static T ThrowForFixedSizeCollection<T>()
         {
-            throw new NotSupportedException($"This collection is fixed size.");
+            throw new NotSupportedException("This collection is fixed size.");
         }
 
         public static void ThrowForReadOnlyCollection()
         {
-            throw new NotSupportedException($"This collection is read only.");
+            throw new NotSupportedException("This collection is read only.");
         }
 
         public static void ThrowForReadOnlyCollection(object parent)

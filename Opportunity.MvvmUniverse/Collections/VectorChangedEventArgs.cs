@@ -4,14 +4,12 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     internal sealed class VectorChangedEventArgs : IVectorChangedEventArgs
     {
-        public VectorChangedEventArgs() { }
-
-        public VectorChangedEventArgs(CollectionChange collectionChange) => this.CollectionChange = collectionChange;
+        private VectorChangedEventArgs(CollectionChange collectionChange) => CollectionChange = collectionChange;
 
         public VectorChangedEventArgs(CollectionChange collectionChange, uint index)
         {
-            this.CollectionChange = collectionChange;
-            this.Index = index;
+            CollectionChange = collectionChange;
+            Index = index;
         }
 
         public CollectionChange CollectionChange { get; }

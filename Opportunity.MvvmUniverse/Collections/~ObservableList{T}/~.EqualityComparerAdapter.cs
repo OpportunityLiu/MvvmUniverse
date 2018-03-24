@@ -9,7 +9,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             public static IEqualityComparer<T> Create(IComparer<T> comparer)
             {
-                if (comparer == null)
+                if (comparer is null)
                     return null;
                 if (comparer is IEqualityComparer<T> ec)
                     return ec;

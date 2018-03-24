@@ -16,7 +16,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// </summary>
     /// <typeparam name="T">Type of items.</typeparam>
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
-    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public partial class ObservableList<T> : ObservableCollectionBase<T>
         , IList<T>, IReadOnlyList<T>
         , ICollection<T>, IReadOnlyCollection<T>, ICollection
@@ -38,10 +38,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="items">Items will be copied to the <see cref="ObservableList{T}"/>.</param>
         public ObservableList(IEnumerable<T> items)
         {
-            if (items == null)
-                this.Items = new List<T>();
-            else
-                this.Items = new List<T>(items);
+            Items = items is null ? new List<T>() : new List<T>(items);
         }
 
         /// <summary>

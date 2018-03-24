@@ -5,7 +5,7 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 {
     internal sealed class DictionaryValueCollectionDebugView<TKey, TValue>
     {
-        private ICollection<TValue> collection;
+        private readonly ICollection<TValue> collection;
 
         public DictionaryValueCollectionDebugView(ICollection<TValue> collection)
         {

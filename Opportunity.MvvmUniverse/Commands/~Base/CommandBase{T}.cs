@@ -128,7 +128,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 error = execution.ErrorCode;
                 break;
             }
-            var executed = Executed;
+            var executed = this.Executed;
             if (executed == null)
             {
                 ThrowUnhandledError(error);

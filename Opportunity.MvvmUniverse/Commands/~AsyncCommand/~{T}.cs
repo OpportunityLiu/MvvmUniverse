@@ -28,7 +28,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <param name="canExecute">Value for <see cref="CanExecuteDelegate"/></param>
         protected AsyncCommand(AsyncPredicate<T> canExecute)
         {
-            this.CanExecuteDelegate = canExecute;
+            CanExecuteDelegate = canExecute;
         }
 
         /// <summary>
@@ -57,11 +57,11 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <returns>Whether the command can execute or not</returns>
         protected override bool CanExecuteOverride(T parameter)
         {
-            if (this.IsExecuting)
+            if (this.isExecuting)
                 return false;
-            if (this.CanExecuteDelegate == null)
-                return true;
-            return this.CanExecuteDelegate.Invoke(this, parameter);
+            if (CanExecuteDelegate is AsyncPredicate<T> p)
+                return p(this, parameter);
+            return true;
         }
 
         /// <summary>

@@ -36,7 +36,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <para></para>
         /// Returns <c><see cref="VectorChanged"/> != <see langword="null"/></c> by default.
         /// </summary>
-        protected virtual bool NeedRaiseVectorChanged => VectorChanged != null;
+        protected virtual bool NeedRaiseVectorChanged => this.VectorChanged != null;
 
         /// <inheritdoc/>
         public event Handler VectorChanged;
@@ -52,7 +52,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
-            var temp = VectorChanged;
+            var temp = this.VectorChanged;
             if (temp == null)
                 return;
             DispatcherHelper.BeginInvoke(() => temp(this, args));
@@ -150,7 +150,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         void ICollection.CopyTo(Array array, int index)
         {
-            if (array is null) throw new ArgumentNullException(nameof(array));
+            if (array is null)
+                throw new ArgumentNullException(nameof(array));
             if (array is T[] tarr)
             {
                 if (this is ICollection<T> col)

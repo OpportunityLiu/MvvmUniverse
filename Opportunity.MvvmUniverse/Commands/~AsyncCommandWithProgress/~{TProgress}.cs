@@ -21,7 +21,7 @@ namespace Opportunity.MvvmUniverse.Commands
         protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncPredicate canExecute)
             : base(canExecute)
         {
-            this.ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
+            ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
         }
 
         /// <summary>
@@ -41,8 +41,8 @@ namespace Opportunity.MvvmUniverse.Commands
 
         private void setProgress(TProgress progress)
         {
-            this.Progress = progress;
-            this.NormalizedProgress = ProgressMapper(this, progress);
+            Progress = progress;
+            NormalizedProgress = ProgressMapper(this, progress);
             OnPropertyChanged(nameof(Progress), nameof(NormalizedProgress));
         }
 

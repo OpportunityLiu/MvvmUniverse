@@ -28,7 +28,11 @@ namespace Opportunity.MvvmUniverse.Commands
         /// Create new instance of <see cref="Command"/>.
         /// </summary>
         /// <param name="canExecute">Value for <see cref="CanExecuteDelegate"/></param>
-        protected Command(Predicate canExecute) { }
+        protected Command(Predicate canExecute)
+        {
+            CanExecuteDelegate = canExecute;
+        }
+
         /// <summary>
         /// Delegate for <see cref="CanExecuteOverride()"/>.
         /// </summary>
@@ -40,9 +44,9 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <returns>Whether the command can execute or not</returns>
         protected override bool CanExecuteOverride()
         {
-            if (this.CanExecuteDelegate == null)
-                return true;
-            return this.CanExecuteDelegate.Invoke(this);
+            if (CanExecuteDelegate is Predicate p)
+                return p(this);
+            return true;
         }
 
         /// <summary>
@@ -59,7 +63,7 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             try
             {
-                this.ExecuteOverride();
+                ExecuteOverride();
                 return AsyncAction.CreateCompleted();
             }
             catch (Exception ex)

@@ -20,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// <typeparam name="TKey">Type of keys.</typeparam>
     /// <typeparam name="TValue">Type of values.</typeparam>
     [DebuggerTypeProxy(typeof(DictionaryDebugView<,>))]
-    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public partial class ObservableDictionary<TKey, TValue> : ObservableCollectionBase<KeyValuePair<TKey, TValue>>
         , IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IOrderedDictionary
         , IList<KeyValuePair<TKey, TValue>>, IReadOnlyList<KeyValuePair<TKey, TValue>>
@@ -71,13 +71,12 @@ namespace Opportunity.MvvmUniverse.Collections
         public ObservableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
         {
             comparer = comparer ?? EqualityComparer<TKey>.Default;
-            this.KeySet = new Dictionary<TKey, int>(comparer);
-            if (dictionary != null)
+            KeySet = new Dictionary<TKey, int>(comparer);
+            if (dictionary is null)
+                return;
+            foreach (var item in dictionary)
             {
-                foreach (var item in dictionary)
-                {
-                    this.Add(item.Key, item.Value);
-                }
+                Add(item.Key, item.Value);
             }
         }
 
@@ -137,7 +136,6 @@ namespace Opportunity.MvvmUniverse.Collections
             check();
             if (!KeySet.TryGetValue(key, out var removedIndex))
                 return false;
-            var removedValue = ValueItems[removedIndex];
             KeySet.Remove(key);
             KeyItems.RemoveAt(removedIndex);
             ValueItems.RemoveAt(removedIndex);
@@ -174,9 +172,9 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void ClearItems()
         {
             check();
-            this.KeyItems.Clear();
-            this.ValueItems.Clear();
-            this.KeySet.Clear();
+            KeyItems.Clear();
+            ValueItems.Clear();
+            KeySet.Clear();
             OnPropertyChanged(nameof(Count));
             OnVectorReset();
             check();
@@ -435,7 +433,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
-            using (var e = this.GetEnumerator())
+            using (var e = GetEnumerator())
             {
                 while (e.MoveNext())
                 {
@@ -452,7 +450,7 @@ namespace Opportunity.MvvmUniverse.Collections
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
             var i = 0;
-            using (var e = this.GetEnumerator())
+            using (var e = GetEnumerator())
             {
                 while (e.MoveNext())
                 {
@@ -465,7 +463,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            if (this.Count + arrayIndex > array.Length)
+            if (Count + arrayIndex > array.Length)
                 throw new ArgumentException("Not enough space in array");
             foreach (var item in this)
             {

@@ -331,7 +331,7 @@ namespace Opportunity.MvvmUniverse.Collections
             if (collection is null)
                 return false;
             return ReferenceEquals(collection, this)
-                || ReferenceEquals(collection, this.Items)
+                || ReferenceEquals(collection, Items)
                 || (collection is ObservableListView<T> view && ReferenceEquals(view.List, this));
         }
     }

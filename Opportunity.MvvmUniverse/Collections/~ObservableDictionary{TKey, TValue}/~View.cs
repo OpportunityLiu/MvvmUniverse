@@ -55,7 +55,7 @@ namespace Opportunity.MvvmUniverse.Collections
             dictionary.VectorChanged += this.onDictionaryVectorChanged;
         }
 
-        private void onDictionaryPropertyChanged(object dictionary, PropertyChangedEventArgs e)
+        private void onDictionaryPropertyChanged(object _, PropertyChangedEventArgs e)
         {
             OnDictionaryPropertyChanged(e);
         }
@@ -70,7 +70,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e));
         }
 
-        private void onDictionaryVectorChanged(IBindableObservableVector dictionary, object e)
+        private void onDictionaryVectorChanged(IBindableObservableVector _, object e)
         {
             OnDictionaryVectorChanged((IVectorChangedEventArgs)e);
         }
@@ -203,7 +203,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public void ForEach(Action<int, TKey, TValue> action) => Dictionary.ForEach(action);
     }
 
-    internal class UndisposableObservableDictionaryView<TKey, TValue> : ObservableDictionaryView<TKey, TValue>
+    internal sealed class UndisposableObservableDictionaryView<TKey, TValue> : ObservableDictionaryView<TKey, TValue>
     {
         public UndisposableObservableDictionaryView(ObservableDictionary<TKey, TValue> dictionary)
             : base(dictionary) { }

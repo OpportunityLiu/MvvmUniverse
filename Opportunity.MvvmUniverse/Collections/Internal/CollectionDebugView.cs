@@ -5,7 +5,7 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 {
     internal sealed class CollectionDebugView<T>
     {
-        private ICollection<T> collection;
+        private readonly ICollection<T> collection;
 
         public CollectionDebugView(ICollection<T> collection)
         {

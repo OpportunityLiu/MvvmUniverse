@@ -13,7 +13,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// </summary>
     /// <typeparam name="T">type of elements</typeparam>
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
-    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public readonly struct RangedListView<T> : IReadOnlyList<T>, ICollection<T>, IList
     {
         /// <summary>
@@ -55,8 +55,8 @@ namespace Opportunity.MvvmUniverse.Collections
             if (count < 0 || startIndex + count > items.Count)
                 throw new ArgumentOutOfRangeException(nameof(count));
             this.items = items;
-            this.StartIndex = startIndex;
-            this.Count = count;
+            StartIndex = startIndex;
+            Count = count;
         }
 
         private readonly IReadOnlyList<T> items;
@@ -66,9 +66,9 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             get
             {
-                if (unchecked((uint)index >= (uint)this.Count))
+                if (unchecked((uint)index >= (uint)Count))
                     throw new ArgumentOutOfRangeException(nameof(index));
-                return this.items[this.StartIndex + index];
+                return this.items[StartIndex + index];
             }
         }
 
@@ -166,12 +166,11 @@ namespace Opportunity.MvvmUniverse.Collections
         }
         void ICollection.CopyTo(Array array, int index)
         {
-            if (array == null)
+            if (array is null)
                 throw new ArgumentNullException(nameof(array));
             if (array.Rank != 1 || array.GetLowerBound(0) != 0)
                 throw new ArgumentException("Unsupported array", nameof(array));
-            var a = array as T[];
-            if (a == null)
+            if (!(array is T[] a))
                 throw new ArgumentException("Wrong array type", nameof(array));
             CopyTo(a, index);
         }
