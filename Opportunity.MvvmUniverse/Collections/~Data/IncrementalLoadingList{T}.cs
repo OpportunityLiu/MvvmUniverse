@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,7 +68,15 @@ namespace Opportunity.MvvmUniverse.Collections
                         if (re.Items == null)
                             return new LoadMoreItemsResult { Count = 0 };
                         if (re.StartIndex > this.Count)
-                            throw new InvalidOperationException("Wrong range returned from implementation of LoadItemsAsync(int).");
+                        {
+                            var c = -1;
+                            try
+                            {
+                                c = re.Items.Count();
+                            }
+                            catch { }
+                            throw new InvalidOperationException($"Wrong range returned from implementation of LoadItemsAsync(int).\nExpacted range: {this.Count} -\nActual range: {re.StartIndex} - {(c > 0 ? (re.StartIndex + c - 1).ToString() : "")}");
+                        }
                         else if (re.StartIndex == this.Count)
                         {
                             foreach (var item in re.Items)

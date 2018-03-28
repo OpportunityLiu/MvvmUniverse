@@ -20,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="startIndex">Start index of loaded items.</param>
         /// <param name="items">Loaded items.</param>
-        /// <param name="replaceLoadedItems"> Should <paramref name="items"/> replace items in the collection or not.</param>
+        /// <param name="replaceLoadedItems"> Should <paramref name="items"/> replace items that already in the collection or not.</param>
         /// <typeparam name="T">Type of results.</typeparam>
         /// <returns>An instance of <see cref="LoadItemsResult{T}"/>.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex"/> is negitive.</exception>
@@ -51,7 +51,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// Load result of <see cref="FixedIncrementalLoadingList{T}.LoadItemAsync(int)"/>.
     /// </summary>
     /// <typeparam name="T">Type of items.</typeparam>
-    public struct LoadItemsResult<T>
+    public readonly struct LoadItemsResult<T>
     {
         internal LoadItemsResult(int startIndex, IEnumerable<T> items, bool replaceLoadedItems)
         {

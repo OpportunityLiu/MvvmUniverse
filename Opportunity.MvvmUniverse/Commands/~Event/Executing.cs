@@ -21,7 +21,7 @@ namespace Opportunity.MvvmUniverse.Commands
     {
         public ExecutingEventArgs(T parameter)
         {
-            this.Parameter = parameter;
+            Parameter = parameter;
         }
 
         public T Parameter { get; }

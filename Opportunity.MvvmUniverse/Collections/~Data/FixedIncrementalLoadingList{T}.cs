@@ -176,7 +176,7 @@ namespace Opportunity.MvvmUniverse.Collections
             var loadR = await loadOp;
             token.ThrowIfCancellationRequested();
             if (loadR.Items == null)
-                throw new InvalidOperationException("Wrong result of LoadItemAsync(int).");
+                throw new InvalidOperationException("Wrong result of LoadItemAsync(int), " + nameof(loadR.Items) + " is null.");
             startIndex = loadR.StartIndex;
             if (loadR.ReplaceLoadedItems)
             {

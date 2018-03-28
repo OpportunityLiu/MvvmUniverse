@@ -14,6 +14,9 @@ using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.Storage.BulkAccess;
+using Windows.Storage.Pickers;
 using Windows.UI.Composition;
 using Windows.UI.Composition.Interactions;
 using Windows.UI.ViewManagement;
@@ -57,12 +60,6 @@ namespace TestApp
         {
             this.InitializeComponent();
             this.xp.RegisterPropertyChangedCallback(VisibleBoundsProperty, VBC);
-            this.btnTest.Command = DataTransferCommands.ShareWithAsyncProvider;
-            this.btnTest.CommandParameter = new Func<IAsyncOperation<DataPackage>>(() => AsyncInfo.Run(async token =>
-            {
-                await Task.Delay(200);
-                return "123".ToDataPackage();
-            }));
         }
 
         private void VBC(DependencyObject sender, DependencyProperty dp) => Debug.WriteLine(this.xp.VisibleBounds);
@@ -159,13 +156,11 @@ namespace TestApp
             // Grid.SetColumn(xp, 0);
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private async void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            //DataTransferCommands.Share.Execute(new Uri("http://baidu.com"));
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
-            //ApplicationView.GetForCurrentView().ExitFullScreenMode();
-            //ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.CompactOverlay);
-            //Grid.SetColumn(xp, 1);
+            var q = KnownFolders.MusicLibrary.CreateFileQuery(Windows.Storage.Search.CommonFileQuery.OrderByMusicProperties);
+            var inof = await new FileInformationFactory(q, Windows.Storage.FileProperties.ThumbnailMode.MusicView).GetItemsAsync();
+            var ff = inof.ToArray().Where(i => (i as FileInformation).Name == "For Us All.mp3");
         }
     }
 }
