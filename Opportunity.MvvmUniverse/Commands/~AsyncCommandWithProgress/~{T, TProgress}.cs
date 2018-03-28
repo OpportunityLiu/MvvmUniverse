@@ -15,20 +15,9 @@ namespace Opportunity.MvvmUniverse.Commands
     public abstract class AsyncCommandWithProgress<T, TProgress> : AsyncCommand<T>, IAsyncCommandWithProgress<T, TProgress>
     {
         /// <summary>
-        /// Create new instance of <see cref="AsyncCommandWithProgress{T,TProgress}"/>.
-        /// </summary>
-        /// <param name="progressMapper">Value for <see cref="ProgressMapper"/>.</param>
-        /// <param name="canExecute">Value for <see cref="AsyncCommand{T}.CanExecuteDelegate"/>.</param>
-        protected AsyncCommandWithProgress(ProgressMapper<T, TProgress> progressMapper, AsyncPredicate<T> canExecute)
-            : base(canExecute)
-        {
-            ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
-        }
-
-        /// <summary>
         /// Used to map <see cref="Progress"/> to <see cref="NormalizedProgress"/>.
         /// </summary>
-        protected ProgressMapper<T, TProgress> ProgressMapper { get; }
+        protected abstract double GetNormalizedProgress(T parameter, TProgress progress);
 
         /// <summary>
         /// Progress data of current execution. Will return default value if <see cref="IAsyncCommand.IsExecuting"/> is <see langword="false"/>.
@@ -43,14 +32,14 @@ namespace Opportunity.MvvmUniverse.Commands
         private void setProgress(T parameter, TProgress progress)
         {
             Progress = progress;
-            NormalizedProgress = ProgressMapper(this, parameter, progress);
+            NormalizedProgress = GetNormalizedProgress(parameter, progress);
             OnPropertyChanged(nameof(Progress), nameof(NormalizedProgress));
         }
 
         /// <summary>
         /// Call <see cref="AsyncCommand.OnFinished(IAsyncAction)"/> and
         /// set <see cref="Progress"/> to default value,
-        /// set <see cref="NormalizedProgress"/> to <c><see cref="ProgressMapper"/>(default)</c>.
+        /// set <see cref="NormalizedProgress"/> to <c><see cref="GetNormalizedProgress(T, TProgress)"/>(<paramref name="parameter"/>, default)</c>.
         /// </summary>
         /// <param name="parameter">Parameter of <see cref="CommandBase{T}.Execute(T)"/>.</param>
         /// <param name="execution">Result of <see cref="CommandBase{T}.StartExecutionAsync(T)"/>.</param>

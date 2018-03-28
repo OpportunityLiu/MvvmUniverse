@@ -80,6 +80,8 @@
     <Compile Include="Commands\~AsyncCommandWithProgress\~.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~{T, TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~{TProgress}.cs" />
+    <Compile Include="Commands\~AsyncCommand\~Impl.cs" />
+    <Compile Include="Commands\~AsyncCommand\~Impl{T}.cs" />
     <Compile Include="Commands\~AsyncCommand\~Action.cs" />
     <Compile Include="Commands\~AsyncCommand\~Action{T}.cs" />
     <Compile Include="Commands\~AsyncCommand\~.cs" />

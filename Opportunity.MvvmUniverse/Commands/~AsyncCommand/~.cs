@@ -8,16 +8,9 @@ using Windows.Foundation;
 namespace Opportunity.MvvmUniverse.Commands
 {
     /// <summary>
-    /// Predicate of <see cref="AsyncCommand"/>.
-    /// </summary>
-    /// <param name="command">Current command of can execute testing.</param>
-    /// <returns>Whether the command can execute or not.</returns>
-    public delegate bool AsyncPredicate(AsyncCommand command);
-
-    /// <summary>
     /// Base class for commands implements <see cref="IAsyncCommand"/>.
     /// </summary>
-    public abstract class AsyncCommand : CommandBase, IAsyncCommand
+    public abstract class AsyncCommand : CommandBase, IAsyncCommand, ICommand
     {
         #region Factory methods
         public static AsyncCommand Create(AsyncTaskExecutor execute)
@@ -42,18 +35,10 @@ namespace Opportunity.MvvmUniverse.Commands
         #endregion Factory methods
 
         /// <summary>
-        /// Create new instance of <see cref="AsyncCommand"/>.
+        /// Check with <see cref="IsExecuting"/>.
         /// </summary>
-        /// <param name="canExecute">Value for <see cref="CanExecuteDelegate"/></param>
-        protected AsyncCommand(AsyncPredicate canExecute)
-        {
-            CanExecuteDelegate = canExecute;
-        }
-
-        /// <summary>
-        /// Delegate for <see cref="CanExecuteOverride()"/>.
-        /// </summary>
-        protected AsyncPredicate CanExecuteDelegate { get; }
+        /// <returns>Whether the command can execute or not.</returns>
+        protected override bool CanExecuteOverride() => !this.isExecuting;
 
         private bool isExecuting = false;
         /// <summary>
@@ -67,19 +52,6 @@ namespace Opportunity.MvvmUniverse.Commands
                 if (Set(ref this.isExecuting, value))
                     OnCanExecuteChanged();
             }
-        }
-
-        /// <summary>
-        /// Check with <see cref="IsExecuting"/> and <see cref="CanExecuteDelegate"/>.
-        /// </summary>
-        /// <returns>Whether the command can execute or not</returns>
-        protected override bool CanExecuteOverride()
-        {
-            if (this.isExecuting)
-                return false;
-            if (CanExecuteDelegate is AsyncPredicate p)
-                return p(this);
-            return true;
         }
 
         /// <summary>

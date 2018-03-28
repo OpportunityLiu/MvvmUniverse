@@ -7,44 +7,11 @@ using Windows.Foundation;
 namespace Opportunity.MvvmUniverse.Commands
 {
     /// <summary>
-    /// Predicate of <see cref="Command{T}"/>.
-    /// </summary>
-    /// <param name="command">Current command of can execute testing.</param>
-    /// <param name="parameter">Current parameter of can execute testing.</param>
-    public delegate bool Predicate<T>(Command<T> command, T parameter);
-
-    /// <summary>
     /// Base class for sync command with parameter.
     /// </summary>
     /// <typeparam name="T">Type of parameter.</typeparam>
     public abstract class Command<T> : CommandBase<T>
     {
-        /// <summary>
-        /// Create new instance of <see cref="Command"/>.
-        /// </summary>
-        /// <param name="canExecute">Value for <see cref="CanExecuteDelegate"/></param>
-        protected Command(Predicate<T> canExecute)
-        {
-            CanExecuteDelegate = canExecute;
-        }
-
-        /// <summary>
-        /// Delegate for <see cref="CanExecuteOverride(T)"/>.
-        /// </summary>
-        protected Predicate<T> CanExecuteDelegate { get; }
-
-        /// <summary>
-        /// Check with <see cref="CanExecuteDelegate"/>.
-        /// </summary>
-        /// <param name="parameter">Parameter of execution.</param>
-        /// <returns>Whether the command can execute or not.</returns>
-        protected override bool CanExecuteOverride(T parameter)
-        {
-            if (CanExecuteDelegate is Predicate<T> p)
-                return p(this, parameter);
-            return true;
-        }
-
         /// <summary>
         /// Execution body of <see cref="Command{T}"/>.
         /// </summary>

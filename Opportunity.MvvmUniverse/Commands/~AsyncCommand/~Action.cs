@@ -13,7 +13,7 @@ namespace Opportunity.MvvmUniverse.Commands
     /// <param name="command">Current command of execution.</param>
     public delegate IAsyncAction AsyncActionExecutor(AsyncCommand command);
 
-    internal sealed class AsyncActionCommand : AsyncCommand
+    internal sealed class AsyncActionCommand : AsyncCommandImpl
     {
         public AsyncActionCommand(AsyncActionExecutor execute, AsyncPredicate canExecute)
             : base(canExecute)

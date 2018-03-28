@@ -14,20 +14,9 @@ namespace Opportunity.MvvmUniverse.Commands
     public abstract class AsyncCommandWithProgress<TProgress> : AsyncCommand, IAsyncCommandWithProgress<TProgress>
     {
         /// <summary>
-        /// Create new instance of <see cref="AsyncCommandWithProgress{TProgress}"/>.
-        /// </summary>
-        /// <param name="progressMapper">Value for <see cref="ProgressMapper"/>.</param>
-        /// <param name="canExecute">Value for <see cref="AsyncCommand.CanExecuteDelegate"/>.</param>
-        protected AsyncCommandWithProgress(ProgressMapper<TProgress> progressMapper, AsyncPredicate canExecute)
-            : base(canExecute)
-        {
-            ProgressMapper = progressMapper ?? throw new ArgumentNullException(nameof(progressMapper));
-        }
-
-        /// <summary>
         /// Used to map <see cref="Progress"/> to <see cref="NormalizedProgress"/>.
         /// </summary>
-        protected ProgressMapper<TProgress> ProgressMapper { get; }
+        protected abstract double GetNormalizedProgress(TProgress progress);
 
         /// <summary>
         /// Progress data of current execution. Will return default value if <see cref="IAsyncCommand.IsExecuting"/> is <see langword="false"/>.
@@ -42,14 +31,14 @@ namespace Opportunity.MvvmUniverse.Commands
         private void setProgress(TProgress progress)
         {
             Progress = progress;
-            NormalizedProgress = ProgressMapper(this, progress);
+            NormalizedProgress = GetNormalizedProgress(progress);
             OnPropertyChanged(nameof(Progress), nameof(NormalizedProgress));
         }
 
         /// <summary>
         /// Call <see cref="AsyncCommand.OnFinished(IAsyncAction)"/> and
         /// set <see cref="Progress"/> to default value,
-        /// set <see cref="NormalizedProgress"/> to <c><see cref="ProgressMapper"/>(default).</c>.
+        /// set <see cref="NormalizedProgress"/> to <c><see cref="GetNormalizedProgress(TProgress)"/>(default).</c>.
         /// </summary>
         /// <param name="execution">Result of <see cref="CommandBase.StartExecutionAsync()"/>.</param>
         protected override void OnFinished(IAsyncAction execution)

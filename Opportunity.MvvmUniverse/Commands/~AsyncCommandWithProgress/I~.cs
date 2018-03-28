@@ -19,15 +19,6 @@ namespace Opportunity.MvvmUniverse.Commands
     }
 
     /// <summary>
-    /// Mapping <see cref="ICommandWithProgress{TProgress}.Progress"/> to <see cref="ICommandWithProgress{TProgress}.NormalizedProgress"/>.
-    /// </summary>
-    /// <typeparam name="TProgress">Type of original progress.</typeparam>
-    /// <param name="command">Caller command.</param>
-    /// <param name="progress">Original progress.</param>
-    /// <returns>Mapped progress.</returns>
-    public delegate double ProgressMapper<TProgress>(IAsyncCommandWithProgress<TProgress> command, TProgress progress);
-
-    /// <summary>
     /// Represents a command without parameter, with progress.
     /// </summary>
     /// <typeparam name="TProgress">Type of progress data.</typeparam>
@@ -38,17 +29,6 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         event ProgressChangedEventHandler<TProgress> ProgressChanged;
     }
-
-    /// <summary>
-    /// Mapping <see cref="ICommandWithProgress{TProgress}.Progress"/> to <see cref="ICommandWithProgress{TProgress}.NormalizedProgress"/>.
-    /// </summary>
-    /// <typeparam name="T">Type of <paramref name="parameter"/>.</typeparam>
-    /// <typeparam name="TProgress">Type of original progress.</typeparam>
-    /// <param name="command">Caller command.</param>
-    /// <param name="parameter">Parameter of current execution.</param>
-    /// <param name="progress">Original progress.</param>
-    /// <returns>Mapped progress.</returns>
-    public delegate double ProgressMapper<T, TProgress>(IAsyncCommandWithProgress<T, TProgress> command, T parameter, TProgress progress);
 
     /// <summary>
     /// Represents a command with parameter of <typeparamref name="T"/>, with progress.

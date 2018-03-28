@@ -8,33 +8,17 @@ using Windows.Foundation;
 namespace Opportunity.MvvmUniverse.Commands
 {
     /// <summary>
-    /// Predicate of <see cref="AsyncCommand{T}"/>.
-    /// </summary>
-    /// <typeparam name="T">Type of parameter.</typeparam>
-    /// <param name="command">Current command of can execute testing.</param>
-    /// <param name="parameter">Current parameter of can execute testing.</param>
-    /// <returns>Whether the command can execute or not.</returns>
-    public delegate bool AsyncPredicate<T>(AsyncCommand<T> command, T parameter);
-
-    /// <summary>
     /// Base class for commands implements <see cref="IAsyncCommand"/>.
     /// </summary>
     /// <typeparam name="T">Type of parameter.</typeparam>
-    public abstract class AsyncCommand<T> : CommandBase<T>, IAsyncCommand
+    public abstract class AsyncCommand<T> : CommandBase<T>, IAsyncCommand, ICommand<T>
     {
         /// <summary>
-        /// Create new instance of <see cref="AsyncCommand{T}"/>.
+        /// Check with <see cref="IsExecuting"/>.
         /// </summary>
-        /// <param name="canExecute">Value for <see cref="CanExecuteDelegate"/></param>
-        protected AsyncCommand(AsyncPredicate<T> canExecute)
-        {
-            CanExecuteDelegate = canExecute;
-        }
-
-        /// <summary>
-        /// Delegate for <see cref="CanExecuteOverride(T)"/>.
-        /// </summary>
-        protected AsyncPredicate<T> CanExecuteDelegate { get; }
+        /// <param name="parameter">Parameter of execution</param>
+        /// <returns>Whether the command can execute or not</returns>
+        protected override bool CanExecuteOverride(T parameter) => !this.isExecuting;
 
         private bool isExecuting = false;
         /// <summary>
@@ -48,20 +32,6 @@ namespace Opportunity.MvvmUniverse.Commands
                 if (Set(ref this.isExecuting, value))
                     OnCanExecuteChanged();
             }
-        }
-
-        /// <summary>
-        /// Check with <see cref="IsExecuting"/> and <see cref="CanExecuteDelegate"/>.
-        /// </summary>
-        /// <param name="parameter">Parameter of execution</param>
-        /// <returns>Whether the command can execute or not</returns>
-        protected override bool CanExecuteOverride(T parameter)
-        {
-            if (this.isExecuting)
-                return false;
-            if (CanExecuteDelegate is AsyncPredicate<T> p)
-                return p(this, parameter);
-            return true;
         }
 
         /// <summary>
