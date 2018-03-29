@@ -8,7 +8,7 @@ using System.Windows.Input;
 namespace Opportunity.MvvmUniverse.Commands
 {
     /// <summary>
-    /// Base class of command.
+    /// Base class of all commands.
     /// </summary>
     public abstract class ObservableCommandBase : ObservableObject, IControllable
     {
@@ -40,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Commands
 
         internal static void ThrowUnhandledError(Exception error)
         {
-            if (error == null)
+            if (error is null)
                 return;
             DispatcherHelper.BeginInvoke(() =>
             {
@@ -62,7 +62,7 @@ namespace Opportunity.MvvmUniverse.Commands
         public virtual void OnCanExecuteChanged()
         {
             var temp = this.CanExecuteChanged;
-            if (temp == null)
+            if (temp is null)
                 return;
             DispatcherHelper.BeginInvoke(() => temp(this, EventArgs.Empty));
         }

@@ -24,10 +24,10 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (parameter is null)
             {
-                if (default(T) == null)
-                    return CanExecute(default);
-                else
+                if (default(T) != null)
                     return false;
+                else
+                    return CanExecute(default);
             }
             if (parameter is T t)
                 return CanExecute(t);
@@ -58,7 +58,17 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <returns>Whether the command can execute or not</returns>
         protected virtual bool CanExecuteOverride(T parameter) => true;
 
-        void System.Windows.Input.ICommand.Execute(object parameter) => Execute((T)parameter);
+        void System.Windows.Input.ICommand.Execute(object parameter)
+        {
+            if (parameter is null)
+            {
+                if (default(T) != null)
+                    return;
+                Execute(default);
+            }
+            else if (parameter is T t)
+                Execute(t);
+        }
 
         /// <summary>
         /// Execute the <see cref="ICommand{T}"/>.
