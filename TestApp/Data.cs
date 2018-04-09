@@ -49,13 +49,17 @@ namespace TestApp
             return AsyncInfo.Run(async token =>
             {
                 await Task.Delay(1000);
-                var s = index / 5 * 5;
-                Debug.WriteLine($"Loaded {s} to {s + 5}.");
-                for (int i = s; i < s + 5; i++)
+                return await Task.Run(() =>
                 {
-                    this[i].Name = this[i].Name.Split()[1];
-                }
-                return LoadItemsResult.Create(s, this.Skip(s).Take(5));
+                    var v = Windows.ApplicationModel.Core.CoreApplication.MainView;
+                    var s = index / 5 * 5;
+                    Debug.WriteLine($"Loaded {s} to {s + 5}.");
+                    for (int i = s; i < s + 5; i++)
+                    {
+                        this[i].Name = this[i].Name.Split()[1];
+                    }
+                    return LoadItemsResult.Create(s, this.Skip(s).Take(5));
+                });
             });
         }
     }

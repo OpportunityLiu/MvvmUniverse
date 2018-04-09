@@ -8,9 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Core;
 using Windows.UI.Xaml.Media;
 
 namespace Opportunity.MvvmUniverse.Test
@@ -142,9 +144,10 @@ namespace Opportunity.MvvmUniverse.Test
             Tester.Test(new[] { new UIntPtr(12), UIntPtr.Zero });
         }
 
-        [UITestMethod]
-        public void UITypes()
+        [TestMethod]
+        public async Task UITypes()
         {
+            await CoreApplication.MainView.Dispatcher.Yield();
             Tester.Test(new[]
             {
                 default,
