@@ -105,7 +105,6 @@
     <Compile Include="Commands\~Command\~{T}.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyChangedEventArgsSource.cs" />
     <Compile Include="Services\Activation\Activator.cs" />
     <Compile Include="Services\Activation\IActivationHandler.cs" />
     <Compile Include="Services\IServiceHandler{TService}.cs" />
@@ -130,6 +129,7 @@
     <Compile Include="Storage\StorageProperty.cs" />
     <Compile Include="Storage\StorageProperty{T}.cs" />
     <Compile Include="Services\Notification\Notificator.cs" />
+    <Compile Include="Views\CommandDictionary.cs" />
     <Compile Include="Views\ViewModelFactory.cs" />
     <Compile Include="Services\ViewIndependentSingleton{T}.cs" />
     <Compile Include="Views\~Controls\MvvmContentDialog.cs" />

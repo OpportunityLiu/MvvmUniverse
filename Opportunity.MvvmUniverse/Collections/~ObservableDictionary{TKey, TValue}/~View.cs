@@ -67,7 +67,7 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void OnDictionaryPropertyChanged(PropertyChangedEventArgs e)
         {
             if (NeedRaisePropertyChanged)
-                OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e));
+                OnPropertyChanged(e);
         }
 
         private void onDictionaryVectorChanged(IBindableObservableVector _, object e)

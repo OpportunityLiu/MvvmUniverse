@@ -55,14 +55,10 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="args">Event args.</param>
         /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
-        /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
-        /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
         protected virtual void OnVectorChanged(IVectorChangedEventArgs args)
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
-            if (this.vectorChanged.InvocationListLength == 0)
-                return;
             this.vectorChanged.Raise(this, args);
         }
 

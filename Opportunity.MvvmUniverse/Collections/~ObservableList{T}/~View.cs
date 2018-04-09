@@ -66,7 +66,7 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void OnListPropertyChanged(PropertyChangedEventArgs e)
         {
             if (NeedRaisePropertyChanged)
-                OnPropertyChanged(new SinglePropertyChangedEventArgsSource(e));
+                OnPropertyChanged(e);
         }
 
         private void onListVectorChanged(IBindableObservableVector _, object e)

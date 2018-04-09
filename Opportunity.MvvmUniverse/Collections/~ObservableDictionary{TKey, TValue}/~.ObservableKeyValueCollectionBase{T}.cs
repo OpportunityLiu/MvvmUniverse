@@ -30,7 +30,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 Parent = parent;
             }
 
-            internal void RaisePropertyChangedInternal(IEnumerable<PropertyChangedEventArgs> args)
+            internal void RaisePropertyChangedInternal(PropertyChangedEventArgs args)
                 => OnPropertyChanged(args);
 
             internal void RaiseVectorChangedInternal(IVectorChangedEventArgs e)

@@ -185,9 +185,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="args">event args</param>
         /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
-        /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
-        /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
-        protected override void OnPropertyChanged(IEnumerable<PropertyChangedEventArgs> args)
+        protected override void OnPropertyChanged(PropertyChangedEventArgs args)
         {
             base.OnPropertyChanged(args);
             this.keys?.RaisePropertyChangedInternal(args);
@@ -199,8 +197,6 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="args">Event args.</param>
         /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
-        /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
-        /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
         protected override void OnVectorChanged(IVectorChangedEventArgs args)
         {
             base.OnVectorChanged(args);

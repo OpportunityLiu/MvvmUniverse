@@ -160,7 +160,7 @@ namespace Opportunity.MvvmUniverse
         {
             if (!NeedRaisePropertyChanged)
                 return;
-            OnPropertyChanged(new SinglePropertyChangedEventArgsSource(propertyName));
+            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
         }
         /// <summary>
         /// Raise <see cref="PropertyChanged"/> event.
@@ -171,12 +171,10 @@ namespace Opportunity.MvvmUniverse
         {
             if (!NeedRaisePropertyChanged)
                 return;
-            OnPropertyChanged(g(propertyName0, propertyName1));
-            IEnumerable<string> g(string p0, string p1)
-            {
-                yield return p0;
-                yield return p1;
-            }
+            var args = new EditablePropertyChangedEventArgs(propertyName0);
+            OnPropertyChanged(args);
+            args.EditablePropertyName = propertyName1;
+            OnPropertyChanged(args);
         }
         /// <summary>
         /// Raise <see cref="PropertyChanged"/> event.
@@ -188,13 +186,12 @@ namespace Opportunity.MvvmUniverse
         {
             if (!NeedRaisePropertyChanged)
                 return;
-            OnPropertyChanged(g(propertyName0, propertyName1, propertyName2));
-            IEnumerable<string> g(string p0, string p1, string p2)
-            {
-                yield return p0;
-                yield return p1;
-                yield return p2;
-            }
+            var args = new EditablePropertyChangedEventArgs(propertyName0);
+            OnPropertyChanged(args);
+            args.EditablePropertyName = propertyName1;
+            OnPropertyChanged(args);
+            args.EditablePropertyName = propertyName2;
+            OnPropertyChanged(args);
         }
         /// <summary>
         /// Raise <see cref="PropertyChanged"/> event.
@@ -208,14 +205,12 @@ namespace Opportunity.MvvmUniverse
                 throw new ArgumentNullException(nameof(propertyNamesRest));
             if (!NeedRaisePropertyChanged)
                 return;
-            this.OnPropertyChanged(new MultiPropertyChangedEventArgsSource(g(propertyName, propertyNamesRest)));
-            IEnumerable<string> g(string p, IEnumerable<string> pRest)
+            var args = new EditablePropertyChangedEventArgs(propertyName);
+            OnPropertyChanged(args);
+            foreach (var item in propertyNamesRest)
             {
-                yield return p;
-                foreach (var item in pRest)
-                {
-                    yield return item;
-                }
+                args.EditablePropertyName = item;
+                OnPropertyChanged(args);
             }
         }
         /// <summary>
@@ -227,6 +222,8 @@ namespace Opportunity.MvvmUniverse
         {
             if (propertyNames == null)
                 throw new ArgumentNullException(nameof(propertyNames));
+            if (!NeedRaisePropertyChanged)
+                return;
             if (propertyNames.Length == 0)
                 return;
             else if (propertyNames.Length == 1)
@@ -249,11 +246,26 @@ namespace Opportunity.MvvmUniverse
                 throw new ArgumentNullException(nameof(propertyNames));
             if (!NeedRaisePropertyChanged)
                 return;
-            this.OnPropertyChanged(new MultiPropertyChangedEventArgsSource(propertyNames));
+            var args = default(EditablePropertyChangedEventArgs);
+            foreach (var item in propertyNames)
+            {
+                if (args is null)
+                    args = new EditablePropertyChangedEventArgs(item);
+                else
+                    args.EditablePropertyName = item;
+                this.OnPropertyChanged(args);
+            }
+        }
+
+        private sealed class EditablePropertyChangedEventArgs : PropertyChangedEventArgs
+        {
+            public EditablePropertyChangedEventArgs(string name) : base(null) { this.EditablePropertyName = name; }
+            public override string PropertyName => this.EditablePropertyName;
+            public string EditablePropertyName;
         }
 
         /// <summary>
-        /// Tell caller of <see cref="OnPropertyChanged(IEnumerable{PropertyChangedEventArgs})"/> that whether this call can be skipped.
+        /// Tell caller of <see cref="OnPropertyChanged(PropertyChangedEventArgs)"/> that whether this call can be skipped.
         /// <para></para>
         /// Returns <c><see cref="PropertyChanged"/> != <see langword="null"/></c> by default.
         /// </summary>
@@ -264,24 +276,17 @@ namespace Opportunity.MvvmUniverse
         /// </summary>
         /// <param name="args">event args</param>
         /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>
-        /// <remarks>Will use <see cref="DispatcherHelper"/> to raise event on UI thread
-        /// if <see cref="DispatcherHelper.UseForNotification"/> is <see langword="true"/>.</remarks>
-        protected virtual void OnPropertyChanged(IEnumerable<PropertyChangedEventArgs> args)
+        protected virtual void OnPropertyChanged(PropertyChangedEventArgs args)
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
-            if (this.propertyChanged.InvocationListLength == 0)
-                return;
             this.propertyChanged.Raise(this, args);
         }
 
-        private readonly DepedencyEvent<PropertyChangedEventHandler, ObservableObject, IEnumerable<PropertyChangedEventArgs>> propertyChanged
-            = new DepedencyEvent<PropertyChangedEventHandler, ObservableObject, IEnumerable<PropertyChangedEventArgs>>((h, s, e) =>
+        private readonly DepedencyEvent<PropertyChangedEventHandler, ObservableObject, PropertyChangedEventArgs> propertyChanged
+            = new DepedencyEvent<PropertyChangedEventHandler, ObservableObject, PropertyChangedEventArgs>((h, s, e) =>
         {
-            foreach (var item in e)
-            {
-                h(s, item);
-            }
+            h(s, e);
         });
         /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
