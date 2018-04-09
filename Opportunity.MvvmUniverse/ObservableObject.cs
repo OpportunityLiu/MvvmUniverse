@@ -6,6 +6,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Core;
+using Windows.UI.Xaml;
 
 namespace Opportunity.MvvmUniverse
 {
@@ -255,7 +257,7 @@ namespace Opportunity.MvvmUniverse
         /// <para></para>
         /// Returns <c><see cref="PropertyChanged"/> != <see langword="null"/></c> by default.
         /// </summary>
-        protected virtual bool NeedRaisePropertyChanged => PropertyChanged != null;
+        protected virtual bool NeedRaisePropertyChanged => this.propertyChanged.InvocationListLength != 0;
 
         /// <summary>
         /// Raise <see cref="PropertyChanged"/> event.
@@ -268,19 +270,24 @@ namespace Opportunity.MvvmUniverse
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
-            var temp = PropertyChanged;
-            if (temp == null)
+            if (this.propertyChanged.InvocationListLength == 0)
                 return;
-            DispatcherHelper.BeginInvoke(() =>
-            {
-                foreach (var item in args)
-                {
-                    temp(this, item);
-                }
-            });
+            this.propertyChanged.Raise(this, args);
         }
 
+        private readonly DepedencyEvent<PropertyChangedEventHandler, ObservableObject, IEnumerable<PropertyChangedEventArgs>> propertyChanged
+            = new DepedencyEvent<PropertyChangedEventHandler, ObservableObject, IEnumerable<PropertyChangedEventArgs>>((h, s, e) =>
+        {
+            foreach (var item in e)
+            {
+                h(s, item);
+            }
+        });
         /// <inheritdoc/>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            add => this.propertyChanged.Add(value);
+            remove => this.propertyChanged.Remove(value);
+        }
     }
 }

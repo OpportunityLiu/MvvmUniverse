@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -42,15 +44,26 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (error is null)
                 return;
-            DispatcherHelper.BeginInvoke(() =>
+            var d = CoreApplication.MainView?.Dispatcher;
+            if (d is null)
             {
                 if (error is AggregateException ae)
                     throw new AggregateException(ae.InnerExceptions);
                 else
                     throw new AggregateException(error);
-            });
+            }
+            else
+                d.Begin(() =>
+                {
+                    if (error is AggregateException ae)
+                        throw new AggregateException(ae.InnerExceptions);
+                    else
+                        throw new AggregateException(error);
+                });
         }
 
+        private readonly DepedencyEvent<EventHandler, ObservableCommandBase, EventArgs> canExecuteChanged
+            = new DepedencyEvent<EventHandler, ObservableCommandBase, EventArgs>((h, s, e) => h(s, e));
         /// <summary>
         /// Raise when return value of <see cref="System.Windows.Input.ICommand.CanExecute(object)"/> changes.
         /// </summary>
@@ -61,11 +74,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         public virtual void OnCanExecuteChanged()
         {
-            var temp = this.CanExecuteChanged;
-            if (temp is null)
-                return;
-            DispatcherHelper.BeginInvoke(() => temp(this, EventArgs.Empty));
+            this.canExecuteChanged.Raise(this, EventArgs.Empty);
         }
-
     }
 }

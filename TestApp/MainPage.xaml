@@ -8,6 +8,7 @@
                 xmlns:c="using:Opportunity.MvvmUniverse.Collections"
                 NavigationCacheMode="Enabled"
                 mc:Ignorable="d"
+                Loaded="MvvmPage_Loaded"
                 Padding="{x:Bind VisibleBounds, Mode=OneWay}">
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Grid.RowDefinitions>
@@ -23,17 +24,20 @@
         <TextBox />
       </Grid>
     </Grid>
-    <!--<ListView x:Name="ItemView"
-              ItemsSource="{x:Bind Source.View, Mode=OneWay}">
+    <ListView x:Name="ItemView"
+              ItemsSource="{x:Bind View, Mode=OneWay}">
       <ListView.ItemTemplate>
         <DataTemplate x:DataType="local:DataItem">
-          <TextBlock Text="{x:Bind Name, FallbackValue='Not loaded'}" />
+          <Grid Width="160">
+            <TextBlock Text="{x:Bind Index, FallbackValue='Not loaded', Mode=OneWay}" />
+            <TextBlock Text="{x:Bind Name, FallbackValue='Not loaded', Mode=OneWay}" HorizontalAlignment="Right" />
+          </Grid>
         </DataTemplate>
       </ListView.ItemTemplate>
-    </ListView>-->
-    <!--<FlipView x:Name="ItemView2"
+    </ListView>
+    <FlipView x:Name="ItemView2"
               Grid.Column="1"
-              ItemsSource="{x:Bind Source.View, Mode=OneWay}">
+              ItemsSource="{x:Bind View, Mode=OneWay}">
       <FlipView.ItemTemplate>
         <DataTemplate x:DataType="local:DataItem">
           <TextBlock Text="{x:Bind Name, FallbackValue='Not loaded', Mode=OneWay}"
@@ -41,29 +45,29 @@
                      VerticalAlignment="Center" />
         </DataTemplate>
       </FlipView.ItemTemplate>
-    </FlipView>-->
-    <views:MvvmPage x:Name="xp"
+    </FlipView>
+    <!--<views:MvvmPage x:Name="xp"
                     Grid.Column="1"
                     Padding="{x:Bind xp.VisibleBounds, Mode=OneWay}">
       <Grid  Background="AliceBlue" />
-    </views:MvvmPage>
+    </views:MvvmPage>-->
     <ScrollViewer Grid.Row="1"
                   HorizontalScrollMode="Auto">
       <StackPanel Orientation="Horizontal">
-        <!--<Button Click="Button_Click"
+        <Button Click="Button_Click"
                 IsEnabled="{x:Bind navigator.CanGoBack, Mode=OneWay}"
                 Content="&lt;-" />
         <Button Content="&lt;&lt;"
-                Click="{x:Bind Source.View.MoveCurrentToFirst, Mode=OneWay}" />
+                Click="{x:Bind View.MoveCurrentToFirst, Mode=OneWay}" />
         <Button Content="&lt;"
-                Click="{x:Bind Source.View.MoveCurrentToPrevious, Mode=OneWay}" />
+                Click="{x:Bind View.MoveCurrentToPrevious, Mode=OneWay}" />
         <Button Content="&gt;"
-                Click="{x:Bind Source.View.MoveCurrentToNext, Mode=OneWay}" />
+                Click="{x:Bind View.MoveCurrentToNext, Mode=OneWay}" />
         <Button Content="&gt;&gt;"
-                Click="{x:Bind Source.View.MoveCurrentToLast, Mode=OneWay}" />
+                Click="{x:Bind View.MoveCurrentToLast, Mode=OneWay}" />
         <Button Click="Button_Click_1"
                 IsEnabled="{x:Bind navigator.CanGoForward, Mode=OneWay}"
-                Content="-&gt;" />-->
+                Content="-&gt;" />
         <Button Click="Button_Click_2"
                 Content="New" />
         <Button x:Name="btnTest"
@@ -74,7 +78,7 @@
     <StackPanel Grid.Row="1"
                 Grid.Column="1">
       <TextBlock  Text="{x:Bind ViewModel.Id, Mode=OneWay, FallbackValue='NULL'}" />
-      <TextBlock  Text="{x:Bind Source.View.CurrentPosition.ToString(), Mode=OneWay}" />
+      <TextBlock  Text="{x:Bind View.CurrentPosition.ToString(), Mode=OneWay}" />
     </StackPanel>
   </Grid>
 </views:MvvmPage>

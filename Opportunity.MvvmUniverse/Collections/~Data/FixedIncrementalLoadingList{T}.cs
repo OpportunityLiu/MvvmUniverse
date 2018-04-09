@@ -262,6 +262,6 @@ namespace Opportunity.MvvmUniverse.Collections
         /// which will call <see cref="LoadItemsAsync(int, int)"/> automatically.
         /// </summary>
         /// <returns>A view of this list.</returns>
-        public ICollectionView CreateView() => new FixedCollectionView(this);
+        public override CollectionView<T> CreateView() => new FixedCollectionView(this);
     }
 }

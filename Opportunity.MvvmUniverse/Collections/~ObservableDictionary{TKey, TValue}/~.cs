@@ -231,7 +231,12 @@ namespace Opportunity.MvvmUniverse.Collections
         public KeyValuePair<TKey, TValue> ItemAt(int index) => CreateKVP(KeyItems[index], ValueItems[index]);
         object IDictionary.this[object key]
         {
-            get => this[CastKey<TKey>(key)];
+            get
+            {
+                if (TryGetValue(CastKey<TKey>(key), out var v))
+                    return v;
+                return default;
+            }
             set => setOrAdd(CastKey<TKey>(key), CastValue<TValue>(value));
         }
         KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[int index]

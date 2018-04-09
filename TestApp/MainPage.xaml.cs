@@ -11,6 +11,7 @@ using System.Numerics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -59,10 +60,10 @@ namespace TestApp
         public MainPage()
         {
             this.InitializeComponent();
-            this.xp.RegisterPropertyChangedCallback(VisibleBoundsProperty, VBC);
+            // this.xp.RegisterPropertyChangedCallback(VisibleBoundsProperty, VBC);
         }
 
-        private void VBC(DependencyObject sender, DependencyProperty dp) => Debug.WriteLine(this.xp.VisibleBounds);
+        // private void VBC(DependencyObject sender, DependencyProperty dp) => Debug.WriteLine(this.xp.VisibleBounds);
 
         public new VM ViewModel { get => (VM)base.ViewModel; set => base.ViewModel = value; }
 
@@ -87,17 +88,10 @@ namespace TestApp
             }
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        private void MvvmPage_Loaded(object sender, RoutedEventArgs e)
         {
-            base.OnNavigatedTo(e);
-            if (Source != null)
-            {
-                Source.View.CurrentChanging -= this.View_CurrentChanging;
-                Source.View.CurrentChanged -= this.View_CurrentChanged;
-            }
-            Source = (CollectionViewSource)e.Parameter ?? new CollectionViewSource { Source = Data };
-            Source.View.CurrentChanged += this.View_CurrentChanged;
-            Source.View.CurrentChanging += this.View_CurrentChanging;
+            View.CurrentChanged += this.View_CurrentChanged;
+            View.CurrentChanging += this.View_CurrentChanging;
             Bindings.Update();
         }
 
@@ -106,9 +100,7 @@ namespace TestApp
             Bindings.Update();
         }
 
-        public DataList Data = new DataList();
-
-        public CollectionViewSource Source;
+        public ICollectionView View = DataList.View;
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -158,9 +150,39 @@ namespace TestApp
 
         private async void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            var q = KnownFolders.MusicLibrary.CreateFileQuery(Windows.Storage.Search.CommonFileQuery.OrderByMusicProperties);
-            var inof = await new FileInformationFactory(q, Windows.Storage.FileProperties.ThumbnailMode.MusicView).GetItemsAsync();
-            var ff = inof.ToArray().Where(i => (i as FileInformation).Name == "For Us All.mp3");
+            var appview = CoreApplication.CreateNewView();
+            var id = await appview.Dispatcher.RunAsync(async () =>
+            {
+                var rootFrame = Window.Current.Content as Frame;
+
+                // 不要在窗口已包含内容时重复应用程序初始化，
+                // 只需确保窗口处于活动状态
+                if (rootFrame == null)
+                {
+                    // 创建要充当导航上下文的框架，并导航到第一页
+                    rootFrame = new Frame();
+                    rootFrame.Margin = new Thickness(10);
+                    rootFrame.Padding = new Thickness(10);
+                    ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseVisible);
+
+                    Navigator.GetOrCreateForCurrentView().Handlers.Add(rootFrame.AsNavigationHandler());
+
+                    // 将框架放在当前窗口中
+                    Window.Current.Content = rootFrame;
+                }
+                if (rootFrame.Content == null)
+                {
+                    // 当导航堆栈尚未还原时，导航到第一页，
+                    // 并通过将所需信息作为导航参数传入来配置
+                    // 参数
+                    await Navigator.GetForCurrentView().NavigateAsync(typeof(MainPage));
+                }
+                // 确保当前窗口处于活动状态
+                Window.Current.Activate();
+                return ApplicationView.GetForCurrentView().Id;
+            });
+            await ApplicationViewSwitcher.TryShowAsStandaloneAsync(id);
+            await ApplicationViewSwitcher.SwitchAsync(id);
         }
     }
 }

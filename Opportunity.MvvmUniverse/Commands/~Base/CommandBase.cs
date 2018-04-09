@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
+using Windows.UI.Core;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -83,11 +85,10 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <returns>True if executing not canceled</returns>
         protected virtual bool OnStarting()
         {
-            var executing = this.Executing;
-            if (executing == null)
+            if (this.executing.InvocationListLength == 0)
                 return true;
             var eventarg = new ExecutingEventArgs();
-            executing.Invoke(this, eventarg);
+            this.executing.RaiseHasThreadAccessOnly(this, eventarg);
             return !eventarg.Canceled;
         }
 
@@ -107,28 +108,53 @@ namespace Opportunity.MvvmUniverse.Commands
                 error = execution.ErrorCode;
                 break;
             }
-            var executed = this.Executed;
-            if (executed == null)
+            if (this.executed.InvocationListLength == 0)
             {
                 ThrowUnhandledError(error);
                 return;
             }
             var args = new ExecutedEventArgs(error);
-            DispatcherHelper.BeginInvoke(() =>
+            var d = CoreApplication.MainView?.Dispatcher;
+            if (d is null)
             {
-                executed(this, args);
+                this.executed.Raise(this, args);
+                if (args.Exception is null)
+                    return;
                 if (!args.Handled)
                     ThrowUnhandledError(args.Exception);
-            });
+            }
+            else
+                d.Begin(async () =>
+                {
+                    this.executed.Raise(this, args);
+                    if (args.Exception is null)
+                        return;
+                    await d.YieldIdle();
+                    if (!args.Handled)
+                        ThrowUnhandledError(args.Exception);
+                });
         }
 
+        private readonly DepedencyEvent<ExecutingEventHandler, ICommand, ExecutingEventArgs> executing
+            = new DepedencyEvent<ExecutingEventHandler, ICommand, ExecutingEventArgs>((h, s, e) => h(s, e));
         /// <summary>
         /// Will be raised before execution.
         /// </summary>
-        public event ExecutingEventHandler Executing;
+        public event ExecutingEventHandler Executing
+        {
+            add => this.executing.Add(value);
+            remove => this.executing.Remove(value);
+        }
+
+        private readonly DepedencyEvent<ExecutedEventHandler, ICommand, ExecutedEventArgs> executed
+            = new DepedencyEvent<ExecutedEventHandler, ICommand, ExecutedEventArgs>((h, s, e) => h(s, e));
         /// <summary>
         /// Will be raised after execution.
         /// </summary>
-        public event ExecutedEventHandler Executed;
+        public event ExecutedEventHandler Executed
+        {
+            add => this.executed.Add(value);
+            remove => this.executed.Remove(value);
+        }
     }
 }

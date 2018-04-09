@@ -9,6 +9,9 @@ using Windows.Foundation.Collections;
 using Windows.UI.Xaml.Interop;
 using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 using System.Diagnostics;
+using Windows.UI.Xaml;
+using Windows.UI.Core;
+using Windows.UI.Xaml.Data;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -17,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// </summary>
     /// <typeparam name="T">Type of objects store in the collection</typeparam>
     public abstract class ObservableCollectionBase<T> : ObservableObject
-        , IBindableObservableVector, IList, ICollection, IEnumerable
+        , IBindableObservableVector, IList, ICollection, IEnumerable, ICollectionViewFactory
     {
         /// <summary>
         /// Create new instance of <see cref="ObservableCollectionBase{T}"/>.
@@ -36,10 +39,16 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <para></para>
         /// Returns <c><see cref="VectorChanged"/> != <see langword="null"/></c> by default.
         /// </summary>
-        protected virtual bool NeedRaiseVectorChanged => this.VectorChanged != null;
+        protected virtual bool NeedRaiseVectorChanged => this.vectorChanged.InvocationListLength != 0;
 
+        private readonly DepedencyEvent<Handler, ObservableCollectionBase<T>, IVectorChangedEventArgs> vectorChanged
+            = new DepedencyEvent<Handler, ObservableCollectionBase<T>, IVectorChangedEventArgs>((h, s, e) => h(s, e));
         /// <inheritdoc/>
-        public event Handler VectorChanged;
+        public event Handler VectorChanged
+        {
+            add => this.vectorChanged.Add(value);
+            remove => this.vectorChanged.Remove(value);
+        }
 
         /// <summary>
         /// Raise <see cref="VectorChanged"/> event.
@@ -52,16 +61,15 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
-            var temp = this.VectorChanged;
-            if (temp == null)
+            if (this.vectorChanged.InvocationListLength == 0)
                 return;
-            DispatcherHelper.BeginInvoke(() => temp(this, args));
+            this.vectorChanged.Raise(this, args);
         }
 
         /// <summary>
         /// Raise <see cref="VectorChanged"/> event of <see cref="Action.Reset"/>.
         /// </summary>
-        protected void OnVectorReset()
+        public void OnVectorReset()
         {
             if (!NeedRaiseVectorChanged)
                 return;
@@ -101,17 +109,20 @@ namespace Opportunity.MvvmUniverse.Collections
             OnVectorChanged(new Args(Action.ItemChanged, (uint)index));
         }
 
-        private bool IsReadOnly => (this as ICollection<T>)?.IsReadOnly ?? true;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool IList.IsReadOnly => IsReadOnly;
+        internal bool IsReadOnlyInternal => ((IList)this).IsReadOnly;
+        // Derived class can override this value.
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        bool IList.IsReadOnly => (this is ICollection<T> c) ? c.IsReadOnly : true;
 
-        private bool IsFixedSize => ((IList)this).IsFixedSize;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal bool IsFixedSizeInternal => ((IList)this).IsFixedSize;
         // Derived class can override this value.
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IList.IsFixedSize => false;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private int Count => ((ICollection)this).Count;
+        internal int CountInternal => ((ICollection)this).Count;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         int ICollection.Count
         {
@@ -134,15 +145,15 @@ namespace Opportunity.MvvmUniverse.Collections
             }
             set
             {
-                if (IsReadOnly) ThrowForReadOnlyCollection();
+                if (IsReadOnlyInternal) ThrowForReadOnlyCollection();
                 ((IList<T>)this)[index] = CastValue<T>(value);
             }
         }
 
         int IList.Add(object value)
         {
-            if (IsReadOnly) ThrowForReadOnlyCollection();
-            if (IsFixedSize) ThrowForFixedSizeCollection();
+            if (IsReadOnlyInternal) ThrowForReadOnlyCollection();
+            if (IsFixedSizeInternal) ThrowForFixedSizeCollection();
             var that = (ICollection<T>)this;
             that.Add(CastValue<T>(value));
             return that.Count - 1;
@@ -186,8 +197,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         void IList.Clear()
         {
-            if (IsReadOnly) ThrowForReadOnlyCollection();
-            if (IsFixedSize) ThrowForFixedSizeCollection();
+            if (IsReadOnlyInternal) ThrowForReadOnlyCollection();
+            if (IsFixedSizeInternal) ThrowForFixedSizeCollection();
             ((ICollection<T>)this).Clear();
         }
 
@@ -232,22 +243,23 @@ namespace Opportunity.MvvmUniverse.Collections
 
         void IList.Insert(int index, object value)
         {
-            if (IsReadOnly) ThrowForReadOnlyCollection();
-            if (IsFixedSize) ThrowForFixedSizeCollection();
+            if (IsReadOnlyInternal) ThrowForReadOnlyCollection();
+            if (IsFixedSizeInternal) ThrowForFixedSizeCollection();
             ((IList<T>)this).Insert(index, CastValue<T>(value));
         }
 
-        void IList.Remove(object value)
+        internal bool Remove(object value)
         {
-            if (IsReadOnly) ThrowForReadOnlyCollection();
-            if (IsFixedSize) ThrowForFixedSizeCollection();
-            ((ICollection<T>)this).Remove(CastValue<T>(value));
+            if (IsReadOnlyInternal) ThrowForReadOnlyCollection();
+            if (IsFixedSizeInternal) ThrowForFixedSizeCollection();
+            return ((ICollection<T>)this).Remove(CastValue<T>(value));
         }
+        void IList.Remove(object value) => Remove(value);
 
         void IList.RemoveAt(int index)
         {
-            if (IsReadOnly) ThrowForReadOnlyCollection();
-            if (IsFixedSize) ThrowForFixedSizeCollection();
+            if (IsReadOnlyInternal) ThrowForReadOnlyCollection();
+            if (IsFixedSizeInternal) ThrowForFixedSizeCollection();
             ((IList<T>)this).RemoveAt(index);
         }
 
@@ -268,5 +280,13 @@ namespace Opportunity.MvvmUniverse.Collections
                 return this.syncRoot;
             }
         }
+
+        /// <summary>
+        /// Create view of current collection.
+        /// </summary>
+        /// <returns>Default view of current collection.</returns>
+        public virtual CollectionView<T> CreateView() => new CollectionView<T>(this);
+
+        ICollectionView ICollectionViewFactory.CreateView() => CreateView();
     }
 }

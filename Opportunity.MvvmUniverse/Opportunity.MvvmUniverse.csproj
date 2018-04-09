@@ -48,6 +48,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Collections\CollectionView.cs" />
     <Compile Include="Collections\~Cache\AutoFillCacheStorage.cs" />
     <Compile Include="Collections\~Cache\CacheStorage.cs" />
     <Compile Include="Collections\~Data\FixedIncrementalLoadingList.FixedCollectionView.cs" />
@@ -102,7 +103,6 @@
     <Compile Include="Commands\~Event\ProgressChanged.cs" />
     <Compile Include="Commands\~Command\~.cs" />
     <Compile Include="Commands\~Command\~{T}.cs" />
-    <Compile Include="DispatcherHelper.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangedEventArgsSource.cs" />
@@ -139,6 +139,7 @@
     <Compile Include="Services\Navigation\INavigationHandler.cs" />
     <Compile Include="Services\Navigation\Navigator.cs" />
     <Compile Include="Views\~Controls\VisibleBoundsHelper.cs" />
+    <Compile Include="DepedencyEvent.cs" />
     <Compile Include="WeakEvent.cs" />
     <EmbeddedResource Include="Properties\Opportunity.MvvmUniverse.rd.xml" />
   </ItemGroup>

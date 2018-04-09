@@ -57,15 +57,17 @@ namespace Opportunity.MvvmUniverse.Commands
         protected virtual void OnProgress(ProgressChangedEventArgs<T, TProgress> e)
         {
             setProgress(e.Parameter, e.Progress);
-            var p = this.ProgressChanged;
-            if (p == null)
-                return;
-            DispatcherHelper.BeginInvoke(() => p.Invoke(this, e));
+            this.progressChanged.Raise(this, e);
         }
 
+        private readonly DepedencyEvent<ProgressChangedEventHandler<T, TProgress>, IAsyncCommandWithProgress<T, TProgress>, ProgressChangedEventArgs<T, TProgress>> progressChanged = new DepedencyEvent<ProgressChangedEventHandler<T, TProgress>, IAsyncCommandWithProgress<T, TProgress>, ProgressChangedEventArgs<T, TProgress>>((h, s, e) => h(s, e));
         /// <summary>
         /// Will be raised when <see cref="Progress"/> changed during execution.
         /// </summary>
-        public event ProgressChangedEventHandler<T, TProgress> ProgressChanged;
+        public event ProgressChangedEventHandler<T, TProgress> ProgressChanged
+        {
+            add => this.progressChanged.Add(value);
+            remove => this.progressChanged.Remove(value);
+        }
     }
 }

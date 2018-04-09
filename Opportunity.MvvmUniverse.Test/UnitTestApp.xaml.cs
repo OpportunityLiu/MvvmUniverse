@@ -46,7 +46,6 @@ namespace Opportunity.MvvmUniverse.Test
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
-            DispatcherHelper.Initialize();
 
             Frame rootFrame = Window.Current.Content as Frame;
 
