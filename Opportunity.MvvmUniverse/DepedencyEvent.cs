@@ -85,7 +85,7 @@ namespace Opportunity.MvvmUniverse
             if (eventHandler is null)
                 return default;
 
-            var dispatcher = Window.Current.Dispatcher;
+            var dispatcher = Window.Current?.Dispatcher;
             return add(eventHandler, dispatcher).Token.EventRegistrationToken;
         }
 
