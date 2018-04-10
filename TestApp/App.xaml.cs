@@ -1,4 +1,5 @@
-﻿using Opportunity.MvvmUniverse.Services.Navigation;
+﻿using Opportunity.MvvmUniverse;
+using Opportunity.MvvmUniverse.Services.Navigation;
 using Opportunity.MvvmUniverse.Views;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,12 @@ namespace TestApp
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            var x = new ObservableObject();
+            x.PropertyChanged += (s, e) =>
+              {
+
+              };
+            x.OnObjectReset();
         }
 
         /// <summary>

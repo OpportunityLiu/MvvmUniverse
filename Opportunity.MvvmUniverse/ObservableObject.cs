@@ -16,7 +16,7 @@ namespace Opportunity.MvvmUniverse
     /// <summary>
     /// Base class for observable object.
     /// </summary>
-    public abstract class ObservableObject : INotifyPropertyChanged
+    public class ObservableObject : INotifyPropertyChanged
     {
         /// <summary>
         /// Token for suspending notification.

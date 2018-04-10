@@ -46,9 +46,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 return;
             var d = DispatcherHelper.Default;
             if (d is null)
-            {
                 run();
-            }
             else
                 d.Begin(run);
 

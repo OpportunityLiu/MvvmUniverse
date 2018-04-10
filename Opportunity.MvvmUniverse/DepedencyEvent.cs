@@ -189,7 +189,7 @@ namespace Opportunity.MvvmUniverse
 
             var defaultDispatcher = DispatcherHelper.Default;
 
-            if (defaultDispatcher.HasThreadAccess)
+            if (defaultDispatcher is null || defaultDispatcher.HasThreadAccess)
             {
                 foreach (var entry in entries)
                 {

@@ -18,7 +18,7 @@ namespace Opportunity.MvvmUniverse
                 {
                     return CoreApplication.MainView.Dispatcher;
                 }
-                catch (Exception)
+                catch
                 {
                     return null;
                 }
