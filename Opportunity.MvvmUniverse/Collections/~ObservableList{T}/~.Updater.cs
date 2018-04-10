@@ -231,7 +231,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             private void swap()
             {
-                using (this.source.SuspendNotification(true))
+                using (this.source.SuspendNotification(false))
                 {
                     this.source.ClearItems();
                     foreach (var item in this.target)
@@ -239,6 +239,8 @@ namespace Opportunity.MvvmUniverse.Collections
                         this.source.Add(item);
                     }
                 }
+                this.source.OnVectorReset();
+                this.source.OnPropertyChanged(EventArgsConst.CountPropertyChanged);
             }
         }
 

@@ -120,7 +120,7 @@ namespace Opportunity.MvvmUniverse.Collections
             KeyItems.Insert(index, key);
             ValueItems.Insert(index, value);
             updateIndex(index + 1, KeyItems.Count - index - 1);
-            OnPropertyChanged(nameof(Count));
+            OnPropertyChanged(EventArgsConst.CountPropertyChanged);
             OnItemInserted(KeySet.Count - 1);
             check();
         }
@@ -140,7 +140,7 @@ namespace Opportunity.MvvmUniverse.Collections
             KeyItems.RemoveAt(removedIndex);
             ValueItems.RemoveAt(removedIndex);
             updateIndex(removedIndex, KeyItems.Count - removedIndex);
-            OnPropertyChanged(nameof(Count));
+            OnPropertyChanged(EventArgsConst.CountPropertyChanged);
             OnItemRemoved(removedIndex);
             check();
             return true;
@@ -175,7 +175,7 @@ namespace Opportunity.MvvmUniverse.Collections
             KeyItems.Clear();
             ValueItems.Clear();
             KeySet.Clear();
-            OnPropertyChanged(nameof(Count));
+            OnPropertyChanged(EventArgsConst.CountPropertyChanged);
             OnVectorReset();
             check();
         }

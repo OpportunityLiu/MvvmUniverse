@@ -93,7 +93,7 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Raise <see cref="ICommand.Executed"/> event.
+        /// Raise <see cref="ICommand.Executed"/> event if <see cref="ObservableObject.NotificationSuspending"/> is <see langword="false"/>.
         /// </summary>
         /// <param name="execution">Result of <see cref="StartExecutionAsync()"/></param>
         protected virtual void OnFinished(IAsyncAction execution)
@@ -108,7 +108,7 @@ namespace Opportunity.MvvmUniverse.Commands
                 error = execution.ErrorCode;
                 break;
             }
-            if (this.executed.InvocationListLength == 0)
+            if (this.executed.InvocationListLength == 0 || NotificationSuspending)
             {
                 ThrowUnhandledError(error);
                 return;
@@ -138,7 +138,7 @@ namespace Opportunity.MvvmUniverse.Commands
         private readonly DepedencyEvent<ExecutingEventHandler, ICommand, ExecutingEventArgs> executing
             = new DepedencyEvent<ExecutingEventHandler, ICommand, ExecutingEventArgs>((h, s, e) => h(s, e));
         /// <summary>
-        /// Will be raised before execution.
+        /// Will be raised before execution, only handlers registed at the same thread of execution starting will receive this event.
         /// </summary>
         public event ExecutingEventHandler Executing
         {

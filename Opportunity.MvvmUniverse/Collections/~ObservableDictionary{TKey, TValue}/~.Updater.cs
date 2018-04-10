@@ -123,7 +123,7 @@ namespace Opportunity.MvvmUniverse.Collections
 
             private void swap()
             {
-                using (this.source.SuspendNotification(true))
+                using (this.source.SuspendNotification(false))
                 {
                     this.source.ClearItems();
                     for (var i = 0; i < this.targetKey.Length; i++)
@@ -131,6 +131,8 @@ namespace Opportunity.MvvmUniverse.Collections
                         this.source.InsertItem(i, this.targetKey[i], this.targetValue[i]);
                     }
                 }
+                this.source.OnVectorReset();
+                this.source.OnPropertyChanged(EventArgsConst.CountPropertyChanged);
             }
         }
 

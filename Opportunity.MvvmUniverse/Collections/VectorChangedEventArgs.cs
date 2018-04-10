@@ -4,7 +4,7 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     internal sealed class VectorChangedEventArgs : IVectorChangedEventArgs
     {
-        private VectorChangedEventArgs(CollectionChange collectionChange) => CollectionChange = collectionChange;
+        public VectorChangedEventArgs(CollectionChange collectionChange) => CollectionChange = collectionChange;
 
         public VectorChangedEventArgs(CollectionChange collectionChange, uint index)
         {
@@ -15,7 +15,5 @@ namespace Opportunity.MvvmUniverse.Collections
         public CollectionChange CollectionChange { get; }
 
         public uint Index { get; }
-
-        public static IVectorChangedEventArgs Reset { get; } = new VectorChangedEventArgs(CollectionChange.Reset);
     }
 }

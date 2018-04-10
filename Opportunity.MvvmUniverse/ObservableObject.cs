@@ -83,8 +83,6 @@ namespace Opportunity.MvvmUniverse
             return r;
         }
 
-        private static readonly PropertyChangedEventArgs PropertyResetEventArgs = new PropertyChangedEventArgs(null);
-
         /// <summary>
         /// If <paramref name="value"/> and <paramref name="field"/> are different,
         /// set <paramref name="field"/> with <paramref name="value"/> and notify.
@@ -233,7 +231,7 @@ namespace Opportunity.MvvmUniverse
         {
             if (!NeedRaisePropertyChanged)
                 return;
-            OnPropertyChanged(PropertyResetEventArgs);
+            OnPropertyChanged(EventArgsConst.PropertyReset);
         }
 
         /// <summary>
@@ -246,7 +244,7 @@ namespace Opportunity.MvvmUniverse
                 return;
             if (string.IsNullOrEmpty(propertyName))
             {
-                OnPropertyChanged(PropertyResetEventArgs);
+                OnPropertyChanged(EventArgsConst.PropertyReset);
                 return;
             }
             OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
@@ -262,7 +260,7 @@ namespace Opportunity.MvvmUniverse
                 return;
             if (string.IsNullOrEmpty(propertyName0) || string.IsNullOrEmpty(propertyName1))
             {
-                OnPropertyChanged(PropertyResetEventArgs);
+                OnPropertyChanged(EventArgsConst.PropertyReset);
                 return;
             }
             this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName0));
@@ -280,7 +278,7 @@ namespace Opportunity.MvvmUniverse
                 return;
             if (string.IsNullOrEmpty(propertyName0) || string.IsNullOrEmpty(propertyName1) || string.IsNullOrEmpty(propertyName2))
             {
-                OnPropertyChanged(PropertyResetEventArgs);
+                OnPropertyChanged(EventArgsConst.PropertyReset);
                 return;
             }
             this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName0));
@@ -301,7 +299,7 @@ namespace Opportunity.MvvmUniverse
                 return;
             if (string.IsNullOrEmpty(propertyName))
             {
-                OnPropertyChanged(PropertyResetEventArgs);
+                OnPropertyChanged(EventArgsConst.PropertyReset);
                 return;
             }
             OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
@@ -309,7 +307,7 @@ namespace Opportunity.MvvmUniverse
             {
                 if (string.IsNullOrEmpty(item))
                 {
-                    OnPropertyChanged(PropertyResetEventArgs);
+                    OnPropertyChanged(EventArgsConst.PropertyReset);
                     return;
                 }
                 OnPropertyChanged(new PropertyChangedEventArgs(item));
@@ -352,7 +350,7 @@ namespace Opportunity.MvvmUniverse
             {
                 if (string.IsNullOrEmpty(item))
                 {
-                    OnPropertyChanged(PropertyResetEventArgs);
+                    OnPropertyChanged(EventArgsConst.PropertyReset);
                     return;
                 }
                 this.OnPropertyChanged(new PropertyChangedEventArgs(item));

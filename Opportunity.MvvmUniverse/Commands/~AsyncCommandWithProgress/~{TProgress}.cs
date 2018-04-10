@@ -55,13 +55,14 @@ namespace Opportunity.MvvmUniverse.Commands
 
         /// <summary>
         /// Set value of <see cref="Progress"/>,
-        /// and raise <see cref="ProgressChanged"/>.
+        /// then raise <see cref="ProgressChanged"/> if <see cref="ObservableObject.NotificationSuspending"/> is <see langword="false"/>.
         /// </summary>
         /// <param name="e">Event args</param>
         protected virtual void OnProgress(ProgressChangedEventArgs<TProgress> e)
         {
             setProgress(e.Progress);
-            this.progressChanged.Raise(this, e);
+            if (!NotificationSuspending)
+                this.progressChanged.Raise(this, e);
         }
 
         private readonly DepedencyEvent<ProgressChangedEventHandler<TProgress>, IAsyncCommandWithProgress<TProgress>, ProgressChangedEventArgs<TProgress>> progressChanged = new DepedencyEvent<ProgressChangedEventHandler<TProgress>, IAsyncCommandWithProgress<TProgress>, ProgressChangedEventArgs<TProgress>>((h, s, e) => h(s, e));
