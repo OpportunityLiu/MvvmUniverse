@@ -44,22 +44,21 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (error is null)
                 return;
-            var d = CoreApplication.MainView?.Dispatcher;
+            var d = DispatcherHelper.Default;
             if (d is null)
+            {
+                run();
+            }
+            else
+                d.Begin(run);
+
+            void run()
             {
                 if (error is AggregateException ae)
                     throw new AggregateException(ae.InnerExceptions);
                 else
                     throw new AggregateException(error);
             }
-            else
-                d.Begin(() =>
-                {
-                    if (error is AggregateException ae)
-                        throw new AggregateException(ae.InnerExceptions);
-                    else
-                        throw new AggregateException(error);
-                });
         }
 
         private readonly DepedencyEvent<EventHandler, ObservableCommandBase, EventArgs> canExecuteChanged

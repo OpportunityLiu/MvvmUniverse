@@ -34,7 +34,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     if (load.Status == AsyncStatus.Started)
                         load.Completed += (s, e) =>
                         {
-                            var d = CoreApplication.MainView?.Dispatcher;
+                            var d = DispatcherHelper.Default;
                             if (d is null)
                                 load.GetResults();
                             else

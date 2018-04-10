@@ -114,25 +114,22 @@ namespace Opportunity.MvvmUniverse.Commands
                 return;
             }
             var args = new ExecutedEventArgs(error);
-            var d = CoreApplication.MainView?.Dispatcher;
+            var d = DispatcherHelper.Default;
             if (d is null)
+                run();
+            else
+                d.Begin(run);
+
+            async void run()
             {
                 this.executed.Raise(this, args);
                 if (args.Exception is null)
                     return;
+                if (d != null)
+                    await d.YieldIdle();
                 if (!args.Handled)
                     ThrowUnhandledError(args.Exception);
             }
-            else
-                d.Begin(async () =>
-                {
-                    this.executed.Raise(this, args);
-                    if (args.Exception is null)
-                        return;
-                    await d.YieldIdle();
-                    if (!args.Handled)
-                        ThrowUnhandledError(args.Exception);
-                });
         }
 
         private readonly DepedencyEvent<ExecutingEventHandler, ICommand, ExecutingEventArgs> executing

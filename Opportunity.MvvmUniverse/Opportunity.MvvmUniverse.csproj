@@ -139,6 +139,7 @@
     <Compile Include="Views\~Controls\VisibleBoundsHelper.cs" />
     <Compile Include="DepedencyEvent.cs" />
     <Compile Include="WeakEvent.cs" />
+    <Compile Include="~Internal\DispatcherHelper.cs" />
     <Compile Include="~Internal\EventArgsConst.cs" />
     <EmbeddedResource Include="Properties\Opportunity.MvvmUniverse.rd.xml" />
   </ItemGroup>

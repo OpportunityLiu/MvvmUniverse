@@ -187,7 +187,7 @@ namespace Opportunity.MvvmUniverse
             if (entries.Length == 0)
                 return;
 
-            var defaultDispatcher = CoreApplication.MainView?.Dispatcher;
+            var defaultDispatcher = DispatcherHelper.Default;
 
             if (defaultDispatcher.HasThreadAccess)
             {
