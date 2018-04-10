@@ -61,7 +61,8 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         /// <summary>
-        /// Raise <see cref="VectorChanged"/> event.
+        /// Raise <see cref="VectorChanged"/> event
+        /// if <see cref="NeedRaiseVectorChanged"/> is <see langword="true"/>.
         /// </summary>
         /// <param name="args">Event args.</param>
         /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>

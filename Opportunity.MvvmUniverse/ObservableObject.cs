@@ -368,7 +368,8 @@ namespace Opportunity.MvvmUniverse
         protected virtual bool NeedRaisePropertyChanged => this.propertyChanged.InvocationListLength != 0 && !NotificationSuspending;
 
         /// <summary>
-        /// Raise <see cref="PropertyChanged"/> event.
+        /// Raise <see cref="PropertyChanged"/> event
+        /// if <see cref="NeedRaisePropertyChanged"/> is <see langword="true"/>.
         /// </summary>
         /// <param name="args">event args</param>
         /// <exception cref="ArgumentNullException"><paramref name="args"/> is <see langword="null"/></exception>

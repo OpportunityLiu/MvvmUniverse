@@ -74,10 +74,22 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Raise <see cref="CanExecuteChanged"/> event.
+        /// Call <see cref="ObservableObject.OnObjectReset()"/> and <see cref="OnCanExecuteChanged()"/>.
+        /// </summary>
+        public override void OnObjectReset()
+        {
+            base.OnObjectReset();
+            OnCanExecuteChanged();
+        }
+
+        /// <summary>
+        /// Raise <see cref="CanExecuteChanged"/> event
+        /// if <see cref="ObservableObject.NotificationSuspending"/> is <see langword="false"/>.
         /// </summary>
         public virtual void OnCanExecuteChanged()
         {
+            if (NotificationSuspending)
+                return;
             this.canExecuteChanged.Raise(this, EventArgs.Empty);
         }
     }
