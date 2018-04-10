@@ -16,6 +16,8 @@ namespace Opportunity.MvvmUniverse
     /// </summary>
     public abstract class ObservableObject : INotifyPropertyChanged
     {
+        private static readonly PropertyChangedEventArgs PropertyResetEventArgs = new PropertyChangedEventArgs(null);
+
         /// <summary>
         /// If <paramref name="value"/> and <paramref name="field"/> are different,
         /// set <paramref name="field"/> with <paramref name="value"/> and notify.
@@ -153,6 +155,16 @@ namespace Opportunity.MvvmUniverse
         }
 
         /// <summary>
+        /// Raise <see cref="PropertyChanged"/> event with empty property name string.
+        /// </summary>
+        public void OnPropertyReset()
+        {
+            if (!NeedRaisePropertyChanged)
+                return;
+            OnPropertyChanged(PropertyResetEventArgs);
+        }
+
+        /// <summary>
         /// Raise <see cref="PropertyChanged"/> event.
         /// </summary>
         /// <param name="propertyName">name of changed property</param>
@@ -160,6 +172,11 @@ namespace Opportunity.MvvmUniverse
         {
             if (!NeedRaisePropertyChanged)
                 return;
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                OnPropertyChanged(PropertyResetEventArgs);
+                return;
+            }
             OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
         }
         /// <summary>
@@ -171,10 +188,13 @@ namespace Opportunity.MvvmUniverse
         {
             if (!NeedRaisePropertyChanged)
                 return;
-            var args = new EditablePropertyChangedEventArgs(propertyName0);
-            OnPropertyChanged(args);
-            args.EditablePropertyName = propertyName1;
-            OnPropertyChanged(args);
+            if (string.IsNullOrEmpty(propertyName0) || string.IsNullOrEmpty(propertyName1))
+            {
+                OnPropertyChanged(PropertyResetEventArgs);
+                return;
+            }
+            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName0));
+            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName1));
         }
         /// <summary>
         /// Raise <see cref="PropertyChanged"/> event.
@@ -186,12 +206,14 @@ namespace Opportunity.MvvmUniverse
         {
             if (!NeedRaisePropertyChanged)
                 return;
-            var args = new EditablePropertyChangedEventArgs(propertyName0);
-            OnPropertyChanged(args);
-            args.EditablePropertyName = propertyName1;
-            OnPropertyChanged(args);
-            args.EditablePropertyName = propertyName2;
-            OnPropertyChanged(args);
+            if (string.IsNullOrEmpty(propertyName0) || string.IsNullOrEmpty(propertyName1) || string.IsNullOrEmpty(propertyName2))
+            {
+                OnPropertyChanged(PropertyResetEventArgs);
+                return;
+            }
+            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName0));
+            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName1));
+            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName2));
         }
         /// <summary>
         /// Raise <see cref="PropertyChanged"/> event.
@@ -205,12 +227,20 @@ namespace Opportunity.MvvmUniverse
                 throw new ArgumentNullException(nameof(propertyNamesRest));
             if (!NeedRaisePropertyChanged)
                 return;
-            var args = new EditablePropertyChangedEventArgs(propertyName);
-            OnPropertyChanged(args);
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                OnPropertyChanged(PropertyResetEventArgs);
+                return;
+            }
+            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
             foreach (var item in propertyNamesRest)
             {
-                args.EditablePropertyName = item;
-                OnPropertyChanged(args);
+                if (string.IsNullOrEmpty(item))
+                {
+                    OnPropertyChanged(PropertyResetEventArgs);
+                    return;
+                }
+                OnPropertyChanged(new PropertyChangedEventArgs(item));
             }
         }
         /// <summary>
@@ -246,22 +276,15 @@ namespace Opportunity.MvvmUniverse
                 throw new ArgumentNullException(nameof(propertyNames));
             if (!NeedRaisePropertyChanged)
                 return;
-            var args = default(EditablePropertyChangedEventArgs);
             foreach (var item in propertyNames)
             {
-                if (args is null)
-                    args = new EditablePropertyChangedEventArgs(item);
-                else
-                    args.EditablePropertyName = item;
-                this.OnPropertyChanged(args);
+                if (string.IsNullOrEmpty(item))
+                {
+                    OnPropertyChanged(PropertyResetEventArgs);
+                    return;
+                }
+                this.OnPropertyChanged(new PropertyChangedEventArgs(item));
             }
-        }
-
-        private sealed class EditablePropertyChangedEventArgs : PropertyChangedEventArgs
-        {
-            public EditablePropertyChangedEventArgs(string name) : base(null) { this.EditablePropertyName = name; }
-            public override string PropertyName => this.EditablePropertyName;
-            public string EditablePropertyName;
         }
 
         /// <summary>
@@ -284,10 +307,7 @@ namespace Opportunity.MvvmUniverse
         }
 
         private readonly DepedencyEvent<PropertyChangedEventHandler, ObservableObject, PropertyChangedEventArgs> propertyChanged
-            = new DepedencyEvent<PropertyChangedEventHandler, ObservableObject, PropertyChangedEventArgs>((h, s, e) =>
-        {
-            h(s, e);
-        });
+            = new DepedencyEvent<PropertyChangedEventHandler, ObservableObject, PropertyChangedEventArgs>((h, s, e) => h(s, e));
         /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
