@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -16,6 +18,71 @@ namespace Opportunity.MvvmUniverse
     /// </summary>
     public abstract class ObservableObject : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Token for suspending notification.
+        /// </summary>
+        [DebuggerDisplay(@"SuspendNotificationCount = {SuspendNotificationCount}")]
+        public sealed class NotificationSuspender : IDisposable
+        {
+            internal int SuspendNotificationCount;
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            private readonly ObservableObject parent;
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            private bool resetOnResuming;
+
+            internal ObservableObject Parent => this.parent;
+            internal bool ResetOnResuming => this.resetOnResuming;
+
+
+            internal NotificationSuspender(ObservableObject parent)
+            {
+                this.parent = parent;
+            }
+
+            internal void Enter(bool resetOnResuming)
+            {
+                this.resetOnResuming = resetOnResuming;
+                Interlocked.Increment(ref this.SuspendNotificationCount);
+            }
+
+            void IDisposable.Dispose() => Exit();
+
+            /// <summary>
+            /// Resume property changed notification.
+            /// </summary>
+            public void Exit()
+            {
+                var resetOnResuming = this.resetOnResuming;
+                var n = Interlocked.Decrement(ref this.SuspendNotificationCount);
+                if (n < 0)
+                    throw new InvalidOperationException("Exit() has been called repeatedly.");
+                if (resetOnResuming && n == 0)
+                    this.parent.OnObjectReset();
+            }
+        }
+
+        /// <summary>
+        /// Indicates the notification is suspending or not.
+        /// </summary>
+        protected bool NotificationSuspending
+            => this.notificationSuspender is null ? false : this.notificationSuspender.SuspendNotificationCount > 0;
+        private NotificationSuspender notificationSuspender;
+        /// <summary>
+        /// Suspend notification temporary.
+        /// </summary>
+        /// <param name="resetOnResuming">Call <see cref="OnObjectReset()"/> on resuming or not.</param>
+        /// <returns><see cref="NotificationSuspender"/> for resuming notification.</returns>
+        /// <remarks>
+        /// Usage:
+        /// <c>using(SuspendNotification(<see langword="true"/>)) { ... }</c>
+        /// </remarks>
+        public NotificationSuspender SuspendNotification(bool resetOnResuming)
+        {
+            var r = LazyInitializer.EnsureInitialized(ref this.notificationSuspender, () => new NotificationSuspender(this));
+            r.Enter(resetOnResuming);
+            return r;
+        }
+
         private static readonly PropertyChangedEventArgs PropertyResetEventArgs = new PropertyChangedEventArgs(null);
 
         /// <summary>
@@ -155,6 +222,11 @@ namespace Opportunity.MvvmUniverse
         }
 
         /// <summary>
+        /// Call <see cref="OnPropertyReset()"/>.
+        /// </summary>
+        public virtual void OnObjectReset() => OnPropertyReset();
+
+        /// <summary>
         /// Raise <see cref="PropertyChanged"/> event with empty property name string.
         /// </summary>
         public void OnPropertyReset()
@@ -290,9 +362,10 @@ namespace Opportunity.MvvmUniverse
         /// <summary>
         /// Tell caller of <see cref="OnPropertyChanged(PropertyChangedEventArgs)"/> that whether this call can be skipped.
         /// <para></para>
-        /// Returns <c><see cref="PropertyChanged"/> != <see langword="null"/></c> by default.
+        /// Returns <see langword="false"/> if <see cref="SuspendNotification(bool)"/> has been called
+        /// or <see cref="PropertyChanged"/> is not registed.
         /// </summary>
-        protected virtual bool NeedRaisePropertyChanged => this.propertyChanged.InvocationListLength != 0;
+        protected virtual bool NeedRaisePropertyChanged => this.propertyChanged.InvocationListLength != 0 && !NotificationSuspending;
 
         /// <summary>
         /// Raise <see cref="PropertyChanged"/> event.
@@ -303,6 +376,8 @@ namespace Opportunity.MvvmUniverse
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
+            if (!NeedRaisePropertyChanged)
+                return;
             this.propertyChanged.Raise(this, args);
         }
 

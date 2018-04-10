@@ -91,7 +91,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     }
                     else if (this.source.TryGetValue(targetKey, out var sourceValue))
                     {
-                        // Must be found after posiiton i. Move forward.
+                        // Must be found after positon i. Move forward.
                         this.source.RemoveItem(targetKey);
                         this.source.InsertItem(i, targetKey, sourceValue);
 
@@ -123,10 +123,13 @@ namespace Opportunity.MvvmUniverse.Collections
 
             private void swap()
             {
-                this.source.ClearItems();
-                for (var i = 0; i < this.targetKey.Length; i++)
+                using (this.source.SuspendNotification(true))
                 {
-                    this.source.InsertItem(i, this.targetKey[i], this.targetValue[i]);
+                    this.source.ClearItems();
+                    for (var i = 0; i < this.targetKey.Length; i++)
+                    {
+                        this.source.InsertItem(i, this.targetKey[i], this.targetValue[i]);
+                    }
                 }
             }
         }

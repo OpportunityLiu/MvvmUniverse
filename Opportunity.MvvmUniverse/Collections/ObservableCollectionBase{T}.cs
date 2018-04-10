@@ -35,11 +35,21 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         /// <summary>
+        /// Call <see cref="ObservableObject.OnObjectReset()"/> and <see cref="OnVectorReset()"/>.
+        /// </summary>
+        public override void OnObjectReset()
+        {
+            base.OnObjectReset();
+            OnVectorReset();
+        }
+
+        /// <summary>
         /// Tell caller of <see cref="OnVectorChanged(IVectorChangedEventArgs)"/> that whether this call can be skipped.
         /// <para></para>
-        /// Returns <c><see cref="VectorChanged"/> != <see langword="null"/></c> by default.
+        /// Returns <see langword="false"/> if <see cref="ObservableObject.SuspendNotification(bool)"/> has been called
+        /// or <see cref="VectorChanged"/> is not registed.
         /// </summary>
-        protected virtual bool NeedRaiseVectorChanged => this.vectorChanged.InvocationListLength != 0;
+        protected virtual bool NeedRaiseVectorChanged => this.vectorChanged.InvocationListLength != 0 && !NotificationSuspending;
 
         private readonly DepedencyEvent<Handler, ObservableCollectionBase<T>, IVectorChangedEventArgs> vectorChanged
             = new DepedencyEvent<Handler, ObservableCollectionBase<T>, IVectorChangedEventArgs>((h, s, e) => h(s, e));
@@ -59,6 +69,8 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
+            if (!NeedRaiseVectorChanged)
+                return;
             this.vectorChanged.Raise(this, args);
         }
 
@@ -67,8 +79,6 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         public void OnVectorReset()
         {
-            if (!NeedRaiseVectorChanged)
-                return;
             OnVectorChanged(Args.Reset);
         }
 
@@ -264,18 +274,7 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool ICollection.IsSynchronized => false;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private object syncRoot;
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                if (this.syncRoot == null)
-                {
-                    System.Threading.Interlocked.CompareExchange<object>(ref this.syncRoot, new object(), null);
-                }
-                return this.syncRoot;
-            }
-        }
+        object ICollection.SyncRoot => this.vectorChanged;
 
         /// <summary>
         /// Create view of current collection.

@@ -231,10 +231,13 @@ namespace Opportunity.MvvmUniverse.Collections
 
             private void swap()
             {
-                this.source.ClearItems();
-                foreach (var item in this.target)
+                using (this.source.SuspendNotification(true))
                 {
-                    this.source.Add(item);
+                    this.source.ClearItems();
+                    foreach (var item in this.target)
+                    {
+                        this.source.Add(item);
+                    }
                 }
             }
         }
