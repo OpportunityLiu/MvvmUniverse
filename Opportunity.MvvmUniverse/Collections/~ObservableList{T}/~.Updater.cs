@@ -40,15 +40,12 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 if (this.targetCount <= 0)
                 {
-                    this.source.ClearItems();
+                    swap();
                     return this.sourceCount;
                 }
                 if (this.sourceCount <= 0)
                 {
-                    foreach (var item in this.target)
-                    {
-                        this.source.Add(item);
-                    }
+                    swap();
                     return this.targetCount;
                 }
                 if (this.sourceCount * this.targetCount > 1_000_000)
@@ -64,7 +61,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     swap();
                     return this.distance;
                 }
-                if (this.itemUpdater == null)
+                if (this.itemUpdater is null)
                     swapMEDFast();
                 else
                     swapMEDFull();

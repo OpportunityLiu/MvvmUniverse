@@ -32,15 +32,18 @@ namespace Opportunity.MvvmUniverse.Commands
             => new AsyncActionCommandWithProgress<T, TProgress>(execute, canExecute);
         #endregion Factory methods
 
+        private TProgress progress;
         /// <summary>
-        /// Progress data of current execution. Will return default value if <see cref="IAsyncCommand.IsExecuting"/> is <see langword="false"/>.
+        /// Progress data of current execution.
         /// </summary>
-        public TProgress Progress { get; private set; }
-
-        private void setProgress(T parameter, TProgress progress)
+        public TProgress Progress
         {
-            Progress = progress;
-            OnPropertyChanged(nameof(Progress));
+            get => this.progress;
+            private set
+            {
+                this.progress = value;
+                OnPropertyChanged(EventArgsConst.ProgressPropertyChanged);
+            }
         }
 
         /// <summary>
@@ -52,7 +55,7 @@ namespace Opportunity.MvvmUniverse.Commands
         protected override void OnFinished(IAsyncAction execution, T parameter)
         {
             try { base.OnFinished(execution, parameter); }
-            finally { setProgress(parameter, default); }
+            finally { Progress = default; }
         }
 
         /// <summary>
@@ -62,9 +65,15 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <param name="e">Event args</param>
         protected virtual void OnProgress(ProgressChangedEventArgs<T, TProgress> e)
         {
-            setProgress(e.Parameter, e.Progress);
-            if (!NotificationSuspending)
+            if (NotificationSuspending)
+            {
+                this.progress = e.Progress;
+            }
+            else
+            {
+                Progress = e.Progress;
                 this.progressChanged.Raise(this, e);
+            }
         }
 
         private readonly DepedencyEvent<ProgressChangedEventHandler<T, TProgress>, IAsyncCommandWithProgress<T, TProgress>, ProgressChangedEventArgs<T, TProgress>> progressChanged = new DepedencyEvent<ProgressChangedEventHandler<T, TProgress>, IAsyncCommandWithProgress<T, TProgress>, ProgressChangedEventArgs<T, TProgress>>((h, s, e) => h(s, e));
