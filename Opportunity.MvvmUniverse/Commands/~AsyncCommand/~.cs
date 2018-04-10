@@ -13,25 +13,37 @@ namespace Opportunity.MvvmUniverse.Commands
     public abstract class AsyncCommand : CommandBase, IAsyncCommand, ICommand
     {
         #region Factory methods
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand"/>.
+        /// </summary>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand"/>.</returns>
         public static AsyncCommand Create(AsyncTaskExecutor execute)
             => new AsyncTaskCommand(execute, null);
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand"/>.
+        /// </summary>
+        /// <param name="canExecute">Predicate of <see cref="AsyncCommand"/>.</param>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand"/>.</returns>
         public static AsyncCommand Create(AsyncTaskExecutor execute, AsyncPredicate canExecute)
             => new AsyncTaskCommand(execute, canExecute);
 
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand"/>.
+        /// </summary>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand"/>.</returns>
         public static AsyncCommand Create(AsyncActionExecutor execute)
             => new AsyncActionCommand(execute, null);
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand"/>.
+        /// </summary>
+        /// <param name="canExecute">Predicate of <see cref="AsyncCommand"/>.</param>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand"/>.</returns>
         public static AsyncCommand Create(AsyncActionExecutor execute, AsyncPredicate canExecute)
             => new AsyncActionCommand(execute, canExecute);
-
-        public static AsyncCommand<T> Create<T>(AsyncTaskExecutor<T> execute)
-            => new AsyncTaskCommand<T>(execute, null);
-        public static AsyncCommand<T> Create<T>(AsyncTaskExecutor<T> execute, AsyncPredicate<T> canExecute)
-            => new AsyncTaskCommand<T>(execute, canExecute);
-
-        public static AsyncCommand<T> Create<T>(AsyncActionExecutor<T> execute)
-            => new AsyncActionCommand<T>(execute, null);
-        public static AsyncCommand<T> Create<T>(AsyncActionExecutor<T> execute, AsyncPredicate<T> canExecute)
-            => new AsyncActionCommand<T>(execute, canExecute);
         #endregion Factory methods
 
         /// <summary>

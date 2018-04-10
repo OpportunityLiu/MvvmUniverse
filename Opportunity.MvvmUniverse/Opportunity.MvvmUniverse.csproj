@@ -75,10 +75,8 @@
     <Compile Include="Collections\~Data\FixedIncrementalLoadingList{T}.cs" />
     <Compile Include="Collections\RangedListView{T}.cs" />
     <Compile Include="Commands\Predefined\DataTransferCommands.cs" />
-    <Compile Include="Commands\~AsyncCommandWithProgress\ProgressMappers.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{T, TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{TProgress}.cs" />
-    <Compile Include="Commands\~AsyncCommandWithProgress\~.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~{T, TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~{TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommand\~Impl.cs" />

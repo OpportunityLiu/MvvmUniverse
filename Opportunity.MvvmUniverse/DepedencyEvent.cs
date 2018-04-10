@@ -43,22 +43,25 @@ namespace Opportunity.MvvmUniverse
     public sealed class DepedencyEvent<TDelegate, TSender, TEventArgs>
         where TDelegate : class
     {
-        [DebuggerDisplay(@"\{{Token.TokenValue} {Dispatcher} {Delegate}\}")]
+        [DebuggerDisplay(@"\{{Token.Value} {Dispatcher?.Target} {Delegate}\}")]
         private readonly struct EventEntry
         {
             public readonly TDelegate Delegate;
-            public readonly CoreDispatcher Dispatcher;
-            public readonly Token Token;
+            public readonly WeakReference<CoreDispatcher> Dispatcher;
+            public readonly EventRegistrationToken Token;
 
             public EventEntry(TDelegate targetDelegate, CoreDispatcher dispatcher, long token)
             {
                 this.Delegate = targetDelegate;
-                this.Dispatcher = dispatcher;
-                this.Token = new Token(unchecked((ulong)token));
+                if (dispatcher != null)
+                    this.Dispatcher = new WeakReference<CoreDispatcher>(dispatcher);
+                else
+                    this.Dispatcher = default;
+                this.Token = new Token(unchecked((ulong)token)).EventRegistrationToken;
             }
         }
 
-        private long version = 1;
+        private long version;
         private EventEntry[] eventEntries = Array.Empty<EventEntry>();
         private readonly Action<TDelegate, TSender, TEventArgs> raiser;
 
@@ -80,13 +83,14 @@ namespace Opportunity.MvvmUniverse
         /// Add handler to event.
         /// </summary>
         /// <param name="eventHandler">Handler to add.</param>
+        /// <returns><see cref="EventRegistrationToken"/> or the registered handler.</returns>
         public EventRegistrationToken Add(TDelegate eventHandler)
         {
             if (eventHandler is null)
                 return default;
 
             var dispatcher = Window.Current?.Dispatcher;
-            return add(eventHandler, dispatcher).Token.EventRegistrationToken;
+            return add(eventHandler, dispatcher).Token;
         }
 
         private EventEntry add(TDelegate d, CoreDispatcher dispatcher)
@@ -112,7 +116,7 @@ namespace Opportunity.MvvmUniverse
             if (eventHandler == null)
                 return default;
 
-            return remove(eventHandler).Token.EventRegistrationToken;
+            return remove(eventHandler).Token;
         }
 
         /// <summary>
@@ -160,7 +164,7 @@ namespace Opportunity.MvvmUniverse
                 var index = -1;
                 for (var i = 0; i < oldV.Length; i++)
                 {
-                    if (d.Equals(oldV[i].Token.EventRegistrationToken))
+                    if (d == oldV[i].Token)
                     {
                         index = i;
                         break;
@@ -177,40 +181,80 @@ namespace Opportunity.MvvmUniverse
             }
         }
 
+        private void raise(TSender sender, TEventArgs e, bool hasThreadAccessOnly)
+        {
+            var entries = this.eventEntries;
+            if (entries.Length == 0)
+                return;
+
+            var defaultDispatcher = CoreApplication.MainView?.Dispatcher;
+
+            if (defaultDispatcher.HasThreadAccess)
+            {
+                foreach (var entry in entries)
+                {
+                    Debug.Assert(entry.Delegate != null);
+                    Debug.Assert(entry.Token != default);
+                    if (entry.Dispatcher is null)
+                        this.raiser(entry.Delegate, sender, e);
+                    else if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
+                        remove(entry.Token);
+                    else if (dispatcher == defaultDispatcher || dispatcher is null)
+                        this.raiser(entry.Delegate, sender, e);
+                    else if (!hasThreadAccessOnly)
+                        dispatcher.Begin(() => this.raiser(entry.Delegate, sender, e));
+                }
+            }
+            else
+            {
+                var c = entries.Length;
+                foreach (var entry in entries)
+                {
+                    Debug.Assert(entry.Delegate != null);
+                    Debug.Assert(entry.Token != default);
+                    if (entry.Dispatcher is null)
+                        continue;
+                    if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
+                    {
+                        remove(entry.Token);
+                        c--;
+                    }
+                    else if (dispatcher == defaultDispatcher || dispatcher is null)
+                        continue;
+                    else if (dispatcher.HasThreadAccess)
+                    {
+                        this.raiser(entry.Delegate, sender, e);
+                        c--;
+                    }
+                    else if (!hasThreadAccessOnly)
+                    {
+                        dispatcher.Begin(() => this.raiser(entry.Delegate, sender, e));
+                        c--;
+                    }
+                }
+                if (c != 0 && !hasThreadAccessOnly)
+                    defaultDispatcher.Begin(() =>
+                    {
+                        foreach (var entry in entries)
+                        {
+                            if (entry.Dispatcher is null)
+                                this.raiser(entry.Delegate, sender, e);
+                            else if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
+                                continue;
+                            else if (dispatcher == defaultDispatcher || dispatcher is null)
+                                this.raiser(entry.Delegate, sender, e);
+                        }
+                    });
+            }
+        }
+
         /// <summary>
-        /// Raise event for handlers associated with current dispatcher or no dispatcher.
+        /// Raise event for handlers associated with current dispatcher.
         /// </summary>
         /// <param name="sender">sender of event</param>
         /// <param name="e">args of event</param>
         public void RaiseHasThreadAccessOnly(TSender sender, TEventArgs e)
-        {
-            var entries = (EventEntry[])this.eventEntries.Clone();
-            if (entries.Length == 0)
-                return;
-            var defaultDispatcher = CoreApplication.MainView?.Dispatcher;
-            var c = entries.Length;
-            for (var i = 0; i < entries.Length; i++)
-            {
-                var entry = entries[i];
-                if (entry.Dispatcher is null || entry.Dispatcher == defaultDispatcher || entry.Delegate is null)
-                    continue;
-                if (entry.Dispatcher.HasThreadAccess)
-                    this.raiser(entry.Delegate, sender, e);
-                entries[i] = default;
-                c--;
-            }
-            if (c == 0)
-                return;
-            if (defaultDispatcher is null || defaultDispatcher.HasThreadAccess)
-            {
-                foreach (var item in entries)
-                {
-                    if (item.Delegate is null)
-                        continue;
-                    this.raiser(item.Delegate, sender, e);
-                }
-            }
-        }
+            => raise(sender, e, true);
 
         /// <summary>
         /// Raise event.
@@ -218,45 +262,6 @@ namespace Opportunity.MvvmUniverse
         /// <param name="sender">sender of event</param>
         /// <param name="e">args of event</param>
         public void Raise(TSender sender, TEventArgs e)
-        {
-            var entries = (EventEntry[])this.eventEntries.Clone();
-            if (entries.Length == 0)
-                return;
-            var defaultDispatcher = CoreApplication.MainView?.Dispatcher;
-            var c = entries.Length;
-            for (var i = 0; i < entries.Length; i++)
-            {
-                var entry = entries[i];
-                if (entry.Dispatcher is null || entry.Dispatcher == defaultDispatcher || entry.Delegate is null)
-                    continue;
-                if (entry.Dispatcher.HasThreadAccess)
-                    this.raiser(entry.Delegate, sender, e);
-                else
-                    entry.Dispatcher.Begin(() => this.raiser(entry.Delegate, sender, e));
-                entries[i] = default;
-                c--;
-            }
-            if (c == 0)
-                return;
-            if (defaultDispatcher is null || defaultDispatcher.HasThreadAccess)
-            {
-                foreach (var item in entries)
-                {
-                    if (item.Delegate is null)
-                        continue;
-                    this.raiser(item.Delegate, sender, e);
-                }
-            }
-            else
-                defaultDispatcher.Begin(() =>
-                {
-                    foreach (var item in entries)
-                    {
-                        if (item.Delegate is null)
-                            continue;
-                        this.raiser(item.Delegate, sender, e);
-                    }
-                });
-        }
+            => raise(sender, e, false);
     }
 }

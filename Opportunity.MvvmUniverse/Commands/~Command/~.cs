@@ -12,10 +12,19 @@ namespace Opportunity.MvvmUniverse.Commands
     public abstract class Command : CommandBase
     {
         #region Factory methods
+        /// <summary>
+        /// Create a new instance of <see cref="Command"/>.
+        /// </summary>
+        /// <param name="execute">Execution body of <see cref="Command"/>.</param>
+        /// <returns>A new instance of <see cref="Command"/>.</returns>
         public static Command Create(Executor execute) => new CommandImpl(execute, null);
+        /// <summary>
+        /// Create a new instance of <see cref="Command"/>.
+        /// </summary>
+        /// <param name="canExecute">Predicate of <see cref="Command"/>.</param>
+        /// <param name="execute">Execution body of <see cref="Command"/>.</param>
+        /// <returns>A new instance of <see cref="Command"/>.</returns>
         public static Command Create(Executor execute, Predicate canExecute) => new CommandImpl(execute, canExecute);
-        public static Command<T> Create<T>(Executor<T> execute) => new CommandImpl<T>(execute, null);
-        public static Command<T> Create<T>(Executor<T> execute, Predicate<T> canExecute) => new CommandImpl<T>(execute, canExecute);
         #endregion Factory methods
 
         /// <summary>

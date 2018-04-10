@@ -12,10 +12,6 @@ namespace Opportunity.MvvmUniverse.Commands
         /// Progress data of current execution. Will return default value if <see cref="IAsyncCommand.IsExecuting"/> is <see langword="false"/>.
         /// </summary>
         TProgress Progress { get; }
-        /// <summary>
-        /// Normalized progress of current execution, for binding usage.
-        /// </summary>
-        double NormalizedProgress { get; }
     }
 
     /// <summary>

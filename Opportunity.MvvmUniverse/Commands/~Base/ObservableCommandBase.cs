@@ -67,7 +67,11 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Raise when return value of <see cref="System.Windows.Input.ICommand.CanExecute(object)"/> changes.
         /// </summary>
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        {
+            add => this.canExecuteChanged.Add(value);
+            remove => this.canExecuteChanged.Remove(value);
+        }
 
         /// <summary>
         /// Raise <see cref="CanExecuteChanged"/> event.

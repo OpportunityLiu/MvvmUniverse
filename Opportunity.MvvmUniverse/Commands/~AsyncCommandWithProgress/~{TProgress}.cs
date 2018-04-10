@@ -13,32 +13,38 @@ namespace Opportunity.MvvmUniverse.Commands
     /// <typeparam name="TProgress">Type of progress.</typeparam>
     public abstract class AsyncCommandWithProgress<TProgress> : AsyncCommand, IAsyncCommandWithProgress<TProgress>
     {
+        #region Factory methods
         /// <summary>
-        /// Used to map <see cref="Progress"/> to <see cref="NormalizedProgress"/>.
+        /// Create a new instance of <see cref="AsyncCommandWithProgress{TProgress}"/>.
         /// </summary>
-        protected abstract double GetNormalizedProgress(TProgress progress);
+        /// <param name="execute">Execution body of <see cref="AsyncCommandWithProgress{TProgress}"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommandWithProgress{TProgress}"/>.</returns>
+        public static AsyncCommandWithProgress<TProgress> Create(AsyncActionWithProgressExecutor<TProgress> execute)
+            => new AsyncActionCommandWithProgress<TProgress>(execute, null);
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommandWithProgress{TProgress}"/>.
+        /// </summary>
+        /// <param name="canExecute">Predicate of <see cref="AsyncCommandWithProgress{TProgress}"/>.</param>
+        /// <param name="execute">Execution body of <see cref="AsyncCommandWithProgress{TProgress}"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommandWithProgress{TProgress}"/>.</returns>
+        public static AsyncCommandWithProgress<TProgress> Create(AsyncActionWithProgressExecutor<TProgress> execute, AsyncPredicate canExecute)
+            => new AsyncActionCommandWithProgress<TProgress>(execute, canExecute);
+        #endregion Factory methods
 
         /// <summary>
         /// Progress data of current execution. Will return default value if <see cref="IAsyncCommand.IsExecuting"/> is <see langword="false"/>.
         /// </summary>
         public TProgress Progress { get; private set; }
 
-        /// <summary>
-        /// Normalized progress of current execution, for binding usage.
-        /// </summary>
-        public double NormalizedProgress { get; private set; }
-
         private void setProgress(TProgress progress)
         {
             Progress = progress;
-            NormalizedProgress = GetNormalizedProgress(progress);
-            OnPropertyChanged(nameof(Progress), nameof(NormalizedProgress));
+            OnPropertyChanged(nameof(Progress));
         }
 
         /// <summary>
         /// Call <see cref="AsyncCommand.OnFinished(IAsyncAction)"/> and
-        /// set <see cref="Progress"/> to default value,
-        /// set <see cref="NormalizedProgress"/> to <c><see cref="GetNormalizedProgress(TProgress)"/>(default).</c>.
+        /// set <see cref="Progress"/> to default value.
         /// </summary>
         /// <param name="execution">Result of <see cref="CommandBase.StartExecutionAsync()"/>.</param>
         protected override void OnFinished(IAsyncAction execution)
@@ -48,7 +54,7 @@ namespace Opportunity.MvvmUniverse.Commands
         }
 
         /// <summary>
-        /// Set value of <see cref="Progress"/> and <see cref="NormalizedProgress"/>,
+        /// Set value of <see cref="Progress"/>,
         /// and raise <see cref="ProgressChanged"/>.
         /// </summary>
         /// <param name="e">Event args</param>

@@ -21,6 +21,6 @@ namespace Opportunity.MvvmUniverse
 {
     internal static class AssemblyInfo
     {
-        public const string Version = "2.5.8.0";
+        public const string Version = "2.5.9.0";
     }
 }

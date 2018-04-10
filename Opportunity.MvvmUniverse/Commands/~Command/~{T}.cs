@@ -12,6 +12,22 @@ namespace Opportunity.MvvmUniverse.Commands
     /// <typeparam name="T">Type of parameter.</typeparam>
     public abstract class Command<T> : CommandBase<T>
     {
+        #region Factory methods
+        /// <summary>
+        /// Create a new instance of <see cref="Command{T}"/>.
+        /// </summary>
+        /// <param name="execute">Execution body of <see cref="Command{T}"/>.</param>
+        /// <returns>A new instance of <see cref="Command{T}"/>.</returns>
+        public static Command<T> Create(Executor<T> execute) => new CommandImpl<T>(execute, null);
+        /// <summary>
+        /// Create a new instance of <see cref="Command{T}"/>.
+        /// </summary>
+        /// <param name="canExecute">Predicate of <see cref="Command{T}"/>.</param>
+        /// <param name="execute">Execution body of <see cref="Command{T}"/>.</param>
+        /// <returns>A new instance of <see cref="Command{T}"/>.</returns>
+        public static Command<T> Create(Executor<T> execute, Predicate<T> canExecute) => new CommandImpl<T>(execute, canExecute);
+        #endregion Factory methods
+
         /// <summary>
         /// Execution body of <see cref="Command{T}"/>.
         /// </summary>

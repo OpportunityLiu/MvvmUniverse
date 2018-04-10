@@ -24,9 +24,9 @@ namespace Opportunity.MvvmUniverse.Test
             public TestVM()
             {
                 this.Commands["Test1"] = AsyncCommand.Create(async c => await Task.Delay(1));
-                this.Commands["Test2"] = AsyncCommand.Create<int>(async (c, i) => await Task.Delay(1));
+                this.Commands["Test2"] = AsyncCommand<int>.Create(async (c, i) => await Task.Delay(1));
                 this.Commands["Test3"] = Command.Create(c => { });
-                this.Commands["Test4"] = Command.Create<int>((c, i) => { });
+                this.Commands["Test4"] = Command<int>.Create((c, i) => { });
                 foreach (var item in Commands.Values)
                 {
                     Assert.AreSame(this, ((IControllable)item).Tag);

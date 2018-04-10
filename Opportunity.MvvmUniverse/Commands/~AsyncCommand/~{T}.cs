@@ -13,6 +13,40 @@ namespace Opportunity.MvvmUniverse.Commands
     /// <typeparam name="T">Type of parameter.</typeparam>
     public abstract class AsyncCommand<T> : CommandBase<T>, IAsyncCommand, ICommand<T>
     {
+        #region Factory methods
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand{T}"/>.
+        /// </summary>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand{T}"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand{T}"/>.</returns>
+        public static AsyncCommand<T> Create(AsyncTaskExecutor<T> execute)
+            => new AsyncTaskCommand<T>(execute, null);
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand{T}"/>.
+        /// </summary>
+        /// <param name="canExecute">Predicate of <see cref="AsyncCommand{T}"/>.</param>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand{T}"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand{T}"/>.</returns>
+        public static AsyncCommand<T> Create(AsyncTaskExecutor<T> execute, AsyncPredicate<T> canExecute)
+            => new AsyncTaskCommand<T>(execute, canExecute);
+
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand{T}"/>.
+        /// </summary>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand{T}"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand{T}"/>.</returns>
+        public static AsyncCommand<T> Create(AsyncActionExecutor<T> execute)
+            => new AsyncActionCommand<T>(execute, null);
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand{T}"/>.
+        /// </summary>
+        /// <param name="canExecute">Predicate of <see cref="AsyncCommand{T}"/>.</param>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand{T}"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand{T}"/>.</returns>
+        public static AsyncCommand<T> Create(AsyncActionExecutor<T> execute, AsyncPredicate<T> canExecute)
+            => new AsyncActionCommand<T>(execute, canExecute);
+        #endregion Factory methods
+
         /// <summary>
         /// Check with <see cref="IsExecuting"/>.
         /// </summary>

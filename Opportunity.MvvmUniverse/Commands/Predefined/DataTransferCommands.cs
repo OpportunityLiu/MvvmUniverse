@@ -77,7 +77,7 @@ namespace Opportunity.MvvmUniverse.Commands.Predefined
         /// accepted type: <see cref="DataPackage"/>, <see cref="string"/>, <see cref="System.Uri"/>, <see cref="IStorageItem"/>, <see cref="IEnumerable"/>&lt;<see cref="IStorageItem"/>&gt; and <see cref="RandomAccessStreamReference"/> of bitmap,
         /// other items will be converted to <see cref="string"/>.
         /// </summary>
-        public static Command<object> SetClipboard { get; } = Command.Create<object>((c, o) =>
+        public static Command<object> SetClipboard { get; } = Command<object>.Create((c, o) =>
         {
             var dp = pack(o);
             Clipboard.SetContent(dp);
@@ -99,7 +99,7 @@ namespace Opportunity.MvvmUniverse.Commands.Predefined
         /// accepted type: <see cref="DataPackage"/>, <see cref="string"/>, <see cref="System.Uri"/>, <see cref="IStorageItem"/>, <see cref="IEnumerable"/>&lt;<see cref="IStorageItem"/>&gt; and <see cref="RandomAccessStreamReference"/> of bitmap,
         /// other items will be converted to <see cref="string"/>.
         /// </summary>
-        public static AsyncCommand<object> Share { get; } = AsyncCommand.Create<object>((c, o) =>
+        public static AsyncCommand<object> Share { get; } = AsyncCommand<object>.Create((c, o) =>
         {
             return DataTransferManager.GetForCurrentView().ShareAsync(pack(o));
         }, (c, o) => DataTransferManager.IsSupported() ? o != null : false);
@@ -107,7 +107,7 @@ namespace Opportunity.MvvmUniverse.Commands.Predefined
         /// Use share UI to share contents.
         /// </summary>
         public static AsyncCommand<Func<DataPackage>> ShareWithProvider { get; }
-            = AsyncCommand.Create<Func<DataPackage>>((c, o) =>
+            = AsyncCommand<Func<DataPackage>>.Create((c, o) =>
         {
             return DataTransferManager.GetForCurrentView().ShareAsync(o);
         }, (c, o) => DataTransferManager.IsSupported() ? o != null : false);
@@ -115,7 +115,7 @@ namespace Opportunity.MvvmUniverse.Commands.Predefined
         /// Use share UI to share contents.
         /// </summary>
         public static AsyncCommand<Func<IAsyncOperation<DataPackage>>> ShareWithAsyncProvider { get; }
-            = AsyncCommand.Create<Func<IAsyncOperation<DataPackage>>>((c, o) =>
+            = AsyncCommand<Func<IAsyncOperation<DataPackage>>>.Create((c, o) =>
         {
             return DataTransferManager.GetForCurrentView().ShareAsync(o);
         }, (c, o) => DataTransferManager.IsSupported() ? o != null : false);
