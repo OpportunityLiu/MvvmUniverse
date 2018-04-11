@@ -61,6 +61,23 @@ namespace TestApp
         {
             this.InitializeComponent();
             // this.xp.RegisterPropertyChangedCallback(VisibleBoundsProperty, VBC);
+            var c = AsyncActionCommand<int>.Create(async (s, i, t) =>
+            {
+                Debug.WriteLine($"Enter {i}");
+                try
+                {
+                    await Task.Delay(1000, t);
+                    Debug.WriteLine($"Exit {i}");
+                }
+                catch (Exception)
+                {
+                    Debug.WriteLine($"Cancel {i}");
+                    throw;
+                }
+            });
+            c.Executed += (s, e) => e.Handled = true;
+            this.btnTest.Command = c;
+            this.btnTest.CommandParameter = 1;
         }
 
         // private void VBC(DependencyObject sender, DependencyProperty dp) => Debug.WriteLine(this.xp.VisibleBounds);
@@ -148,41 +165,43 @@ namespace TestApp
             // Grid.SetColumn(xp, 0);
         }
 
-        private async void Button_Click_3(object sender, RoutedEventArgs e)
+        private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            var appview = CoreApplication.CreateNewView();
-            var id = await appview.Dispatcher.RunAsync(async () =>
-            {
-                var rootFrame = Window.Current.Content as Frame;
+            this.btnTest.CommandParameter = (int)this.btnTest.CommandParameter + 1;
+            Debug.WriteLine($"Inc: { this.btnTest.CommandParameter }");
+            //var appview = CoreApplication.CreateNewView();
+            //var id = await appview.Dispatcher.RunAsync(async () =>
+            //{
+            //    var rootFrame = Window.Current.Content as Frame;
 
-                // 不要在窗口已包含内容时重复应用程序初始化，
-                // 只需确保窗口处于活动状态
-                if (rootFrame == null)
-                {
-                    // 创建要充当导航上下文的框架，并导航到第一页
-                    rootFrame = new Frame();
-                    rootFrame.Margin = new Thickness(10);
-                    rootFrame.Padding = new Thickness(10);
-                    ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseVisible);
+            //    // 不要在窗口已包含内容时重复应用程序初始化，
+            //    // 只需确保窗口处于活动状态
+            //    if (rootFrame == null)
+            //    {
+            //        // 创建要充当导航上下文的框架，并导航到第一页
+            //        rootFrame = new Frame();
+            //        rootFrame.Margin = new Thickness(10);
+            //        rootFrame.Padding = new Thickness(10);
+            //        ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseVisible);
 
-                    Navigator.GetOrCreateForCurrentView().Handlers.Add(rootFrame.AsNavigationHandler());
+            //        Navigator.GetOrCreateForCurrentView().Handlers.Add(rootFrame.AsNavigationHandler());
 
-                    // 将框架放在当前窗口中
-                    Window.Current.Content = rootFrame;
-                }
-                if (rootFrame.Content == null)
-                {
-                    // 当导航堆栈尚未还原时，导航到第一页，
-                    // 并通过将所需信息作为导航参数传入来配置
-                    // 参数
-                    await Navigator.GetForCurrentView().NavigateAsync(typeof(MainPage));
-                }
-                // 确保当前窗口处于活动状态
-                Window.Current.Activate();
-                return ApplicationView.GetForCurrentView().Id;
-            });
-            await ApplicationViewSwitcher.TryShowAsStandaloneAsync(id);
-            await ApplicationViewSwitcher.SwitchAsync(id);
+            //        // 将框架放在当前窗口中
+            //        Window.Current.Content = rootFrame;
+            //    }
+            //    if (rootFrame.Content == null)
+            //    {
+            //        // 当导航堆栈尚未还原时，导航到第一页，
+            //        // 并通过将所需信息作为导航参数传入来配置
+            //        // 参数
+            //        await Navigator.GetForCurrentView().NavigateAsync(typeof(MainPage));
+            //    }
+            //    // 确保当前窗口处于活动状态
+            //    Window.Current.Activate();
+            //    return ApplicationView.GetForCurrentView().Id;
+            //});
+            //await ApplicationViewSwitcher.TryShowAsStandaloneAsync(id);
+            //await ApplicationViewSwitcher.SwitchAsync(id);
         }
     }
 }

@@ -79,6 +79,7 @@
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~{T, TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~{TProgress}.cs" />
+    <Compile Include="Commands\~AsyncCommand\~Helper.cs" />
     <Compile Include="Commands\~AsyncCommand\~Impl.cs" />
     <Compile Include="Commands\~AsyncCommand\~Impl{T}.cs" />
     <Compile Include="Commands\~AsyncCommand\~Action.cs" />

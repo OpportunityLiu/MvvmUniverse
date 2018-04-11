@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.ApplicationModel.Core;
@@ -85,6 +86,9 @@ namespace Opportunity.MvvmUniverse.Commands
             if (!OnStarting(parameter))
                 return false;
 
+            if (this.current != null)
+                throw new InvalidOperationException("this.Current is not null.");
+
             var t = default(IAsyncAction);
             try
             {
@@ -94,13 +98,30 @@ namespace Opportunity.MvvmUniverse.Commands
             {
                 t = AsyncAction.CreateFault(ex);
             }
-            if (t.Status != AsyncStatus.Started)
+
+            if (Interlocked.CompareExchange(ref this.current, t, null) != null)
+                throw new InvalidOperationException("this.Current is not null.");
+            OnCurrentChanged();
+
+            if (Current.Status != AsyncStatus.Started)
                 OnFinished(t, parameter);
             else
-                t.Completed = (s, _) => OnFinished(s, parameter);
+            {
+                Current.Completed = (s, _) => OnFinished(s, parameter);
+            }
             return true;
         }
 
+        private IAsyncAction current;
+        /// <summary>
+        /// Current execution.
+        /// </summary>
+        protected IAsyncAction Current => this.current;
+
+        /// <summary>
+        /// Will be called when <see cref="Current"/> changed.
+        /// </summary>
+        public virtual void OnCurrentChanged() { }
 
         /// <summary>
         /// Start execution with given <paramref name="parameter"/>.
@@ -129,37 +150,48 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <param name="execution">Result of <see cref="StartExecutionAsync(T)"/></param>
         protected virtual void OnFinished(IAsyncAction execution, T parameter)
         {
-            var error = default(Exception);
-            switch (execution.Status)
+            if (execution != this.current)
+                throw new InvalidOperationException("execution != this.Current");
+            try
             {
-            case AsyncStatus.Canceled:
-                error = new OperationCanceledException();
-                break;
-            case AsyncStatus.Error:
-                error = execution.ErrorCode;
-                break;
-            }
-            if (this.executed.InvocationListLength == 0 || NotificationSuspending)
-            {
-                ThrowUnhandledError(error);
-                return;
-            }
-            var args = new ExecutedEventArgs<T>(parameter, error);
-            var d = DispatcherHelper.Default;
-            if (d is null)
-                run();
-            else
-                d.Begin(run);
-
-            async void run()
-            {
-                this.executed.Raise(this, args);
-                if (args.Exception is null)
+                var error = default(Exception);
+                switch (execution.Status)
+                {
+                case AsyncStatus.Canceled:
+                    error = new OperationCanceledException();
+                    break;
+                case AsyncStatus.Error:
+                    error = execution.ErrorCode;
+                    break;
+                }
+                if (this.executed.InvocationListLength == 0 || NotificationSuspending)
+                {
+                    ThrowUnhandledError(error);
                     return;
-                if (d != null)
-                    await d.YieldIdle();
-                if (!args.Handled)
-                    ThrowUnhandledError(args.Exception);
+                }
+                var args = new ExecutedEventArgs<T>(parameter, error);
+                var d = DispatcherHelper.Default;
+                if (d is null)
+                    run();
+                else
+                    d.Begin(run);
+
+                async void run()
+                {
+                    this.executed.Raise(this, args);
+                    if (args.Exception is null)
+                        return;
+                    if (d != null)
+                        await d.YieldIdle();
+                    if (!args.Handled)
+                        ThrowUnhandledError(args.Exception);
+                }
+            }
+            finally
+            {
+                if (execution != Interlocked.CompareExchange(ref this.current, null, execution))
+                    throw new InvalidOperationException("execution != this.Current");
+                OnCurrentChanged();
             }
         }
 

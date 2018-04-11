@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 
@@ -35,6 +37,22 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         /// <param name="execute">Execution body of <see cref="AsyncCommand{T}"/>.</param>
         /// <returns>A new instance of <see cref="AsyncCommand{T}"/>.</returns>
+        public static AsyncCommand<T> Create(CancelableAsyncTaskExecutor<T> execute)
+            => new CancelableAsyncTaskCommand<T>(execute, null);
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand{T}"/>.
+        /// </summary>
+        /// <param name="canExecute">Predicate of <see cref="AsyncCommand{T}"/>.</param>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand{T}"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand{T}"/>.</returns>
+        public static AsyncCommand<T> Create(CancelableAsyncTaskExecutor<T> execute, AsyncPredicate<T> canExecute)
+            => new CancelableAsyncTaskCommand<T>(execute, canExecute);
+
+        /// <summary>
+        /// Create a new instance of <see cref="AsyncCommand{T}"/>.
+        /// </summary>
+        /// <param name="execute">Execution body of <see cref="AsyncCommand{T}"/>.</param>
+        /// <returns>A new instance of <see cref="AsyncCommand{T}"/>.</returns>
         public static AsyncCommand<T> Create(AsyncActionExecutor<T> execute)
             => new AsyncActionCommand<T>(execute, null);
         /// <summary>
@@ -52,45 +70,58 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         /// <param name="parameter">Parameter of execution</param>
         /// <returns>Whether the command can execute or not</returns>
-        protected override bool CanExecuteOverride(T parameter) => !this.isExecuting;
+        protected override bool CanExecuteOverride(T parameter)
+            => AsyncCommandHelper.CanExecuteOverride(IsExecuting, ReentrancyHandler);
 
-        private bool isExecuting = false;
+        /// <summary>
+        /// Reentrance handling method of async commands.
+        /// </summary>
+        public IReentrancyHandler<T> ReentrancyHandler { get; set; }
+
         /// <summary>
         /// Indicates whether the command is executing. 
         /// </summary>
-        public bool IsExecuting
+        public bool IsExecuting => this.Current != null;
+
+        public override void OnCurrentChanged()
         {
-            get => this.isExecuting;
-            protected set
-            {
-                if (Set(ref this.isExecuting, value))
-                    OnCanExecuteChanged();
-            }
+            OnPropertyChanged(EventArgsConst.IsExecutingPropertyChanged);
+            OnCanExecuteChanged();
         }
 
         /// <summary>
         /// Call <see cref="CommandBase{T}.OnStarting(T)"/>.
-        /// If not be canceled, <see cref="IsExecuting"/> will be set to <see langword="true"/>.
         /// </summary>
-        /// <param name="parameter">Parameter of execution</param>
-        /// <returns>True if executing not canceled</returns>
+        /// <param name="parameter">Parameter of execution.</param>
+        /// <returns>True if executing not canceled.</returns>
         protected override bool OnStarting(T parameter)
         {
-            var r = base.OnStarting(parameter);
-            if (r)
-                IsExecuting = true;
-            return r;
+            if (IsExecuting)
+            {
+                this.ReentrancyHandler.Enqueue(parameter, Current);
+                return false;
+            }
+            return base.OnStarting(parameter);
         }
 
         /// <summary>
-        /// Call <see cref="CommandBase{T}.OnFinished(IAsyncAction, T)"/> and set <see cref="IsExecuting"/> to <see langword="false"/>.
+        /// Call <see cref="CommandBase{T}.OnFinished(IAsyncAction, T)"/>.
         /// </summary>
         /// <param name="parameter">Parameter of <see cref="CommandBase{T}.Execute(T)"/>.</param>
         /// <param name="execution">Result of <see cref="CommandBase{T}.StartExecutionAsync(T)"/>.</param>
         protected override void OnFinished(IAsyncAction execution, T parameter)
         {
-            IsExecuting = false;
-            base.OnFinished(execution, parameter);
+            try
+            {
+                base.OnFinished(execution, parameter);
+            }
+            finally
+            {
+                if (ReentrancyHandler.TryDequeue(out parameter))
+                {
+                    Execute(parameter);
+                }
+            }
         }
     }
 }

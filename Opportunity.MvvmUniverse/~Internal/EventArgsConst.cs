@@ -15,6 +15,7 @@ namespace Opportunity.MvvmUniverse
         public static readonly ConstPropertyChangedEventArgs PropertyReset = new ConstPropertyChangedEventArgs(null);
         public static readonly ConstPropertyChangedEventArgs CountPropertyChanged = new ConstPropertyChangedEventArgs(nameof(IList.Count));
         public static readonly ConstPropertyChangedEventArgs ProgressPropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.IAsyncCommandWithProgress<object>.Progress));
+        public static readonly ConstPropertyChangedEventArgs IsExecutingPropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.IAsyncCommand.IsExecuting));
 
         public static readonly VectorChangedEventArgs VectorReset = new VectorChangedEventArgs(CollectionChange.Reset);
     }
