@@ -29,6 +29,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Markup;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using System.Collections.Concurrent;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -75,9 +76,10 @@ namespace TestApp
                     throw;
                 }
             });
+            c.ReentrancyHandler = ReentrancyHandler.Queued<int>();
             c.Executed += (s, e) => e.Handled = true;
             this.btnTest.Command = c;
-            this.btnTest.CommandParameter = 1;
+            this.btnTest.CommandParameter = 0;
         }
 
         // private void VBC(DependencyObject sender, DependencyProperty dp) => Debug.WriteLine(this.xp.VisibleBounds);

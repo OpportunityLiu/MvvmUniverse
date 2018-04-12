@@ -79,6 +79,17 @@
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~{T, TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~{TProgress}.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\Disallowed~.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\FirstQueued~.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\Ignored~.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\I~.cs" />
+    <Compile Include="Commands\~AsyncCommand\I~.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\LastQueued~.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\Queued~.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\~.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\~Base.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\Restart~.cs" />
+    <Compile Include="Commands\~AsyncCommand\~ReentrancyHandler\SingleQueued~.cs" />
     <Compile Include="Commands\~AsyncCommand\~Helper.cs" />
     <Compile Include="Commands\~AsyncCommand\~Impl.cs" />
     <Compile Include="Commands\~AsyncCommand\~Impl{T}.cs" />
@@ -90,7 +101,6 @@
     <Compile Include="Commands\~AsyncCommand\~Task{T}.cs" />
     <Compile Include="Commands\~Base\CommandBase.cs" />
     <Compile Include="Commands\~Base\CommandBase{T}.cs" />
-    <Compile Include="Commands\~AsyncCommand\I~.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\I~.cs" />
     <Compile Include="Commands\~Base\ICommand.cs" />
     <Compile Include="Commands\~Base\IControllable.cs" />

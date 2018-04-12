@@ -73,16 +73,30 @@ namespace Opportunity.MvvmUniverse.Commands
         protected override bool CanExecuteOverride(T parameter)
             => AsyncCommandHelper.CanExecuteOverride(IsExecuting, ReentrancyHandler);
 
+        private IReentrancyHandler<T> reentrancyHandler = Commands.ReentrancyHandler.Disallowed<T>();
         /// <summary>
         /// Reentrance handling method of async commands.
         /// </summary>
-        public IReentrancyHandler<T> ReentrancyHandler { get; set; }
+        public IReentrancyHandler<T> ReentrancyHandler
+        {
+            get => this.reentrancyHandler;
+            set
+            {
+                value = value ?? Commands.ReentrancyHandler.Disallowed<T>();
+                this.reentrancyHandler.Detach();
+                value.Attach(this);
+                this.reentrancyHandler = value;
+            }
+        }
 
         /// <summary>
         /// Indicates whether the command is executing. 
         /// </summary>
         public bool IsExecuting => this.Current != null;
 
+        /// <summary>
+        /// Notify property changed and can execute changed.
+        /// </summary>
         public override void OnCurrentChanged()
         {
             OnPropertyChanged(EventArgsConst.IsExecutingPropertyChanged);
@@ -98,7 +112,12 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (IsExecuting)
             {
-                this.ReentrancyHandler.Enqueue(parameter, Current);
+                if (this.ReentrancyHandler.Enqueue(parameter))
+                {
+                    var c = Current;
+                    if (c != null && c.Status == AsyncStatus.Started)
+                        c.Cancel();
+                }
                 return false;
             }
             return base.OnStarting(parameter);
