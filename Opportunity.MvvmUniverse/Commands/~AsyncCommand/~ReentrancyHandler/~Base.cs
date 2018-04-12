@@ -7,7 +7,7 @@ namespace Opportunity.MvvmUniverse.Commands
     /// Base class for implementation of <see cref="IReentrancyHandler{T}"/>.
     /// </summary>
     /// <typeparam name="T">Type of parameter.</typeparam>
-    public abstract class ReentrancyHandlerBase<T> : IReentrancyHandler<T>
+    public abstract class ReentrancyHandlerBase<T> : ObservableObject, IReentrancyHandler<T>
     {
         /// <summary>
         /// Returns <see langword="true"/> by default.
@@ -34,6 +34,7 @@ namespace Opportunity.MvvmUniverse.Commands
             var i = Interlocked.CompareExchange(ref this.command, command, null);
             if (i != null)
                 throw new InvalidOperationException("This instance of " + GetType() + " has attached to a IAsyncCommand.");
+            OnPropertyChanged(EventArgsConst.AttachedCommandPropertyChanged);
         }
         /// <summary>
         /// Set <see cref="AttachedCommand"/> to <see langword="null"/>.
@@ -41,6 +42,7 @@ namespace Opportunity.MvvmUniverse.Commands
         public virtual void Detach()
         {
             this.command = null;
+            OnPropertyChanged(EventArgsConst.AttachedCommandPropertyChanged);
         }
 
         /// <inheritdoc/>

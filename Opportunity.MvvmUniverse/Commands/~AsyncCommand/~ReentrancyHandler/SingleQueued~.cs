@@ -27,6 +27,8 @@ namespace Opportunity.MvvmUniverse.Commands
         public override bool Enqueue(T value)
         {
             this.queuedValue = Box.Create(value);
+            OnPropertyChanged(EventArgsConst.QueuedValuePropertyChanged);
+            OnPropertyChanged(EventArgsConst.HasValuePropertyChanged);
             return false;
         }
 
@@ -46,6 +48,8 @@ namespace Opportunity.MvvmUniverse.Commands
             else
             {
                 value = v.Value;
+                OnPropertyChanged(EventArgsConst.QueuedValuePropertyChanged);
+                OnPropertyChanged(EventArgsConst.HasValuePropertyChanged);
                 return true;
             }
         }

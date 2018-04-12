@@ -18,6 +18,9 @@ namespace Opportunity.MvvmUniverse
         public static readonly ConstPropertyChangedEventArgs IsExecutingPropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.IAsyncCommand.IsExecuting));
 
         public static readonly VectorChangedEventArgs VectorReset = new VectorChangedEventArgs(CollectionChange.Reset);
+        public static readonly ConstPropertyChangedEventArgs AttachedCommandPropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.ReentrancyHandlerBase<object>.AttachedCommand));
+        public static readonly ConstPropertyChangedEventArgs QueuedValuePropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.SingleQueuedReentrancyHandler<object>.QueuedValue));
+        public static readonly ConstPropertyChangedEventArgs HasValuePropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.SingleQueuedReentrancyHandler<object>.HasValue));
     }
 
     internal sealed class ConstPropertyChangedEventArgs : PropertyChangedEventArgs
