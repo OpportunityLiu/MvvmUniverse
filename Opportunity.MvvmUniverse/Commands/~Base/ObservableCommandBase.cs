@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace Opportunity.MvvmUniverse.Commands
     {
         internal ObservableCommandBase() { }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private bool isEnabled = true;
         /// <summary>
         /// Overall switch of command.
@@ -30,6 +32,7 @@ namespace Opportunity.MvvmUniverse.Commands
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private object tag;
         /// <summary>
         /// A tag associated with this object.

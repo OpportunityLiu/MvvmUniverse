@@ -1,4 +1,4 @@
-﻿namespace Opportunity.MvvmUniverse.Commands
+﻿namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
 {
     /// <summary>
     /// Cancel current execution when reentrance happens.

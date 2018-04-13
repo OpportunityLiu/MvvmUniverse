@@ -30,7 +30,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     var end = index + 3;
                     if (end > this.Source.CountInternal)
                         end = this.Source.CountInternal;
-                    var load = ((FixedIncrementalLoadingList<T>)this.Source).LoadItemsAsync(start, end - start);
+                    var load = this.Source.LoadItemsAsync(start, end - start);
                     if (load.Status == AsyncStatus.Started)
                         load.Completed += (s, e) =>
                         {
@@ -46,9 +46,11 @@ namespace Opportunity.MvvmUniverse.Collections
                 return r;
             }
 
+            public new FixedIncrementalLoadingList<T> Source => (FixedIncrementalLoadingList<T>)base.Source;
+
             public async void RangesChanged(ItemIndexRange visibleRange, IReadOnlyList<ItemIndexRange> trackedItems)
             {
-                await ((FixedIncrementalLoadingList<T>)this.Source).LoadItemsAsync(visibleRange.FirstIndex, (int)visibleRange.Length);
+                await this.Source.LoadItemsAsync(visibleRange.FirstIndex, (int)visibleRange.Length);
             }
         }
     }

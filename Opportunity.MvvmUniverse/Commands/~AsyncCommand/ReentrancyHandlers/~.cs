@@ -1,4 +1,4 @@
-﻿namespace Opportunity.MvvmUniverse.Commands
+﻿namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
 {
     /// <summary>
     /// Factory methods for <see cref="IReentrancyHandler{T}"/>.

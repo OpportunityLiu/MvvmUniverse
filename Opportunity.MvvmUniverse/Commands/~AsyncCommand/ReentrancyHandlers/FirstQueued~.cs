@@ -1,4 +1,4 @@
-﻿namespace Opportunity.MvvmUniverse.Commands
+﻿namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
 {
     /// <summary>
     /// First reentrance request will be handled after current execution, others will be ignored.

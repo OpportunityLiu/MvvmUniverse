@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -67,6 +68,7 @@ namespace Opportunity.MvvmUniverse.Commands
             this.progress = progress;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private TProgress progress;
         /// <summary>
         /// Progress of current execution.
@@ -126,6 +128,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         public T Parameter { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private TProgress progress;
         /// <summary>
         /// Progress of current execution.

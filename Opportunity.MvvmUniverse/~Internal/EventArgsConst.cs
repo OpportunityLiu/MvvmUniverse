@@ -1,4 +1,5 @@
 ﻿using Opportunity.MvvmUniverse.Collections;
+using Opportunity.MvvmUniverse.Commands.ReentrancyHandlers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,9 +19,9 @@ namespace Opportunity.MvvmUniverse
         public static readonly ConstPropertyChangedEventArgs IsExecutingPropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.IAsyncCommand.IsExecuting));
 
         public static readonly VectorChangedEventArgs VectorReset = new VectorChangedEventArgs(CollectionChange.Reset);
-        public static readonly ConstPropertyChangedEventArgs AttachedCommandPropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.ReentrancyHandlerBase<object>.AttachedCommand));
-        public static readonly ConstPropertyChangedEventArgs QueuedValuePropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.SingleQueuedReentrancyHandler<object>.QueuedValue));
-        public static readonly ConstPropertyChangedEventArgs HasValuePropertyChanged = new ConstPropertyChangedEventArgs(nameof(Commands.SingleQueuedReentrancyHandler<object>.HasValue));
+        public static readonly ConstPropertyChangedEventArgs AttachedCommandPropertyChanged = new ConstPropertyChangedEventArgs(nameof(ReentrancyHandlerBase<object>.AttachedCommand));
+        public static readonly ConstPropertyChangedEventArgs QueuedValuePropertyChanged = new ConstPropertyChangedEventArgs(nameof(SingleQueuedReentrancyHandler<object>.QueuedValue));
+        public static readonly ConstPropertyChangedEventArgs HasValuePropertyChanged = new ConstPropertyChangedEventArgs(nameof(SingleQueuedReentrancyHandler<object>.HasValue));
     }
 
     internal sealed class ConstPropertyChangedEventArgs : PropertyChangedEventArgs

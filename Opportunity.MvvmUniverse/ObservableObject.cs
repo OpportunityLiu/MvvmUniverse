@@ -66,6 +66,7 @@ namespace Opportunity.MvvmUniverse
         /// </summary>
         protected bool NotificationSuspending
             => this.notificationSuspender is null ? false : this.notificationSuspender.SuspendNotificationCount > 0;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private NotificationSuspender notificationSuspender;
         /// <summary>
         /// Suspend notification temporary.

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Commands.ReentrancyHandlers;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -73,20 +75,15 @@ namespace Opportunity.MvvmUniverse.Commands
         protected override bool CanExecuteOverride(T parameter)
             => AsyncCommandHelper.CanExecuteOverride(IsExecuting, ReentrancyHandler);
 
-        private IReentrancyHandler<T> reentrancyHandler = Commands.ReentrancyHandler.Disallowed<T>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private IReentrancyHandler<T> reentrancyHandler = ReentrancyHandlers.ReentrancyHandler.Disallowed<T>();
         /// <summary>
         /// Reentrance handling method of async commands.
         /// </summary>
         public IReentrancyHandler<T> ReentrancyHandler
         {
             get => this.reentrancyHandler;
-            set
-            {
-                value = value ?? Commands.ReentrancyHandler.Disallowed<T>();
-                this.reentrancyHandler.Detach();
-                value.Attach(this);
-                this.reentrancyHandler = value;
-            }
+            set => this.SetReentrancyHandler(ref this.reentrancyHandler, value);
         }
 
         /// <summary>
@@ -99,6 +96,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         public override void OnCurrentChanged()
         {
+            base.OnCurrentChanged();
             OnPropertyChanged(EventArgsConst.IsExecutingPropertyChanged);
             OnCanExecuteChanged();
         }

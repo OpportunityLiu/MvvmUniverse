@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 
-namespace Opportunity.MvvmUniverse.Commands
+namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
 {
     /// <summary>
     /// Base class for implementation of <see cref="IReentrancyHandler{T}"/>.
@@ -14,6 +15,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         public virtual bool AllowReenter => true;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private IAsyncCommand command;
         /// <summary>
         /// Currently attached <see cref="IAsyncCommand"/> of this instance.

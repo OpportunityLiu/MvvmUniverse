@@ -29,11 +29,11 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
         /// <returns><see cref="Navigator"/> of current view.</returns>
         public static Navigator GetOrCreateForCurrentView()
         {
-            var nav = ViewIndependentSingleton<Navigator>.Value;
+            var nav = ViewDependentSingleton<Navigator>.Value;
             if (nav != null)
                 return nav;
             nav = new Navigator();
-            ViewIndependentSingleton<Navigator>.Value = nav;
+            ViewDependentSingleton<Navigator>.Value = nav;
             return nav;
         }
 
@@ -41,7 +41,7 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
         /// Get <see cref="Navigator"/> of current view.
         /// </summary>
         /// <returns><see cref="Navigator"/> of current view, or <see langword="null"/>, if not created.</returns>
-        public static Navigator GetForCurrentView() => ViewIndependentSingleton<Navigator>.Value;
+        public static Navigator GetForCurrentView() => ViewDependentSingleton<Navigator>.Value;
 
         /// <summary>
         /// Destory <see cref="Navigator"/> of current view.
@@ -49,10 +49,10 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
         /// <returns>Whether the <see cref="Navigator"/> is found and destoryed.</returns>
         public static bool DestoryForCurrentView()
         {
-            var nav = ViewIndependentSingleton<Navigator>.Value;
+            var nav = ViewDependentSingleton<Navigator>.Value;
             if (nav == null)
                 return false;
-            ViewIndependentSingleton<Navigator>.Value = null;
+            ViewDependentSingleton<Navigator>.Value = null;
             nav.destory();
             return true;
         }
@@ -75,6 +75,7 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private ServiceHandlerCollection<Navigator, INavigationHandler> handlers;
         /// <summary>
         /// Handlers handles navigation methods.

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Opportunity.MvvmUniverse.Services
 {
-    internal static class ViewIndependentSingleton<T>
+    internal static class ViewDependentSingleton<T>
         where T : class
     {
         private static int count;

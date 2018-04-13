@@ -1,14 +1,34 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
-namespace Opportunity.MvvmUniverse.Commands
+namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
 {
     /// <summary>
     /// <see cref="IReentrancyHandler{T}"/> with a single slot of parameter.
     /// </summary>
     /// <typeparam name="T">Type of parameter.</typeparam>
+    [DebuggerDisplay(@"{Name, nq}, HasValue = {HasValue}, QueuedValue = {QueuedValue}")]
     public abstract class SingleQueuedReentrancyHandler<T> : ReentrancyHandlerBase<T>
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string Name
+        {
+            get
+            {
+                var name = ToString();
+                var typeName = GetType().ToString();
+                if (name == typeName && name.StartsWith("Opportunity.MvvmUniverse.Commands.ReentrancyHandlers."))
+                {
+                    name = name.Substring("Opportunity.MvvmUniverse.Commands.ReentrancyHandlers.".Length);
+                    return name.Split(new[] { "ReentrancyHandler" }, StringSplitOptions.None).First();
+                }
+                return name;
+            }
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private Box<T> queuedValue;
         /// <summary>
         /// Has value in queue.

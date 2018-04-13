@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Opportunity.MvvmUniverse.Commands
+namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
 {
     /// <summary>
     /// Handler for async command reentrancy.

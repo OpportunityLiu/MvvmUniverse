@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -42,6 +43,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns>Loaded items.</returns>
         protected abstract IAsyncOperation<LoadItemsResult<T>> LoadItemsAsync(int count);
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private int isLoading;
         /// <summary>
         /// Indicates <see cref="LoadMoreItemsAsync(uint)"/> is running.

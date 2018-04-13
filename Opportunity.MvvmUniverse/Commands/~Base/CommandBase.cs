@@ -1,6 +1,7 @@
 ﻿using Opportunity.Helpers.Universal.AsyncHelpers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -84,6 +85,7 @@ namespace Opportunity.MvvmUniverse.Commands
             return true;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private IAsyncAction current;
         /// <summary>
         /// Current execution.

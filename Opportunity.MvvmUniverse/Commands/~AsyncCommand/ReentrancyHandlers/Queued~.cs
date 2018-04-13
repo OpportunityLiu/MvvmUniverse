@@ -1,13 +1,32 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Linq;
 
-namespace Opportunity.MvvmUniverse.Commands
+namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
 {
     /// <summary>
     /// <see cref="IReentrancyHandler{T}"/> with a queue of parameter.
     /// </summary>
     /// <typeparam name="T">Type of parameter.</typeparam>
+    [DebuggerDisplay(@"{Name, nq}, QueueLength = {QueuedValues.Count}")]
     public class QueuedReentrancyHandler<T> : ReentrancyHandlerBase<T>
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string Name
+        {
+            get
+            {
+                var name = ToString();
+                var typeName = GetType().ToString();
+                if (name == typeName && name.StartsWith("Opportunity.MvvmUniverse.Commands.ReentrancyHandlers."))
+                {
+                    name = name.Substring("Opportunity.MvvmUniverse.Commands.ReentrancyHandlers.".Length);
+                    return name.Split(new[] { "ReentrancyHandler" }, StringSplitOptions.None).First();
+                }
+                return name;
+            }
+        }
         /// <summary>
         /// Items in queue.
         /// </summary>

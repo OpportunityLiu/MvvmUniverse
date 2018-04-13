@@ -39,13 +39,26 @@ namespace Opportunity.MvvmUniverse
     /// <typeparam name="TDelegate">Delegate type of event</typeparam>
     /// <typeparam name="TSender">Type of sender</typeparam>
     /// <typeparam name="TEventArgs">Type of event args</typeparam>
+    [DebuggerTypeProxy(typeof(DepedencyEvent<,,>.DebuggerProxy))]
     [DebuggerDisplay(@"InvocationListLength = {InvocationListLength}")]
     public sealed class DepedencyEvent<TDelegate, TSender, TEventArgs>
         where TDelegate : class
     {
-        [DebuggerDisplay(@"\{{Token.Value} {Dispatcher?.Target} {Delegate}\}")]
+        [DebuggerDisplay(@"Token = {Token.Value}, Dispatcher = {DispatcherDisplay,nq}")]
         private readonly struct EventEntry
         {
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            private object DispatcherDisplay
+            {
+                get
+                {
+                    if (this.Dispatcher is null)
+                        return "null";
+                    if (!this.Dispatcher.TryGetTarget(out var target))
+                        return "invalid";
+                    return target;
+                }
+            }
             public readonly TDelegate Delegate;
             public readonly WeakReference<CoreDispatcher> Dispatcher;
             public readonly EventRegistrationToken Token;
@@ -61,8 +74,27 @@ namespace Opportunity.MvvmUniverse
             }
         }
 
+        private class DebuggerProxy
+        {
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            private readonly DepedencyEvent<TDelegate, TSender, TEventArgs> e;
+
+            public DebuggerProxy(DepedencyEvent<TDelegate, TSender, TEventArgs> e)
+            {
+                this.e = e;
+            }
+
+            public int InvocationListLength => this.e.invocationList.Length;
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            protected EventEntry[] InvocationListValues => this.e.invocationList;
+            protected Action<TDelegate, TSender, TEventArgs> Raiser => this.e.raiser;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private long version;
-        private EventEntry[] eventEntries = Array.Empty<EventEntry>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private EventEntry[] invocationList = Array.Empty<EventEntry>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Action<TDelegate, TSender, TEventArgs> raiser;
 
         /// <summary>
@@ -77,7 +109,7 @@ namespace Opportunity.MvvmUniverse
         /// <summary>
         /// Length of invocation list.
         /// </summary>
-        public int InvocationListLength => this.eventEntries.Length;
+        public int InvocationListLength => this.invocationList.Length;
 
         /// <summary>
         /// Add handler to event.
@@ -97,11 +129,11 @@ namespace Opportunity.MvvmUniverse
         {
             while (true)
             {
-                var oldV = this.eventEntries;
+                var oldV = this.invocationList;
                 var newV = new EventEntry[oldV.Length + 1];
                 Array.Copy(oldV, newV, oldV.Length);
                 newV[oldV.Length] = new EventEntry(d, dispatcher, Interlocked.Increment(ref this.version));
-                var oldV2 = Interlocked.CompareExchange(ref this.eventEntries, newV, oldV);
+                var oldV2 = Interlocked.CompareExchange(ref this.invocationList, newV, oldV);
                 if (oldV == oldV2)
                     return newV[oldV.Length];
             }
@@ -135,7 +167,7 @@ namespace Opportunity.MvvmUniverse
         {
             while (true)
             {
-                var oldV = this.eventEntries;
+                var oldV = this.invocationList;
                 var index = -1;
                 for (var i = 0; i < oldV.Length; i++)
                 {
@@ -150,7 +182,7 @@ namespace Opportunity.MvvmUniverse
                 var newV = new EventEntry[oldV.Length - 1];
                 Array.Copy(oldV, newV, index);
                 Array.Copy(oldV, index + 1, newV, index, oldV.Length - index - 1);
-                var oldV2 = Interlocked.CompareExchange(ref this.eventEntries, newV, oldV);
+                var oldV2 = Interlocked.CompareExchange(ref this.invocationList, newV, oldV);
                 if (oldV == oldV2)
                     return oldV[index];
             }
@@ -160,7 +192,7 @@ namespace Opportunity.MvvmUniverse
         {
             while (true)
             {
-                var oldV = this.eventEntries;
+                var oldV = this.invocationList;
                 var index = -1;
                 for (var i = 0; i < oldV.Length; i++)
                 {
@@ -175,15 +207,20 @@ namespace Opportunity.MvvmUniverse
                 var newV = new EventEntry[oldV.Length - 1];
                 Array.Copy(oldV, newV, index);
                 Array.Copy(oldV, index + 1, newV, index, oldV.Length - index - 1);
-                var oldV2 = Interlocked.CompareExchange(ref this.eventEntries, newV, oldV);
+                var oldV2 = Interlocked.CompareExchange(ref this.invocationList, newV, oldV);
                 if (oldV == oldV2)
                     return oldV[index];
             }
         }
 
+        /// <summary>
+        /// Clear invocation list.
+        /// </summary>
+        public void Clear() => this.invocationList = Array.Empty<EventEntry>();
+
         private void raise(TSender sender, TEventArgs e, bool hasThreadAccessOnly)
         {
-            var entries = this.eventEntries;
+            var entries = this.invocationList;
             if (entries.Length == 0)
                 return;
 

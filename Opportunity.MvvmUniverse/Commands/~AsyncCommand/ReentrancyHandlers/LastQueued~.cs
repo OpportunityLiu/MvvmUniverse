@@ -1,6 +1,6 @@
 ﻿using Windows.Foundation;
 
-namespace Opportunity.MvvmUniverse.Commands
+namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
 {
     /// <summary>
     /// Last reentrance request will be handled after current execution, others will be ignored.

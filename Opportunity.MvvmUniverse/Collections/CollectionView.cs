@@ -7,6 +7,7 @@ using Windows.Foundation.Collections;
 using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 using Opportunity.Helpers.Universal.AsyncHelpers;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -14,12 +15,22 @@ namespace Opportunity.MvvmUniverse.Collections
     /// View that supports current item, grouping and so on.
     /// </summary>
     /// <typeparam name="T">Type of elements.</typeparam>
+    [DebuggerDisplay(@"Current = {CurrentPosition}/{Count}, IsCurrentPositionLocked = {IsCurrentPositionLocked}")]
     public class CollectionView<T> : ObservableObject, ICollectionView, IDisposable, ISupportIncrementalLoading
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private ObservableCollectionBase<T> source;
         /// <summary>
         /// Source of data.
         /// </summary>
-        public ObservableCollectionBase<T> Source { get; }
+        public ObservableCollectionBase<T> Source
+        {
+            get
+            {
+                checkDisposed();
+                return this.source;
+            }
+        }
 
         /// <summary>
         /// Create new instance of <see cref="CollectionView{T}"/>
@@ -27,10 +38,10 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="source">Source of data.</param>
         public CollectionView(ObservableCollectionBase<T> source)
         {
-            this.Source = source;
-            this.Source.VectorChanged += this.Source_VectorChanged;
-            this.Source.PropertyChanged += this.Source_PropertyChanged;
-            if (this.Source.CountInternal > 0)
+            this.source = source;
+            this.source.VectorChanged += this.Source_VectorChanged;
+            this.source.PropertyChanged += this.Source_PropertyChanged;
+            if (this.source.CountInternal > 0)
                 this.currentItem = ((IList)this.Source)[0];
         }
 
@@ -39,12 +50,37 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public event VectorChangedEventHandler<object> VectorChanged
         {
-            add => this.vectorChanged.Add(value);
+            add
+            {
+                checkDisposed();
+                return this.vectorChanged.Add(value);
+            }
             remove => this.vectorChanged.Remove(value);
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private bool isCurrentPositionLocked;
+        /// <summary>
+        /// Set to <see langword="true"/> to avoid modification by MoveCurrent* methods.
+        /// </summary>
+        public bool IsCurrentPositionLocked
+        {
+            get
+            {
+                checkDisposed();
+                return this.isCurrentPositionLocked;
+            }
+            set
+            {
+                checkDisposed();
+                Set(ref this.isCurrentPositionLocked, value);
+            }
         }
 
         private void Source_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (Disposed)
+                return;
             switch (e.PropertyName)
             {
             case nameof(Count):
@@ -60,6 +96,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         private void Source_VectorChanged(Windows.UI.Xaml.Interop.IBindableObservableVector vector, object e)
         {
+            if (Disposed)
+                return;
             var arg = (IVectorChangedEventArgs)e;
 
             this.vectorChanged.Raise(this, arg);
@@ -149,6 +187,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public bool IsCurrentBeforeFirst => this.currentPosition < 0;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private int currentPosition;
         /// <inheritdoc/>
         public int CurrentPosition
@@ -156,6 +195,7 @@ namespace Opportunity.MvvmUniverse.Collections
             get => this.currentPosition;
             private set => Set(nameof(IsCurrentAfterLast), nameof(IsCurrentBeforeFirst), ref this.currentPosition, value);
         }
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private object currentItem;
         /// <inheritdoc/>
         public object CurrentItem { get => this.currentItem; private set => Set(ref this.currentItem, value); }
@@ -165,7 +205,11 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public event EventHandler<object> CurrentChanged
         {
-            add => this.currentChanged.Add(value);
+            add
+            {
+                checkDisposed();
+                return this.currentChanged.Add(value);
+            }
             remove => this.currentChanged.Remove(value);
         }
 
@@ -174,6 +218,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         protected void OnCurrentChanged()
         {
+            checkDisposed();
             this.currentChanged.Raise(this, null);
         }
 
@@ -182,7 +227,11 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public event CurrentChangingEventHandler CurrentChanging
         {
-            add => this.currentChanging.Add(value);
+            add
+            {
+                checkDisposed();
+                return this.currentChanging.Add(value);
+            }
             remove => this.currentChanging.Remove(value);
         }
 
@@ -193,6 +242,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns>Indicates this operation was cancelled or not.</returns>
         protected bool OnCurrentChanging(bool isCancelable)
         {
+            checkDisposed();
+            if (isCancelable && this.isCurrentPositionLocked)
+                return true;
             if (this.currentChanging.InvocationListLength == 0)
                 return false;
             var arg = new CurrentChangingEventArgs(isCancelable);
@@ -230,8 +282,10 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public int Count => this.Source.CountInternal;
         /// <inheritdoc/>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsReadOnly => this.Source.IsReadOnlyInternal;
         /// <inheritdoc/>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsFixedSize => this.Source.IsFixedSizeInternal;
 
         /// <inheritdoc/>
@@ -239,8 +293,22 @@ namespace Opportunity.MvvmUniverse.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => ((IList)this.Source).GetEnumerator();
 
+        private void checkDisposed()
+        {
+            if (Disposed)
+                throw new InvalidOperationException("The instance has been disposed.");
+        }
+
+        /// <summary>
+        /// Returns <see langword="false"/> when <see cref="Disposed"/>, otherwise, bese value will be used.
+        /// </summary>
+        protected override bool NeedRaisePropertyChanged => !Disposed && base.NeedRaisePropertyChanged;
+
         #region IDisposable Support
-        private bool disposedValue = false; // 要检测冗余调用
+        /// <summary>
+        /// <see cref="Dispose(bool)"/> has been called.
+        /// </summary>
+        protected bool Disposed { get; private set; }  // 要检测冗余调用
 
         /// <summary>
         /// Implement of <see cref="IDisposable"/>.
@@ -248,35 +316,27 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="disposing">Is <see cref="Dispose()"/> called.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.disposedValue)
+            if (!this.Disposed)
             {
                 if (disposing)
                 {
                     // 释放托管状态(托管对象)。
-                    this.Source.VectorChanged -= this.Source_VectorChanged;
-                    this.Source.PropertyChanged -= this.Source_PropertyChanged;
+                    this.source.VectorChanged -= this.Source_VectorChanged;
+                    this.source.PropertyChanged -= this.Source_PropertyChanged;
                 }
 
                 // 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
                 // 将大型字段设置为 null。
-
-                this.disposedValue = true;
+                this.source = null;
+                this.currentItem = default;
+                this.Disposed = true;
             }
         }
-
-        // 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
-        // ~CollectionView() {
-        //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
-        //   Dispose(false);
-        // }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
             Dispose(true);
-            // 如果在以上内容中替代了终结器，则取消注释以下行。
-            // GC.SuppressFinalize(this);
         }
         #endregion
     }

@@ -144,6 +144,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns>Load result, must contains item at position <paramref name="index"/>.</returns>
         protected abstract IAsyncOperation<LoadItemsResult<T>> LoadItemAsync(int index);
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private int isLoading;
         /// <summary>
         /// Indicates <see cref="LoadItemsAsync(int,int)"/> is running.

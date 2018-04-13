@@ -39,7 +39,7 @@ namespace Opportunity.MvvmUniverse.Services
             }
         }
 
-        private static LockHelper GetLock() => new LockHelper(ViewIndependentSingleton<TService>.Count > 1);
+        private static LockHelper GetLock() => new LockHelper(ViewDependentSingleton<TService>.Count > 1);
 
         public TService Service { get; private set; }
 

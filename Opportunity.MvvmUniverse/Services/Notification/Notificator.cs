@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Foundation;
@@ -16,19 +17,26 @@ namespace Opportunity.MvvmUniverse.Services.Notification
     /// </summary>
     public class Notificator : DependencyObject, IService<INotificationHandler>
     {
+        private static Notificator viewIndependent;
+        /// <summary>
+        /// Get <see cref="Notificator"/> of application.
+        /// </summary>
+        /// <returns><see cref="Notificator"/> of application.</returns>
+        public static Notificator GetForViewIndependent() => LazyInitializer.EnsureInitialized(ref viewIndependent, () => new Notificator());
+
         /// <summary>
         /// Get <see cref="Notificator"/> of current view.
         /// </summary>
         /// <returns><see cref="Notificator"/> of current view.</returns>
         public static Notificator GetForCurrentView()
         {
-            var notificator = ViewIndependentSingleton<Notificator>.Value;
+            var notificator = ViewDependentSingleton<Notificator>.Value;
             if (notificator != null)
                 return notificator;
             if (Window.Current == null)
                 return null;
             notificator = new Notificator();
-            ViewIndependentSingleton<Notificator>.Value = notificator;
+            ViewDependentSingleton<Notificator>.Value = notificator;
             return notificator;
         }
 

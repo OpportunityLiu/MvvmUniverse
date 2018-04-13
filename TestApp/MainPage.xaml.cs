@@ -30,6 +30,8 @@ using Windows.UI.Xaml.Markup;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Collections.Concurrent;
+using Opportunity.MvvmUniverse.Commands.ReentrancyHandlers;
+using Opportunity.MvvmUniverse.Collections;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -112,6 +114,8 @@ namespace TestApp
             View.CurrentChanged += this.View_CurrentChanged;
             View.CurrentChanging += this.View_CurrentChanging;
             Bindings.Update();
+            var x = LoadItemsResult.Create(12, new[] { 1, 2, 3 });
+            var d = new ArraySegment<int>(new[] { 1, 2, 3 }, 1, 2);
         }
 
         private void View_CurrentChanged(object sender, object e)

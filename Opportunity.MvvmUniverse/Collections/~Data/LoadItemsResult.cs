@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -51,6 +53,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// Load result of <see cref="FixedIncrementalLoadingList{T}.LoadItemAsync(int)"/>.
     /// </summary>
     /// <typeparam name="T">Type of items.</typeparam>
+    [DebuggerDisplay(@"StartIndex = {StartIndex}, Count = {Count}")]
     public readonly struct LoadItemsResult<T>
     {
         internal LoadItemsResult(int startIndex, IEnumerable<T> items, bool replaceLoadedItems)
@@ -59,6 +62,9 @@ namespace Opportunity.MvvmUniverse.Collections
             this.Items = items;
             this.ReplaceLoadedItems = replaceLoadedItems;
         }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private int Count => Items?.Count() ?? 0;
 
         /// <summary>
         /// Start index of loaded items.
