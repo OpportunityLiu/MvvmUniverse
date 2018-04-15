@@ -29,13 +29,13 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
         /// </summary>
         /// <returns><see cref="Navigator"/> of current view.</returns>
         public static Navigator GetOrCreateForCurrentView()
-            => ThreadLocalSinglelon.GetOrCreate(() => new Navigator());
+            => ThreadLocalSingleton.GetOrCreate(() => new Navigator());
 
         /// <summary>
         /// Get <see cref="Navigator"/> of current view.
         /// </summary>
         /// <returns><see cref="Navigator"/> of current view, or <see langword="null"/>, if not created.</returns>
-        public static Navigator GetForCurrentView() => ThreadLocalSinglelon.Get<Navigator>();
+        public static Navigator GetForCurrentView() => ThreadLocalSingleton.Get<Navigator>();
 
         /// <summary>
         /// Destory <see cref="Navigator"/> of current view.
@@ -43,7 +43,7 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
         /// <returns>Whether the <see cref="Navigator"/> is found and destoryed.</returns>
         public static bool DestoryForCurrentView()
         {
-            var nav = ThreadLocalSinglelon.Reset<Navigator>();
+            var nav = ThreadLocalSingleton.Reset<Navigator>();
             if (nav is null)
                 return false;
             nav.destory();

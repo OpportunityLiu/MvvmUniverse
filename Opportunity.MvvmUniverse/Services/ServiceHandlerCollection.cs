@@ -40,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Services
             }
         }
 
-        private static LockHelper GetLock() => new LockHelper(ThreadLocalSinglelon.Count<TService>() > 1);
+        private static LockHelper GetLock() => new LockHelper(ThreadLocalSingleton.Count<TService>() > 1);
 
         public TService Service { get; private set; }
 

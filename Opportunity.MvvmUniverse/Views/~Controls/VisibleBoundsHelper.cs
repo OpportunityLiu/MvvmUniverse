@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opportunity.Helpers.Universal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,15 @@ using Windows.UI.Xaml;
 
 namespace Opportunity.MvvmUniverse.Views
 {
-    internal class VisibleBoundsHelper
+    /// <summary>
+    /// Helepr class for visible bounds.
+    /// </summary>
+    public class VisibleBoundsHelper
     {
+        /// <summary>
+        /// Get <see cref="VisibleBoundsHelper"/> for current view.
+        /// </summary>
+        /// <returns><see cref="VisibleBoundsHelper"/> for current view.</returns>
         public static VisibleBoundsHelper GetForCurrentView()
         {
             if (CoreApplication.GetCurrentView().Properties.TryGetValue(nameof(VisibleBoundsHelper), out var helper))
@@ -26,6 +34,9 @@ namespace Opportunity.MvvmUniverse.Views
         private VisibleBoundsHelper() { }
 
         private event EventHandler<Rect> visibleBoundsChanged;
+        /// <summary>
+        /// Raises when <see cref="VisibleBounds"/> changed.
+        /// </summary>
         public event EventHandler<Rect> VisibleBoundsChanged
         {
             add
@@ -103,7 +114,7 @@ namespace Opportunity.MvvmUniverse.Views
             var tb = coreView.TitleBar;
             var tbh = (tb.ExtendViewIntoTitleBar && !isFullScreen) ? tb.Height : 0;
             var wb = CoreWindow.GetForCurrentThread().Bounds;
-            var vb = isFullScreen ? wb : applicationView.VisibleBounds;
+            var vb = isFullScreen && !ApiInfo.IsXbox ? wb : applicationView.VisibleBounds;
 
             var left = vb.Left - wb.Left;
             var top = vb.Top + tbh - wb.Top;
@@ -114,6 +125,9 @@ namespace Opportunity.MvvmUniverse.Views
         }
 
         private Rect visibleBounds = Rect.Empty;
+        /// <summary>
+        /// Visible bounds of current view.
+        /// </summary>
         public Rect VisibleBounds
         {
             get => this.visibleBounds;

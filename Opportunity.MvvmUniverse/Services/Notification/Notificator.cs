@@ -23,7 +23,7 @@ namespace Opportunity.MvvmUniverse.Services.Notification
         /// Get <see cref="Notificator"/> of application.
         /// </summary>
         /// <returns><see cref="Notificator"/> of application.</returns>
-        public static Notificator GetForViewIndependent() => Singlelon.GetOrCreate(() => new Notificator());
+        public static Notificator GetForViewIndependent() => Singleton.GetOrCreate(() => new Notificator());
 
         /// <summary>
         /// Get <see cref="Notificator"/> of current view.
@@ -33,7 +33,7 @@ namespace Opportunity.MvvmUniverse.Services.Notification
         {
             if (Window.Current == null)
                 return null;
-            return ThreadLocalSinglelon.GetOrCreate(() => new Notificator());
+            return ThreadLocalSingleton.GetOrCreate(() => new Notificator());
         }
 
         private Notificator()
