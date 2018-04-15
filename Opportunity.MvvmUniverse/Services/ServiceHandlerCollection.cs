@@ -1,4 +1,5 @@
 ﻿using Opportunity.MvvmUniverse.Collections;
+using Opportunity.Helpers.ObjectModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace Opportunity.MvvmUniverse.Services
             }
         }
 
-        private static LockHelper GetLock() => new LockHelper(ViewDependentSingleton<TService>.Count > 1);
+        private static LockHelper GetLock() => new LockHelper(ThreadLocalSinglelon.Count<TService>() > 1);
 
         public TService Service { get; private set; }
 

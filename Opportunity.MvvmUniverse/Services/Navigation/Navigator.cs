@@ -15,6 +15,7 @@ using Opportunity.MvvmUniverse.Commands;
 using System.Threading;
 using System.Diagnostics;
 using System.ComponentModel;
+using Opportunity.Helpers.ObjectModel;
 
 namespace Opportunity.MvvmUniverse.Services.Navigation
 {
@@ -28,20 +29,13 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
         /// </summary>
         /// <returns><see cref="Navigator"/> of current view.</returns>
         public static Navigator GetOrCreateForCurrentView()
-        {
-            var nav = ViewDependentSingleton<Navigator>.Value;
-            if (nav != null)
-                return nav;
-            nav = new Navigator();
-            ViewDependentSingleton<Navigator>.Value = nav;
-            return nav;
-        }
+            => ThreadLocalSinglelon.GetOrCreate(() => new Navigator());
 
         /// <summary>
         /// Get <see cref="Navigator"/> of current view.
         /// </summary>
         /// <returns><see cref="Navigator"/> of current view, or <see langword="null"/>, if not created.</returns>
-        public static Navigator GetForCurrentView() => ViewDependentSingleton<Navigator>.Value;
+        public static Navigator GetForCurrentView() => ThreadLocalSinglelon.Get<Navigator>();
 
         /// <summary>
         /// Destory <see cref="Navigator"/> of current view.
@@ -49,10 +43,9 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
         /// <returns>Whether the <see cref="Navigator"/> is found and destoryed.</returns>
         public static bool DestoryForCurrentView()
         {
-            var nav = ViewDependentSingleton<Navigator>.Value;
-            if (nav == null)
+            var nav = ThreadLocalSinglelon.Reset<Navigator>();
+            if (nav is null)
                 return false;
-            ViewDependentSingleton<Navigator>.Value = null;
             nav.destory();
             return true;
         }

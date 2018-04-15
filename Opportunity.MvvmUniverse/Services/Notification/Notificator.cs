@@ -1,4 +1,5 @@
-﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+﻿using Opportunity.Helpers.ObjectModel;
+using Opportunity.Helpers.Universal.AsyncHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Opportunity.MvvmUniverse.Services.Notification
         /// Get <see cref="Notificator"/> of application.
         /// </summary>
         /// <returns><see cref="Notificator"/> of application.</returns>
-        public static Notificator GetForViewIndependent() => LazyInitializer.EnsureInitialized(ref viewIndependent, () => new Notificator());
+        public static Notificator GetForViewIndependent() => Singlelon.GetOrCreate(() => new Notificator());
 
         /// <summary>
         /// Get <see cref="Notificator"/> of current view.
@@ -30,14 +31,9 @@ namespace Opportunity.MvvmUniverse.Services.Notification
         /// <returns><see cref="Notificator"/> of current view.</returns>
         public static Notificator GetForCurrentView()
         {
-            var notificator = ViewDependentSingleton<Notificator>.Value;
-            if (notificator != null)
-                return notificator;
             if (Window.Current == null)
                 return null;
-            notificator = new Notificator();
-            ViewDependentSingleton<Notificator>.Value = notificator;
-            return notificator;
+            return ThreadLocalSinglelon.GetOrCreate(() => new Notificator());
         }
 
         private Notificator()
