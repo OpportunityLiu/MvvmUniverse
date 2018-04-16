@@ -61,27 +61,25 @@ namespace Opportunity.MvvmUniverse.Commands
             if (!OnStarting())
                 return false;
 
-            if (this.current != null)
-                throw new InvalidOperationException("this.Current is not null.");
+            CommandHelper.CheckCurrent(this.current);
 
-            var t = default(IAsyncAction);
+            var execution = default(IAsyncAction);
             try
             {
-                t = StartExecutionAsync() ?? AsyncAction.CreateCompleted();
+                execution = StartExecutionAsync() ?? AsyncAction.CreateCompleted();
             }
             catch (Exception ex)
             {
-                t = AsyncAction.CreateFault(ex);
+                execution = AsyncAction.CreateFault(ex);
             }
 
-            if (Interlocked.CompareExchange(ref this.current, t, null) != null)
-                throw new InvalidOperationException("this.Current is not null.");
+            CommandHelper.SetCurrent(ref this.current, execution);
             OnCurrentChanged();
 
-            if (t.Status != AsyncStatus.Started)
-                OnFinished(t);
+            if (execution.Status != AsyncStatus.Started)
+                OnFinished(execution);
             else
-                t.Completed = (s, _) => OnFinished(s);
+                execution.Completed = (s, _) => OnFinished(s);
             return true;
         }
 
@@ -124,23 +122,14 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <param name="execution">Result of <see cref="StartExecutionAsync()"/></param>
         protected virtual void OnFinished(IAsyncAction execution)
         {
-            if (execution != this.current)
-                throw new InvalidOperationException("execution != this.Current");
+            CommandHelper.CheckCurrent(this.current, execution);
+
             try
             {
-                var error = default(Exception);
-                switch (execution.Status)
-                {
-                case AsyncStatus.Canceled:
-                    error = new OperationCanceledException();
-                    break;
-                case AsyncStatus.Error:
-                    error = execution.ErrorCode;
-                    break;
-                }
+                var error = CommandHelper.GetError(execution);
                 if (this.executed.InvocationListLength == 0 || NotificationSuspending)
                 {
-                    ThrowUnhandledError(error);
+                    DispatcherHelper.ThrowUnhandledError(error);
                     return;
                 }
                 var args = new ExecutedEventArgs(error);
@@ -158,13 +147,12 @@ namespace Opportunity.MvvmUniverse.Commands
                     if (d != null)
                         await d.YieldIdle();
                     if (!args.Handled)
-                        ThrowUnhandledError(args.Exception);
+                        DispatcherHelper.ThrowUnhandledError(args.Exception);
                 }
             }
             finally
             {
-                if (execution != Interlocked.CompareExchange(ref this.current, null, execution))
-                    throw new InvalidOperationException("execution != this.Current");
+                CommandHelper.ResetCurrent(ref this.current, execution);
                 OnCurrentChanged();
             }
         }

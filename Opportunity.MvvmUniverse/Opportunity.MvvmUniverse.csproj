@@ -105,6 +105,7 @@
     <Compile Include="Commands\~Base\ICommand.cs" />
     <Compile Include="Commands\~Base\IControllable.cs" />
     <Compile Include="Commands\~Base\ObservableCommandBase.cs" />
+    <Compile Include="Commands\~Base\~Helper.cs" />
     <Compile Include="Commands\~Command\~Impl{T}.cs" />
     <Compile Include="Commands\~Command\~Impl.cs" />
     <Compile Include="Commands\~Event\Executed.cs" />

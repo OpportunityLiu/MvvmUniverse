@@ -43,25 +43,6 @@ namespace Opportunity.MvvmUniverse.Commands
             set => ForceSet(ref this.tag, value);
         }
 
-        internal static void ThrowUnhandledError(Exception error)
-        {
-            if (error is null)
-                return;
-            var d = DispatcherHelper.Default;
-            if (d is null)
-                run();
-            else
-                d.Begin(run);
-
-            void run()
-            {
-                if (error is AggregateException ae)
-                    throw new AggregateException(ae.InnerExceptions);
-                else
-                    throw new AggregateException(error);
-            }
-        }
-
         private readonly DepedencyEvent<EventHandler, ObservableCommandBase, EventArgs> canExecuteChanged
             = new DepedencyEvent<EventHandler, ObservableCommandBase, EventArgs>((h, s, e) => h(s, e));
         /// <summary>

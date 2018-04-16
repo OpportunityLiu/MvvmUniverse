@@ -24,5 +24,24 @@ namespace Opportunity.MvvmUniverse
                 }
             }
         }
+
+        internal static void ThrowUnhandledError(Exception error)
+        {
+            if (error is null)
+                return;
+            var d = Default;
+            if (d is null)
+                throwCore(error);
+            else
+                d.Begin(() => throwCore(error));
+        }
+
+        private static void throwCore(Exception error)
+        {
+            if (error is AggregateException ae)
+                throw new AggregateException(ae.InnerExceptions);
+            else
+                throw new AggregateException(error);
+        }
     }
 }
