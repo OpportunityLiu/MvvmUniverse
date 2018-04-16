@@ -25,7 +25,8 @@
     
     
     <!-- 在此处添加应用程序特定的运行时指令。-->
-
-
+    <Namespace Name="System.Reflection" Dynamic="Excluded">
+      
+    </Namespace>
   </Application>
 </Directives>
