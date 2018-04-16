@@ -90,12 +90,15 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Current execution.
         /// </summary>
-        protected IAsyncAction Current => this.current;
+        public IAsyncAction Current => this.current;
 
         /// <summary>
         /// Will be called when <see cref="Current"/> changed.
         /// </summary>
-        public virtual void OnCurrentChanged() { }
+        public virtual void OnCurrentChanged()
+        {
+            this.OnPropertyChanged(EventArgsConst.CountPropertyChanged);
+        }
 
         /// <summary>
         /// Start execution.
