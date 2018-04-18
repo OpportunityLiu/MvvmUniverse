@@ -134,41 +134,19 @@ namespace TestApp
         {
             navigator.GoForwardAsync();
         }
-        MvvmContentDialog cd;
+
+
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            this.cd = this.cd ?? new MvvmContentDialog
+            var FP = new FileOpenPicker
             {
-                Title = "TITLE",
-                PrimaryButtonText = "Re",
-                CloseButtonText = "Close",
-                CloseButtonCommand = Command.Create(a =>
+                FileTypeFilter =
                 {
-                    Debug.WriteLine("Closed");
-                }),
-                Content = new TextBox
-                {
-                    AcceptsReturn = true
+                    ".mp3"
                 },
             };
-            var r = cd.ShowAsync();
-            cd.Closing += (s, args) =>
-                {
-                };
-            cd.Closed += (s, args) =>
-                    {
-                    };
-            cd.PrimaryButtonClick += (s, args) =>
-             {
-                 args.Cancel = true;
-             };
-
-            //ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
-            //await ApplicationView.GetForCurrentView().TryEnterViewModeAsync(ApplicationViewMode.Default);
-
-            //this.ViewModel = new VM();
-            //ApplicationView.GetForCurrentView().IsScreenCaptureEnabled = false;
-            // Grid.SetColumn(xp, 0);
+            var file = await FP.PickSingleFileAsync();
+            var p = await file.Properties.GetMusicPropertiesAsync();
         }
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)

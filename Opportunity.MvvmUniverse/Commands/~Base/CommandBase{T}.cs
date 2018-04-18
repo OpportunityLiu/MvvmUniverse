@@ -121,7 +121,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         public virtual void OnCurrentChanged()
         {
-            this.OnPropertyChanged(EventArgsConst.CountPropertyChanged);
+            this.OnPropertyChanged(ConstPropertyChangedEventArgs.Current);
         }
 
         /// <summary>

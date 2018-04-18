@@ -52,7 +52,7 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void InsertItem(int index, T item)
         {
             Items.Insert(index, item);
-            OnPropertyChanged(EventArgsConst.CountPropertyChanged);
+            OnPropertyChanged(ConstPropertyChangedEventArgs.Count);
             OnItemInserted(index);
         }
 
@@ -66,7 +66,7 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void RemoveItem(int index)
         {
             Items.RemoveAt(index);
-            OnPropertyChanged(EventArgsConst.CountPropertyChanged);
+            OnPropertyChanged(ConstPropertyChangedEventArgs.Count);
             OnItemRemoved(index);
         }
 
@@ -95,7 +95,7 @@ namespace Opportunity.MvvmUniverse.Collections
             if (Count == 0)
                 return;
             Items.Clear();
-            OnPropertyChanged(EventArgsConst.CountPropertyChanged);
+            OnPropertyChanged(ConstPropertyChangedEventArgs.Count);
             OnVectorReset();
         }
 

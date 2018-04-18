@@ -94,7 +94,7 @@ namespace Opportunity.MvvmUniverse.Commands
         public override void OnCurrentChanged()
         {
             base.OnCurrentChanged();
-            OnPropertyChanged(EventArgsConst.IsExecutingPropertyChanged);
+            OnPropertyChanged(ConstPropertyChangedEventArgs.IsExecuting);
             OnCanExecuteChanged();
         }
 

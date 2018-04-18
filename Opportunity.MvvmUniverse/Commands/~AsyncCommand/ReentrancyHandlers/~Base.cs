@@ -36,7 +36,7 @@ namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
             var i = Interlocked.CompareExchange(ref this.command, command, null);
             if (i != null)
                 throw new InvalidOperationException("This instance of " + GetType() + " has attached to a IAsyncCommand.");
-            OnPropertyChanged(EventArgsConst.AttachedCommandPropertyChanged);
+            OnPropertyChanged(ConstPropertyChangedEventArgs.AttachedCommand);
         }
         /// <summary>
         /// Set <see cref="AttachedCommand"/> to <see langword="null"/>.
@@ -44,7 +44,7 @@ namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
         public virtual void Detach()
         {
             this.command = null;
-            OnPropertyChanged(EventArgsConst.AttachedCommandPropertyChanged);
+            OnPropertyChanged(ConstPropertyChangedEventArgs.AttachedCommand);
         }
 
         /// <inheritdoc/>

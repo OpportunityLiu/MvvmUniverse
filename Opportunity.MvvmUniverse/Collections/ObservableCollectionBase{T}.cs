@@ -80,7 +80,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         public void OnVectorReset()
         {
-            OnVectorChanged(EventArgsConst.VectorReset);
+            OnVectorChanged(Args.Reset);
         }
 
         /// <summary>

@@ -237,7 +237,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     }
                 }
                 this.source.OnVectorReset();
-                this.source.OnPropertyChanged(EventArgsConst.CountPropertyChanged);
+                this.source.OnPropertyChanged(ConstPropertyChangedEventArgs.Count);
             }
         }
 

@@ -41,7 +41,7 @@ namespace Opportunity.MvvmUniverse.Commands
             private set
             {
                 this.progress = value;
-                OnPropertyChanged(EventArgsConst.ProgressPropertyChanged);
+                OnPropertyChanged(ConstPropertyChangedEventArgs.Progress);
             }
         }
 

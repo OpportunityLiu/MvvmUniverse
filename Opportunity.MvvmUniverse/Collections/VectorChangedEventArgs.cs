@@ -15,5 +15,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public CollectionChange CollectionChange { get; }
 
         public uint Index { get; }
+
+        public static readonly VectorChangedEventArgs Reset = new VectorChangedEventArgs(CollectionChange.Reset);
     }
 }

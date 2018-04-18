@@ -48,8 +48,8 @@ namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
         public override bool Enqueue(T value)
         {
             this.queuedValue = Box.Create(value);
-            OnPropertyChanged(EventArgsConst.QueuedValuePropertyChanged);
-            OnPropertyChanged(EventArgsConst.HasValuePropertyChanged);
+            OnPropertyChanged(ConstPropertyChangedEventArgs.QueuedValue);
+            OnPropertyChanged(ConstPropertyChangedEventArgs.HasValue);
             return false;
         }
 
@@ -69,8 +69,8 @@ namespace Opportunity.MvvmUniverse.Commands.ReentrancyHandlers
             else
             {
                 value = v.Value;
-                OnPropertyChanged(EventArgsConst.QueuedValuePropertyChanged);
-                OnPropertyChanged(EventArgsConst.HasValuePropertyChanged);
+                OnPropertyChanged(ConstPropertyChangedEventArgs.QueuedValue);
+                OnPropertyChanged(ConstPropertyChangedEventArgs.HasValue);
                 return true;
             }
         }
