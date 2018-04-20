@@ -153,14 +153,19 @@ namespace TestApp
             {
                 var items = await folder.GetItemsAsync(1000);
                 var list = new List<OneDriveStorageFile>(items.Count);
+                var getFolder = new List<Task<List<OneDriveStorageFile>>>();
                 foreach (var item in items)
                 {
                     if (item.IsFile())
                         list.Add((OneDriveStorageFile)item);
                     else if (item.IsFolder())
-                        list.AddRange(await getFile((OneDriveStorageFolder)item));
+                        getFolder.Add(getFile((OneDriveStorageFolder)item));
                     else
                         continue;// IsOneNote
+                }
+                foreach (var item in getFolder)
+                {
+                    list.AddRange(await item);
                 }
                 return list;
             }
@@ -168,6 +173,7 @@ namespace TestApp
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
+            var f = await StorageFolder.GetFolderFromPathAsync(Path.Combine(@"C:\Users\lzy\OneDrive\", Uri.UnescapeDataString(@"Music\Ace%20Combat%20X%C2%B2")));
             this.btnTest.CommandParameter = (int)this.btnTest.CommandParameter + 1;
             Debug.WriteLine($"Inc: { this.btnTest.CommandParameter }");
             //var appview = CoreApplication.CreateNewView();
