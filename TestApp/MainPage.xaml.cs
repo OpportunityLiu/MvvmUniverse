@@ -138,15 +138,13 @@ namespace TestApp
 
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            var FP = new FileOpenPicker
+            var mf = KnownFolders.MusicLibrary;
+            var files = (await mf.GetFilesAsync(Windows.Storage.Search.CommonFileQuery.OrderByMusicProperties)).ToList();\
+            foreach (var file in files)
             {
-                FileTypeFilter =
-                {
-                    ".mp3"
-                },
-            };
-            var file = await FP.PickSingleFileAsync();
-            var p = await file.Properties.GetMusicPropertiesAsync();
+                var p = await file.Properties.GetMusicPropertiesAsync();
+
+            }
         }
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
