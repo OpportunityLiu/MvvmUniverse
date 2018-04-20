@@ -32,6 +32,7 @@ using Windows.UI.Xaml.Navigation;
 using System.Collections.Concurrent;
 using Opportunity.MvvmUniverse.Commands.ReentrancyHandlers;
 using Opportunity.MvvmUniverse.Collections;
+using Microsoft.Toolkit.Services.OneDrive;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -138,12 +139,30 @@ namespace TestApp
 
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            var mf = KnownFolders.MusicLibrary;
-            var files = (await mf.GetFilesAsync(Windows.Storage.Search.CommonFileQuery.OrderByMusicProperties)).ToList();\
-            foreach (var file in files)
-            {
-                var p = await file.Properties.GetMusicPropertiesAsync();
+            OneDriveService.ServicePlatformInitializer = new Microsoft.Toolkit.Uwp.Services.OneDrive.Platform.OneDriveServicePlatformInitializer();
+            OneDriveService.Instance.Initialize("daf2a654-5b98-4954-bd03-d09a375628ed", new[] { Microsoft.Toolkit.Services.Services.MicrosoftGraph.MicrosoftGraphScope.FilesReadAll });
+            await OneDriveService.Instance.LoginAsync();
+            var rf = await OneDriveService.Instance.RootFolderAsync();
+            var mf = await rf.GetFolderAsync("Music");
 
+            var files = await getFile(mf);
+
+            var musicPropertis = files.Select(f => f.OneDriveItem.Audio);
+
+            async Task<List<OneDriveStorageFile>> getFile(OneDriveStorageFolder folder)
+            {
+                var items = await folder.GetItemsAsync(1000);
+                var list = new List<OneDriveStorageFile>(items.Count);
+                foreach (var item in items)
+                {
+                    if (item.IsFile())
+                        list.Add((OneDriveStorageFile)item);
+                    else if (item.IsFolder())
+                        list.AddRange(await getFile((OneDriveStorageFolder)item));
+                    else
+                        continue;// IsOneNote
+                }
+                return list;
             }
         }
 
