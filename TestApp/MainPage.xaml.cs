@@ -146,7 +146,7 @@ namespace TestApp
             var mf = await rf.GetFolderAsync("Music");
 
             var files = await getFile(mf);
-
+            var thumb = await files[0].GetThumbnailSetAsync();
             var musicPropertis = files.Select(f => f.OneDriveItem.Audio);
 
             async Task<List<OneDriveStorageFile>> getFile(OneDriveStorageFolder folder)

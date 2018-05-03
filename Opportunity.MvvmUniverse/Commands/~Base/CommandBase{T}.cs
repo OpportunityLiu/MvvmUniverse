@@ -87,7 +87,7 @@ namespace Opportunity.MvvmUniverse.Commands
             if (!OnStarting(parameter))
                 return false;
 
-            CommandHelper.CheckCurrent(this.current);
+            CommandHelper.AssertCurrentIsNull(this.current);
 
             var execution = default(IAsyncAction);
             try
@@ -151,7 +151,7 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <param name="execution">Result of <see cref="StartExecutionAsync(T)"/></param>
         protected virtual void OnFinished(IAsyncAction execution, T parameter)
         {
-            CommandHelper.CheckCurrent(this.current, execution);
+            CommandHelper.AssertCurrentEquals(this.current, execution);
 
             try
             {
@@ -162,22 +162,8 @@ namespace Opportunity.MvvmUniverse.Commands
                     return;
                 }
                 var args = new ExecutedEventArgs<T>(parameter, error);
-                var d = DispatcherHelper.Default;
-                if (d is null)
-                    run();
-                else
-                    d.Begin(run);
-
-                async void run()
-                {
-                    this.executed.Raise(this, args);
-                    if (args.Exception is null)
-                        return;
-                    if (d != null)
-                        await d.YieldIdle();
-                    if (!args.Handled)
-                        DispatcherHelper.ThrowUnhandledError(args.Exception);
-                }
+                this.executed.Raise(this, args);
+                CommandHelper.ThrowIfUnhandled(args);
             }
             finally
             {

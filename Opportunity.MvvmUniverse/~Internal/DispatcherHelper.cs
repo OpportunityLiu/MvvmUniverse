@@ -31,6 +31,8 @@ namespace Opportunity.MvvmUniverse
                 return;
             var d = Default;
             if (d is null)
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
+            else if (d.HasThreadAccess)
                 throwCore(error);
             else
                 d.Begin(() => throwCore(error));

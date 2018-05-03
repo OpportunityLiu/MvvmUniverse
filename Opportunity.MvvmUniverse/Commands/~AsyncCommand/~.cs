@@ -73,7 +73,7 @@ namespace Opportunity.MvvmUniverse.Commands
             => AsyncCommandHelper.CanExecuteOverride(IsExecuting, ReentrancyHandler);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private IReentrancyHandler<object> reentrancyHandler = ReentrancyHandlers.ReentrancyHandler.Disallowed();
+        private IReentrancyHandler<object> reentrancyHandler = ReentrancyHandlers.ReentrancyHandler.Cache<object>.Disallowed;
         /// <summary>
         /// Reentrance handling method of async commands.
         /// </summary>
@@ -106,7 +106,7 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (IsExecuting)
             {
-                if (this.ReentrancyHandler.Enqueue(default))
+                if (this.reentrancyHandler.Enqueue(default))
                 {
                     var c = Current;
                     if (c != null && c.Status == AsyncStatus.Started)
@@ -129,7 +129,7 @@ namespace Opportunity.MvvmUniverse.Commands
             }
             finally
             {
-                if (ReentrancyHandler.TryDequeue(out _))
+                if (this.reentrancyHandler.TryDequeue(out _))
                 {
                     Execute();
                 }

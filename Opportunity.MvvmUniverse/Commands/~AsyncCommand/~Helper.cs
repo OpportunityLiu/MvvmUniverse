@@ -21,7 +21,7 @@ namespace Opportunity.MvvmUniverse.Commands
         public static void SetReentrancyHandler<TCommand, T>(this TCommand command, ref IReentrancyHandler<T> field, IReentrancyHandler<T> value)
             where TCommand : ObservableObject, IAsyncCommand
         {
-            value = value ?? ReentrancyHandler.Disallowed<T>();
+            value = value ?? ReentrancyHandler.Cache<T>.Disallowed;
             if (field.Equals(value))
                 return;
             field.Detach();

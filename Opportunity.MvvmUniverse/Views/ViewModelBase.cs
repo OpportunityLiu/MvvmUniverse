@@ -34,14 +34,5 @@ namespace Opportunity.MvvmUniverse.Views
         /// </summary>
         protected CommandDictionary Commands => LazyInitializer.EnsureInitialized(ref this.commands, () => new CommandDictionary(this));
         private CommandDictionary commands;
-
-        /// <summary>
-        /// Get command from <see cref="Commands"/>.
-        /// </summary>
-        /// <typeparam name="T">Type of command.</typeparam>
-        /// <param name="key">Key of command.</param>
-        /// <returns>Command with <paramref name="key"/> from <see cref="Commands"/>.</returns>
-        protected T GetCommand<T>([CallerMemberName] string key = null)
-            where T : System.Windows.Input.ICommand => (T)Commands[key];
     }
 }

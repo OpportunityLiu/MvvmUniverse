@@ -5,7 +5,7 @@
     /// </summary>
     public static class ReentrancyHandler
     {
-        private static class Cache<T>
+        internal static class Cache<T>
         {
             public static readonly DisallowedReentrancyHandler<T> Disallowed = new DisallowedReentrancyHandler<T>();
             public static readonly IgnoredReentrancyHandler<T> Ignored = new IgnoredReentrancyHandler<T>();
