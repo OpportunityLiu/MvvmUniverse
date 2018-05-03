@@ -25,25 +25,16 @@ namespace Opportunity.MvvmUniverse
             }
         }
 
-        internal static void ThrowUnhandledError(Exception error)
+        public static void ThrowUnhandledError(Exception error)
         {
             if (error is null)
                 return;
+            var e = System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error);
             var d = Default;
             if (d is null)
-                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
-            else if (d.HasThreadAccess)
-                throwCore(error);
+                e.Throw();
             else
-                d.Begin(() => throwCore(error));
-        }
-
-        private static void throwCore(Exception error)
-        {
-            if (error is AggregateException ae)
-                throw new AggregateException(ae.InnerExceptions);
-            else
-                throw new AggregateException(error);
+                d.Begin(() => e.Throw());
         }
     }
 }

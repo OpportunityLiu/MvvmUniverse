@@ -139,36 +139,8 @@ namespace TestApp
 
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            OneDriveService.ServicePlatformInitializer = new Microsoft.Toolkit.Uwp.Services.OneDrive.Platform.OneDriveServicePlatformInitializer();
-            OneDriveService.Instance.Initialize("daf2a654-5b98-4954-bd03-d09a375628ed", new[] { Microsoft.Toolkit.Services.Services.MicrosoftGraph.MicrosoftGraphScope.FilesReadAll });
-            await OneDriveService.Instance.LoginAsync();
-            var rf = await OneDriveService.Instance.RootFolderAsync();
-            var mf = await rf.GetFolderAsync("Music");
-
-            var files = await getFile(mf);
-            var thumb = await files[0].GetThumbnailSetAsync();
-            var musicPropertis = files.Select(f => f.OneDriveItem.Audio);
-
-            async Task<List<OneDriveStorageFile>> getFile(OneDriveStorageFolder folder)
-            {
-                var items = await folder.GetItemsAsync(1000);
-                var list = new List<OneDriveStorageFile>(items.Count);
-                var getFolder = new List<Task<List<OneDriveStorageFile>>>();
-                foreach (var item in items)
-                {
-                    if (item.IsFile())
-                        list.Add((OneDriveStorageFile)item);
-                    else if (item.IsFolder())
-                        getFolder.Add(getFile((OneDriveStorageFolder)item));
-                    else
-                        continue;// IsOneNote
-                }
-                foreach (var item in getFolder)
-                {
-                    list.AddRange(await item);
-                }
-                return list;
-            }
+            new ContentDialog().ShowAsync();
+            new ContentDialog().ShowAsync();
         }
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
