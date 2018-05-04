@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
@@ -91,10 +92,15 @@ namespace Opportunity.MvvmUniverse.Views
             caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds, e.NewSize);
         }
 
-        private void caculateVisibleBoundsThickness(Rect vb, Size size)
+        private int caculateVisibleBoundsDelayCounter = 0;
+        private async void caculateVisibleBoundsThickness(Rect vb, Size size)
         {
-            var transedView = this.TransformToVisual(null).Inverse.TransformBounds(vb);
+            Interlocked.Increment(ref this.caculateVisibleBoundsDelayCounter);
+            await Dispatcher.Yield(CoreDispatcherPriority.Low);
+            if (Interlocked.Decrement(ref this.caculateVisibleBoundsDelayCounter) != 0)
+                return;
 
+            var transedView = this.TransformToVisual(null).Inverse.TransformBounds(vb);
             VisibleBounds = new Thickness(bound(transedView.Left), bound(transedView.Top), bound(size.Width - transedView.Right), bound(size.Height - transedView.Bottom));
         }
 

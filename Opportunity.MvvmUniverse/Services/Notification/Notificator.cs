@@ -18,7 +18,6 @@ namespace Opportunity.MvvmUniverse.Services.Notification
     /// </summary>
     public class Notificator : DependencyObject, IService<INotificationHandler>
     {
-        private static Notificator viewIndependent;
         /// <summary>
         /// Get <see cref="Notificator"/> of application.
         /// </summary>
