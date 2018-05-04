@@ -145,6 +145,7 @@ namespace TestApp
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
+            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
             var f = await StorageFolder.GetFolderFromPathAsync(Path.Combine(@"C:\Users\lzy\OneDrive\", Uri.UnescapeDataString(@"Music\Ace%20Combat%20X%C2%B2")));
             this.btnTest.CommandParameter = (int)this.btnTest.CommandParameter + 1;
             Debug.WriteLine($"Inc: { this.btnTest.CommandParameter }");
