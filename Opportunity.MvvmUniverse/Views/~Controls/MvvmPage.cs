@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
@@ -67,17 +66,19 @@ namespace Opportunity.MvvmUniverse.Views
         {
             InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneShowing;
             VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged += this.MvvmPage_VisibleBoundsChanged;
+            this.SizeChanged += this.MvvmPage_SizeChanged;
         }
 
         private void MvvmPage_Unloaded(object sender, RoutedEventArgs e)
         {
             InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneShowing;
             VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged -= this.MvvmPage_VisibleBoundsChanged;
+            this.SizeChanged -= this.MvvmPage_SizeChanged;
         }
 
         private void MvvmPage_VisibleBoundsChanged(object sender, Rect e)
         {
-            caculateVisibleBoundsThickness();
+            caculateVisibleBoundsThickness(e, new Size(this.ActualWidth, this.ActualHeight));
         }
 
         private void InputPane_InputPaneShowing(InputPane sender, InputPaneVisibilityEventArgs args)
@@ -85,17 +86,16 @@ namespace Opportunity.MvvmUniverse.Views
             args.EnsuredFocusedElementInView = true;
         }
 
-        private int caculateVisibleBoundsDelayCounter = 0;
-        private async void caculateVisibleBoundsThickness()
+        private void MvvmPage_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Interlocked.Increment(ref this.caculateVisibleBoundsDelayCounter);
-            await Task.Delay(16);
-            if (Interlocked.Decrement(ref this.caculateVisibleBoundsDelayCounter) != 0)
-                return;
+            caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds, e.NewSize);
+        }
 
-            var vb = VisibleBoundsHelper.GetForCurrentView().VisibleBounds;
+        private void caculateVisibleBoundsThickness(Rect vb, Size size)
+        {
             var transedView = this.TransformToVisual(null).Inverse.TransformBounds(vb);
-            VisibleBounds = new Thickness(bound(transedView.Left), bound(transedView.Top), bound(ActualWidth - transedView.Right), bound(ActualHeight - transedView.Bottom));
+
+            VisibleBounds = new Thickness(bound(transedView.Left), bound(transedView.Top), bound(size.Width - transedView.Right), bound(size.Height - transedView.Bottom));
         }
 
         private Thickness visibleBounds = new Thickness();
@@ -150,7 +150,6 @@ namespace Opportunity.MvvmUniverse.Views
                 return new Size();
             var pad = this.Padding;
             this.Content.Arrange(new Rect(new Point(pad.Left, pad.Top), new Size(bound(finalSize.Width - pad.Left - pad.Right), bound(finalSize.Height - pad.Top - pad.Bottom))));
-            caculateVisibleBoundsThickness();
             return finalSize;
         }
 
