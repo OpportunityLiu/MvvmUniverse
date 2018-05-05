@@ -29,20 +29,13 @@ namespace Opportunity.MvvmUniverse.Collections
         , IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable
         , IDisposable
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private ObservableDictionary<TKey, TValue> dictionary;
         /// <summary>
         /// <see cref="ObservableDictionary{TKey, TValue}"/> of this view.
         /// </summary>
         protected internal ObservableDictionary<TKey, TValue> Dictionary
-        {
-            get
-            {
-                var dic = this.dictionary;
-                if (dic == null)
-                    throw new InvalidOperationException("Instance disposed.");
-                return dic;
-            }
-        }
+            => this.dictionary ?? throw new InvalidOperationException("Instance disposed.");
 
         /// <summary>
         /// Create new instance of <see cref="ObservableDictionaryView{TKey, TValue}"/>.
@@ -91,7 +84,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public virtual void Dispose()
         {
             var dic = Interlocked.Exchange(ref this.dictionary, null);
-            if (dic == null)
+            if (dic is null)
                 return;
             dic.VectorChanged -= this.onDictionaryVectorChanged;
             dic.PropertyChanged -= this.onDictionaryPropertyChanged;

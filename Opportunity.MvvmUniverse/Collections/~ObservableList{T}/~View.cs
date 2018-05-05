@@ -27,21 +27,13 @@ namespace Opportunity.MvvmUniverse.Collections
         , IEnumerable<T>, IEnumerable
         , IDisposable
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private ObservableList<T> list;
-
         /// <summary>
         /// <see cref="ObservableList{T}"/> of this view.
         /// </summary>
         protected internal ObservableList<T> List
-        {
-            get
-            {
-                var l = this.list;
-                if (l == null)
-                    throw new InvalidOperationException("Instance disposed.");
-                return l;
-            }
-        }
+            => this.list ?? throw new InvalidOperationException("Instance disposed.");
 
         /// <summary>
         /// Create a new instance of <see cref="ObservableListView{T}"/>.
@@ -90,7 +82,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public virtual void Dispose()
         {
             var l = Interlocked.Exchange(ref this.list, null);
-            if (l == null)
+            if (l is null)
                 return;
             l.VectorChanged -= this.onListVectorChanged;
             l.PropertyChanged -= this.onListPropertyChanged;
