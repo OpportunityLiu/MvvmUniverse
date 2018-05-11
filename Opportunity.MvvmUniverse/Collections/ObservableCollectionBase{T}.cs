@@ -216,7 +216,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 var item = CastValue<T>(value);
                 if (this is ICollection<T> col)
                     return col.Contains(item);
-                var rcol = (IReadOnlyList<T>)this;
+                var rcol = (IEnumerable<T>)this;
                 return rcol.Contains(item);
             }
             catch (Exception)
@@ -232,7 +232,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 var item = CastValue<T>(value);
                 if (this is IList<T> col)
                     return col.IndexOf(item);
-                var rcol = (IReadOnlyList<T>)this;
+                var rcol = (IEnumerable<T>)this;
                 var ind = 0;
                 foreach (var i in rcol)
                 {

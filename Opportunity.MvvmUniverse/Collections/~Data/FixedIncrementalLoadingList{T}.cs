@@ -20,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// An <see cref="IncrementalLoadingList{T}"/> with a previous known final length.
     /// </summary>
     /// <typeparam name="T">Type of record.</typeparam>
-    public abstract partial class FixedIncrementalLoadingList<T> : ObservableList<T>, IList, ICollectionViewFactory
+    public abstract partial class FixedIncrementalLoadingList<T> : ObservableList<T>, IList
     {
         /// <summary>
         /// Create instance of <see cref="FixedIncrementalLoadingList{T}"/>.
@@ -233,7 +233,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     }
                     finally
                     {
-                        Interlocked.Exchange(ref this.isLoading, 0);
+                        Volatile.Write(ref this.isLoading, 0);
                         OnPropertyChanged(nameof(IsLoading));
                     }
                 });

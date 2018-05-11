@@ -81,7 +81,17 @@ namespace Opportunity.MvvmUniverse.Collections
             }
 
             private readonly Func<TKey, IAsyncOperation<TCache>> creator;
-            protected override IAsyncOperation<TCache> CreateAsync(TKey key) => this.creator(key);
+            protected override IAsyncOperation<TCache> CreateAsync(TKey key)
+            {
+                try
+                {
+                    return this.creator(key);
+                }
+                catch (Exception ex)
+                {
+                    return AsyncOperation<TCache>.CreateFault(ex);
+                }
+            }
         }
 
         private sealed class DelegateAutoFillCacheStorage<TKey, TCache> : AutoFillCacheStorage<TKey, TCache>

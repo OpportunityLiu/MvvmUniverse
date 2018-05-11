@@ -62,12 +62,15 @@ namespace Opportunity.MvvmUniverse.Collections
                 {
                     try
                     {
+                        var currentCount = Count;
                         var lp = LoadItemsAsync((int)count);
                         token.Register(lp.Cancel);
                         var re = await lp;
                         token.ThrowIfCancellationRequested();
+                        if (Count != currentCount)
+                            throw new InvalidOperationException("The collection has changed during loading.");
                         var lc = 0u;
-                        if (re.Items == null)
+                        if (re.Items is null)
                             return new LoadMoreItemsResult { Count = 0 };
                         if (re.StartIndex > this.Count)
                         {
@@ -109,7 +112,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     }
                     finally
                     {
-                        Interlocked.Exchange(ref this.isLoading, 0);
+                        Volatile.Write(ref this.isLoading, 0);
                         OnPropertyChanged(nameof(IsLoading), nameof(HasMoreItems));
                     }
                 });

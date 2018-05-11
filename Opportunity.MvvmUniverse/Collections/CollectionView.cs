@@ -122,7 +122,8 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         /// <inheritdoc/>
-        public bool MoveCurrentTo(object item) => MoveCurrentToPosition(IndexOf(item));
+        public bool MoveCurrentTo(T item) => MoveCurrentToPosition(IndexOf(item));
+        bool ICollectionView.MoveCurrentTo(object item) => MoveCurrentToPosition(((IList<object>)this).IndexOf(item));
         /// <inheritdoc/>
         public bool MoveCurrentToPosition(int index) => MoveCurrentToPosition(index, true);
 
@@ -255,25 +256,56 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         /// <inheritdoc/>
-        public void Add(object item) => ((IList)this.Source).Add(item);
+        public void Add(T item)
+        {
+            if (IsReadOnly)
+                ThrowForReadOnlyCollection(this.Source);
+            ((IList<T>)this.Source).Add(item);
+        }
+        void ICollection<object>.Add(object item) => ((IList)this.Source).Add(item);
         /// <inheritdoc/>
         public void Clear() => ((IList)this.Source).Clear();
         /// <inheritdoc/>
-        public bool Contains(object item) => ((IList)this.Source).Contains(item);
+        public bool Contains(T item) => ((IEnumerable<T>)this.Source).Contains(item);
+        bool ICollection<object>.Contains(object item) => ((IList)this.Source).Contains(item);
         /// <inheritdoc/>
-        public int IndexOf(object item) => ((IList)this.Source).IndexOf(item);
+        public int IndexOf(T item) => ((IEnumerable<T>)this.Source).IndexOf(item);
+        int IList<object>.IndexOf(object item) => ((IList)this.Source).IndexOf(item);
         /// <inheritdoc/>
-        public void Insert(int index, object item) => ((IList)this.Source).Insert(index, item);
+        public void Insert(int index, T item)
+        {
+            if (IsReadOnly)
+                ThrowForReadOnlyCollection(this.Source);
+            ((IList<T>)this.Source).Insert(index, item);
+        }
+        void IList<object>.Insert(int index, object item) => ((IList)this.Source).Insert(index, item);
         /// <inheritdoc/>
         public void RemoveAt(int index) => ((IList)this.Source).RemoveAt(index);
         /// <inheritdoc/>
-        public bool Remove(object item) => this.Source.Remove(item);
+        public bool Remove(T item)
+        {
+            if (IsReadOnly)
+                ThrowForReadOnlyCollection(this.Source);
+            return ((IList<T>)this.Source).Remove(item);
+        }
+        bool ICollection<object>.Remove(object item) => this.Source.Remove(item);
 
         /// <inheritdoc/>
-        public void CopyTo(object[] array, int arrayIndex) => ((IList)this.Source).CopyTo(array, arrayIndex);
+        public void CopyTo(T[] array, int arrayIndex) => ((IEnumerable<T>)this.Source).CopyTo(array, arrayIndex);
+        void ICollection<object>.CopyTo(object[] array, int arrayIndex) => ((IList)this.Source).CopyTo(array, arrayIndex);
 
         /// <inheritdoc/>
-        public object this[int index]
+        public T this[int index]
+        {
+            get => ((IEnumerable<T>)this.Source).ElementAt(index);
+            set
+            {
+                if (IsReadOnly)
+                    ThrowForReadOnlyCollection(this.Source);
+                ((IList<T>)this.Source)[index] = value;
+            }
+        }
+        object IList<object>.this[int index]
         {
             get => ((IList)this.Source)[index];
             set => ((IList)this.Source)[index] = value;
@@ -282,14 +314,13 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public int Count => this.Source.CountInternal;
         /// <inheritdoc/>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsReadOnly => this.Source.IsReadOnlyInternal;
         /// <inheritdoc/>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsFixedSize => this.Source.IsFixedSizeInternal;
 
         /// <inheritdoc/>
-        public IEnumerator<object> GetEnumerator() => this.Source.Cast<object>().GetEnumerator();
+        IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)this.Source).GetEnumerator();
+        IEnumerator<object> IEnumerable<object>.GetEnumerator() => this.Source.Cast<object>().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => ((IList)this.Source).GetEnumerator();
 
