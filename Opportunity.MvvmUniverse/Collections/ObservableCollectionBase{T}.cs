@@ -129,17 +129,9 @@ namespace Opportunity.MvvmUniverse.Collections
         bool IList.IsFixedSize => false;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal int CountInternal
-        {
-            get
-            {
-                if (this is ICollection<T> col)
-                    return col.Count;
-                return ((IReadOnlyCollection<T>)this).Count;
-            }
-        }
+        internal int CountInternal => ((ICollection)this).Count;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int ICollection.Count => CountInternal;
+        int ICollection.Count => (this is ICollection<T> col) ? col.Count : ((IReadOnlyCollection<T>)this).Count;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IList.this[int index]

@@ -188,7 +188,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.currentPosition = parent.StartIndex - 1;
             }
 
-            private RangedListView<T> parent;
+            private readonly RangedListView<T> parent;
             private int currentPosition;
 
             /// <inheritdoc />
