@@ -139,8 +139,7 @@ namespace TestApp
 
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            new ContentDialog().ShowAsync();
-            new ContentDialog().ShowAsync();
+            new ContentDialog1().ShowAsync();
         }
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)

@@ -95,7 +95,7 @@ namespace Opportunity.MvvmUniverse.Views
         {
             var transedView = this.TransformToVisual(null).Inverse.TransformBounds(vb);
 
-            VisibleBounds = new Thickness(bound(transedView.Left), bound(transedView.Top), bound(size.Width - transedView.Right), bound(size.Height - transedView.Bottom));
+            VisibleBounds = new Thickness(transedView.Left.BoundToZero(), transedView.Top.BoundToZero(), (size.Width - transedView.Right).BoundToZero(), (size.Height - transedView.Bottom).BoundToZero());
         }
 
         private Thickness visibleBounds = new Thickness();
@@ -107,7 +107,7 @@ namespace Opportunity.MvvmUniverse.Views
             get => this.visibleBounds;
             private set
             {
-                if (this.visibleBounds == value)
+                if (MathHelper.Diff(this.visibleBounds, value) < 4)
                     return;
                 Debug.WriteLine(value);
                 this.visibleBounds = value;
@@ -138,7 +138,9 @@ namespace Opportunity.MvvmUniverse.Views
             if (this.Content == null)
                 return new Size();
             var pad = this.Padding;
-            this.Content.Measure(new Size(bound(availableSize.Width - pad.Left - pad.Right), bound(availableSize.Height - pad.Top - pad.Bottom)));
+            this.Content.Measure(new Size(
+                (availableSize.Width - pad.Left - pad.Right).BoundToZero(),
+                (availableSize.Height - pad.Top - pad.Bottom).BoundToZero()));
             var ns = this.Content.DesiredSize;
             return new Size(ns.Width + pad.Left + pad.Right, ns.Height + pad.Top + pad.Bottom);
         }
@@ -149,10 +151,10 @@ namespace Opportunity.MvvmUniverse.Views
             if (this.Content == null)
                 return new Size();
             var pad = this.Padding;
-            this.Content.Arrange(new Rect(new Point(pad.Left, pad.Top), new Size(bound(finalSize.Width - pad.Left - pad.Right), bound(finalSize.Height - pad.Top - pad.Bottom))));
+            this.Content.Arrange(new Rect(new Point(pad.Left, pad.Top), new Size(
+                (finalSize.Width - pad.Left - pad.Right).BoundToZero(),
+                (finalSize.Height - pad.Top - pad.Bottom).BoundToZero())));
             return finalSize;
         }
-
-        private static double bound(double v) => v < 0 ? 0 : v;
     }
 }

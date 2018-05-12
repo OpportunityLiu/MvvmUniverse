@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -66,11 +67,13 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void BackgroundElement_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            Debug.WriteLine($"BackgroundElement_SizeChanged {e.NewSize}");
             caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
         private void MvvmContentDialog_VisibleBoundsChanged(object sender, Rect e)
         {
+            Debug.WriteLine($"BackgroundElement_SizeChanged {e}");
             caculateVisibleBoundsThickness(e);
         }
 
@@ -81,11 +84,18 @@ namespace Opportunity.MvvmUniverse.Views
                 var size = new Size(this.BackgroundElement.ActualWidth, this.BackgroundElement.ActualHeight);
                 var transedView = this.BackgroundElement.TransformToVisual(null).Inverse.TransformBounds(vb);
                 var innerBound = this.DialogSpace.Padding;
-                var padding = new Thickness(bound(transedView.Left - innerBound.Left), bound(transedView.Top - innerBound.Top), bound(size.Width - transedView.Right - innerBound.Right), bound(size.Height - transedView.Bottom - innerBound.Bottom));
-                this.BackgroundElement.Padding = padding;
+                var padding = new Thickness(
+                    (transedView.Left - innerBound.Left).BoundToZero(),
+                    (transedView.Top - innerBound.Top).BoundToZero(),
+                    (size.Width - transedView.Right - innerBound.Right).BoundToZero(),
+                    (size.Height - transedView.Bottom - innerBound.Bottom).BoundToZero());
+                var oldPadding = this.BackgroundElement.Padding;
+                if (MathHelper.Diff(oldPadding, padding) >= 4)
+                {
+                    Debug.WriteLine($"New padding {padding}");
+                    this.BackgroundElement.Padding = padding;
+                }
             }
         }
-
-        private static double bound(double v) => v < 0 ? 0 : v;
     }
 }

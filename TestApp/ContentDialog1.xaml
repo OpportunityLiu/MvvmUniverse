@@ -1,0 +1,45 @@
+﻿<views:MvvmContentDialog xmlns:views="using:Opportunity.MvvmUniverse.Views"
+                         x:Class="TestApp.ContentDialog1"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         mc:Ignorable="d"
+                         Title="新版本"
+                         xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+                         PrimaryButtonText="现在升级"
+                         SecondaryButtonText="在 GitHub 上查看"
+                         CloseButtonText="以后再说"
+                         PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+                         SecondaryButtonClick="ContentDialog_SecondaryButtonClick"
+                         RequestedTheme="Dark">
+  <StackPanel x:Name="spRoot">
+    <TextBlock x:Name="tbVersion"
+               Text="版本 2018.5.12.0 已发布"
+               Style="{ThemeResource CaptionTextBlockStyle}" />
+    <TextBlock x:Name="tbTitle"
+               Text=""
+               Style="{ThemeResource SubtitleTextBlockStyle}"
+               Padding="0,8" />
+    <controls:MarkdownTextBlock x:Name="tbContent"/>
+    <RelativePanel x:Name="rpDownload"
+                   x:Load="False"
+                   Margin="0,12,0,0">
+      <ProgressBar x:Name="pb"
+                   IsIndeterminate="True"
+                   RelativePanel.AlignLeftWithPanel="True"
+                   RelativePanel.AlignRightWithPanel="True" />
+      <TextBlock x:Name="tbCurrent"
+                 RelativePanel.LeftOf="tbSep"
+                 RelativePanel.AlignVerticalCenterWith="tbSep" />
+      <TextBlock x:Name="tbSep"
+                 Text="/"
+                 Margin="4,0"
+                 RelativePanel.LeftOf="tbTotal"
+                 RelativePanel.AlignVerticalCenterWith="tbTotal" />
+      <TextBlock x:Name="tbTotal"
+                 RelativePanel.Below="pb"
+                 RelativePanel.AlignRightWithPanel="True" />
+    </RelativePanel>
+  </StackPanel>
+</views:MvvmContentDialog>

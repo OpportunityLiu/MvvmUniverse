@@ -141,6 +141,7 @@
     <Compile Include="Services\Notification\Notificator.cs" />
     <Compile Include="Views\CommandDictionary.cs" />
     <Compile Include="Views\ViewModelFactory.cs" />
+    <Compile Include="Views\~Controls\MathHelper.cs" />
     <Compile Include="Views\~Controls\MvvmContentDialog.cs" />
     <Compile Include="Views\~Controls\MvvmPage.cs" />
     <Compile Include="Views\ViewModelBase.cs" />
