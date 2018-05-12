@@ -35,10 +35,14 @@ namespace Opportunity.MvvmUniverse.Views
             base.OnApplyTemplate();
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged -= this.BackgroundElement_SizeChanged;
-            this.BackgroundElement = (Border)GetTemplateChild(nameof(this.BackgroundElement));
-            if (this.BackgroundElement != null)
+            this.BackgroundElement = GetTemplateChild(nameof(this.BackgroundElement)) as Border;
+            if (this.BackgroundElement is null)
+                throw new InvalidOperationException("Border named BackgroundElement not found");
+            else
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
-            this.DialogSpace = (Grid)GetTemplateChild(nameof(this.DialogSpace));
+            this.DialogSpace = GetTemplateChild(nameof(this.DialogSpace)) as Grid;
+            if(this.DialogSpace is null)
+                throw new InvalidOperationException("Grid named DialogSpace not found");
             caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
