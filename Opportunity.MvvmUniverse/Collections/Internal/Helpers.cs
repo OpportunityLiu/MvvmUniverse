@@ -6,6 +6,22 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
 {
     internal static class Helpers
     {
+        public static bool TryCastValue<T>(object value, out T item)
+        {
+            if (value is null)
+            {
+                item = default;
+                return (default(T) == null);
+            }
+            if (value is T)
+            {
+                item = (T)value;
+                return true;
+            }
+            item = default;
+            return false;
+        }
+
         public static T CastValue<T>(object value) => CastValue<T>(value, nameof(value));
 
         public static T CastValue<T>(object value, string paramName)

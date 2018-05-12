@@ -17,7 +17,7 @@ namespace Opportunity.MvvmUniverse.Views
     /// </summary>
     public sealed class CommandDictionary : IDictionary<string, ISysCommand>
     {
-        private Dictionary<string, ISysCommand> data = new Dictionary<string, ISysCommand>();
+        private readonly Dictionary<string, ISysCommand> data = new Dictionary<string, ISysCommand>();
         private readonly object tag;
 
         internal CommandDictionary(object tag)

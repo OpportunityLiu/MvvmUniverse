@@ -41,8 +41,18 @@ namespace Opportunity.MvvmUniverse.Collections
             this.source = source;
             this.source.VectorChanged += this.Source_VectorChanged;
             this.source.PropertyChanged += this.Source_PropertyChanged;
-            if (this.source.CountInternal > 0)
-                this.currentItem = ((IList)this.Source)[0];
+            this.currentItem = ((IEnumerable<T>)this.Source).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Raise <see cref="VectorChanged"/> and <see cref="ObservableObject.OnObjectReset()"/>.
+        /// </summary>
+        public override void OnObjectReset()
+        {
+            if (NotificationSuspending)
+                return;
+            this.vectorChanged.Raise(this, VectorChangedEventArgs.Reset);
+            base.OnObjectReset();
         }
 
         private readonly DepedencyEvent<VectorChangedEventHandler<object>, CollectionView<T>, IVectorChangedEventArgs> vectorChanged
@@ -100,7 +110,8 @@ namespace Opportunity.MvvmUniverse.Collections
                 return;
             var arg = (IVectorChangedEventArgs)e;
 
-            this.vectorChanged.Raise(this, arg);
+            if (!NotificationSuspending)
+                this.vectorChanged.Raise(this, arg);
             switch (arg.CollectionChange)
             {
             case CollectionChange.ItemInserted:
@@ -140,21 +151,21 @@ namespace Opportunity.MvvmUniverse.Collections
             if (index < 0)
             {
                 CurrentPosition = -1;
-                CurrentItem = null;
+                CurrentItem = default;
                 OnCurrentChanged();
                 return false;
             }
             else if (index >= Count)
             {
                 CurrentPosition = Count;
-                CurrentItem = null;
+                CurrentItem = default;
                 OnCurrentChanged();
                 return false;
             }
             else
             {
                 CurrentPosition = index;
-                CurrentItem = ((IList)this.Source)[index];
+                CurrentItem = (this.Source is IList<T> l) ? l[index] : ((IReadOnlyList<T>)this.Source)[index];
                 OnCurrentChanged();
                 return true;
             }
@@ -197,9 +208,11 @@ namespace Opportunity.MvvmUniverse.Collections
             private set => Set(nameof(IsCurrentAfterLast), nameof(IsCurrentBeforeFirst), ref this.currentPosition, value);
         }
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private object currentItem;
+        private T currentItem;
         /// <inheritdoc/>
-        public object CurrentItem { get => this.currentItem; private set => Set(ref this.currentItem, value); }
+        public T CurrentItem { get => this.currentItem; private set => Set(ref this.currentItem, value); }
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        object ICollectionView.CurrentItem => (IsCurrentAfterLast || IsCurrentBeforeFirst) ? null : (object)this.currentItem;
 
         private readonly DepedencyEvent<EventHandler<object>, CollectionView<T>, object> currentChanged
             = new DepedencyEvent<EventHandler<object>, CollectionView<T>, object>((h, s, e) => h(s, e));
@@ -284,11 +297,10 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public bool Remove(T item)
         {
-            if (IsReadOnly)
-                ThrowForReadOnlyCollection(this.Source);
+            if (IsReadOnly) ThrowForReadOnlyCollection(this.Source);
             return ((IList<T>)this.Source).Remove(item);
         }
-        bool ICollection<object>.Remove(object item) => this.Source.Remove(item);
+        bool ICollection<object>.Remove(object item) => TryCastValue(item, out T t) ? this.Remove(t) : false;
 
         /// <inheritdoc/>
         public void CopyTo(T[] array, int arrayIndex) => ((IEnumerable<T>)this.Source).CopyTo(array, arrayIndex);

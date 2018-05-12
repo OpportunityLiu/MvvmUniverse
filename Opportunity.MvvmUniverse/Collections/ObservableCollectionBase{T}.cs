@@ -129,9 +129,7 @@ namespace Opportunity.MvvmUniverse.Collections
         bool IList.IsFixedSize => false;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal int CountInternal => ((ICollection)this).Count;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int ICollection.Count
+        internal int CountInternal
         {
             get
             {
@@ -140,6 +138,8 @@ namespace Opportunity.MvvmUniverse.Collections
                 return ((IReadOnlyCollection<T>)this).Count;
             }
         }
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        int ICollection.Count => CountInternal;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IList.this[int index]
@@ -171,33 +171,9 @@ namespace Opportunity.MvvmUniverse.Collections
             if (array is null)
                 throw new ArgumentNullException(nameof(array));
             if (array is T[] tarr)
-            {
-                if (this is ICollection<T> col)
-                {
-                    col.CopyTo(tarr, index);
-                }
-                else
-                {
-                    var rcol = (IReadOnlyCollection<T>)this;
-                    if (index + rcol.Count > tarr.Length)
-                        throw new ArgumentException("Not enough space for copying.");
-                    foreach (var item in rcol)
-                    {
-                        tarr[index] = item;
-                        index++;
-                    }
-                }
-            }
+                ((IEnumerable<T>)this).CopyTo(tarr, index);
             else if (array is object[] oarr)
-            {
-                if (((ICollection)this).Count + index > array.Length)
-                    throw new ArgumentException("Not enough space for copying.");
-                foreach (var item in this)
-                {
-                    oarr[index] = item;
-                    index++;
-                }
-            }
+                ((IEnumerable<T>)this).Cast<object>().CopyTo(oarr, index);
             else
                 throw new ArgumentException("Wrong type of array.", nameof(array));
         }
@@ -211,41 +187,16 @@ namespace Opportunity.MvvmUniverse.Collections
 
         bool IList.Contains(object value)
         {
-            try
-            {
-                var item = CastValue<T>(value);
-                if (this is ICollection<T> col)
-                    return col.Contains(item);
-                var rcol = (IEnumerable<T>)this;
-                return rcol.Contains(item);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            if (TryCastValue(value, out T item))
+                return ((IEnumerable<T>)this).Contains(item);
+            return false;
         }
 
         int IList.IndexOf(object value)
         {
-            try
-            {
-                var item = CastValue<T>(value);
-                if (this is IList<T> col)
-                    return col.IndexOf(item);
-                var rcol = (IEnumerable<T>)this;
-                var ind = 0;
-                foreach (var i in rcol)
-                {
-                    if (EqualityComparer<T>.Default.Equals(i, item))
-                        return ind;
-                    ind++;
-                }
-                return -1;
-            }
-            catch
-            {
-                return -1;
-            }
+            if (TryCastValue(value, out T item))
+                return ((IEnumerable<T>)this).IndexOf(item);
+            return -1;
         }
 
         void IList.Insert(int index, object value)
@@ -255,13 +206,12 @@ namespace Opportunity.MvvmUniverse.Collections
             ((IList<T>)this).Insert(index, CastValue<T>(value));
         }
 
-        internal bool Remove(object value)
+        void IList.Remove(object value)
         {
             if (IsReadOnlyInternal) ThrowForReadOnlyCollection();
             if (IsFixedSizeInternal) ThrowForFixedSizeCollection();
-            return ((ICollection<T>)this).Remove(CastValue<T>(value));
+            ((ICollection<T>)this).Remove(CastValue<T>(value));
         }
-        void IList.Remove(object value) => Remove(value);
 
         void IList.RemoveAt(int index)
         {

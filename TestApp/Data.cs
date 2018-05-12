@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using Windows.Foundation;
 using System.Threading;
 using Opportunity.MvvmUniverse;
 using Windows.UI.Xaml.Data;
+using System.Linq;
 
 namespace TestApp
 {

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Windows.UI.Xaml.Data;
+using System.Linq;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -116,24 +117,18 @@ namespace Opportunity.MvvmUniverse.Collections
         public bool Contains(T item) => IndexOf(item) >= 0;
         bool IList.Contains(object value)
         {
-            try
-            {
-                return Contains(CastValue<T>(value));
-            }
-            catch (ArgumentException)
-            {
+            if (!TryCastValue(value, out T item))
                 return false;
-            }
+            return Contains(item);
         }
 
         /// <inheritdoc />
         public int IndexOf(T item)
         {
-            var c = EqualityComparer<T>.Default;
             var ii = 0;
             foreach (var i in this)
             {
-                if (c.Equals(i, item))
+                if (EqualityComparer<T>.Default.Equals(i, item))
                     return ii;
                 ii++;
             }
@@ -141,20 +136,15 @@ namespace Opportunity.MvvmUniverse.Collections
         }
         int IList.IndexOf(object value)
         {
-            try
-            {
-                return IndexOf(CastValue<T>(value));
-            }
-            catch (ArgumentException)
-            {
+            if (!TryCastValue(value, out T item))
                 return -1;
-            }
+            return IndexOf(item);
         }
 
         /// <inheritdoc />
         public void CopyTo(T[] array, int arrayIndex)
         {
-            if (array == null)
+            if (array is null)
                 throw new ArgumentNullException(nameof(array));
             if (array.Length - arrayIndex < Count)
                 throw new ArgumentException("Array size not enough", nameof(array));
@@ -170,9 +160,12 @@ namespace Opportunity.MvvmUniverse.Collections
                 throw new ArgumentNullException(nameof(array));
             if (array.Rank != 1 || array.GetLowerBound(0) != 0)
                 throw new ArgumentException("Unsupported array", nameof(array));
-            if (!(array is T[] a))
+            if (array is T[] a)
+                CopyTo(a, index);
+            else if (array is object[] o)
+                this.Cast<object>().CopyTo(o, index);
+            else
                 throw new ArgumentException("Wrong array type", nameof(array));
-            CopyTo(a, index);
         }
 
         bool ICollection<T>.Remove(T item) => ThrowForReadOnlyCollection<bool>(this.items);
