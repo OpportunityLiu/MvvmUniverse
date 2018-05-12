@@ -331,7 +331,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public bool IsFixedSize => this.Source.IsFixedSizeInternal;
 
         /// <inheritdoc/>
-        IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)this.Source).GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)this.Source).GetEnumerator();
         IEnumerator<object> IEnumerable<object>.GetEnumerator() => this.Source.Cast<object>().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => ((IList)this.Source).GetEnumerator();
