@@ -73,29 +73,26 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void MvvmContentDialog_VisibleBoundsChanged(object sender, Rect e)
         {
-            Debug.WriteLine($"BackgroundElement_SizeChanged {e}");
+            Debug.WriteLine($"MvvmContentDialog_VisibleBoundsChanged {e}");
             caculateVisibleBoundsThickness(e);
         }
 
         private void caculateVisibleBoundsThickness(Rect vb)
         {
-            if (this.BackgroundElement != null)
-            {
-                var size = new Size(this.BackgroundElement.ActualWidth, this.BackgroundElement.ActualHeight);
-                var transedView = this.BackgroundElement.TransformToVisual(null).Inverse.TransformBounds(vb);
-                var innerBound = this.DialogSpace.Padding;
-                var padding = new Thickness(
-                    (transedView.Left - innerBound.Left).BoundToZero(),
-                    (transedView.Top - innerBound.Top).BoundToZero(),
-                    (size.Width - transedView.Right - innerBound.Right).BoundToZero(),
-                    (size.Height - transedView.Bottom - innerBound.Bottom).BoundToZero());
-                var oldPadding = this.BackgroundElement.Padding;
-                if (MathHelper.Diff(oldPadding, padding) >= 4)
-                {
-                    Debug.WriteLine($"New padding {padding}");
-                    this.BackgroundElement.Padding = padding;
-                }
-            }
+            if (this.BackgroundElement is null)
+                return;
+            var size = new Size(this.BackgroundElement.ActualWidth, this.BackgroundElement.ActualHeight);
+            var transedView = this.BackgroundElement.TransformToVisual(null).Inverse.TransformBounds(vb);
+            var innerBound = this.DialogSpace.Padding;
+            var padding = new Thickness(
+                (transedView.Left - innerBound.Left).BoundToZero(),
+                (transedView.Top - innerBound.Top).BoundToZero(),
+                (size.Width - transedView.Right - innerBound.Right).BoundToZero(),
+                (size.Height - transedView.Bottom - innerBound.Bottom).BoundToZero());
+            if (MathHelper.Diff(this.BackgroundElement.Padding, padding) < 4)
+                return;
+            Debug.WriteLine($"New padding {padding}");
+            this.BackgroundElement.Padding = padding;
         }
     }
 }
