@@ -29,6 +29,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         private Border BackgroundElement;
         private Grid DialogSpace;
+        private bool opening = false;
         /// <inheritdoc/>
         protected override void OnApplyTemplate()
         {
@@ -36,13 +37,9 @@ namespace Opportunity.MvvmUniverse.Views
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged -= this.BackgroundElement_SizeChanged;
             this.BackgroundElement = GetTemplateChild(nameof(this.BackgroundElement)) as Border;
-            if (this.BackgroundElement is null)
-                throw new InvalidOperationException("Border named BackgroundElement not found");
-            else
+            if (this.BackgroundElement != null && this.opening)
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
             this.DialogSpace = GetTemplateChild(nameof(this.DialogSpace)) as Grid;
-            if(this.DialogSpace is null)
-                throw new InvalidOperationException("Grid named DialogSpace not found");
             caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
@@ -52,6 +49,8 @@ namespace Opportunity.MvvmUniverse.Views
             VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged += this.MvvmContentDialog_VisibleBoundsChanged;
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
+            this.opening = true;
+            caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
         private void MvvmContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
@@ -62,6 +61,7 @@ namespace Opportunity.MvvmUniverse.Views
                 this.BackgroundElement.SizeChanged -= this.BackgroundElement_SizeChanged;
             this.ClearValue(WidthProperty);
             this.ClearValue(HeightProperty);
+            this.opening = false;
         }
 
         private void InputPane_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)
@@ -83,7 +83,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void caculateVisibleBoundsThickness(Rect vb)
         {
-            if (this.BackgroundElement is null)
+            if (this.BackgroundElement is null || this.DialogSpace is null)
                 return;
             var size = new Size(this.BackgroundElement.ActualWidth, this.BackgroundElement.ActualHeight);
             var transedView = this.BackgroundElement.TransformToVisual(null).Inverse.TransformBounds(vb);
