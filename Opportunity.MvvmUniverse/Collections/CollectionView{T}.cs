@@ -165,7 +165,7 @@ namespace Opportunity.MvvmUniverse.Collections
             else
             {
                 CurrentPosition = index;
-                CurrentItem = (this.Source is IList<T> l) ? l[index] : ((IReadOnlyList<T>)this.Source)[index];
+                CurrentItem = this[index];
                 OnCurrentChanged();
                 return true;
             }
@@ -309,7 +309,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public T this[int index]
         {
-            get => ((IEnumerable<T>)this.Source).ElementAt(index);
+            get => (this.Source is IList<T> l) ? l[index] : ((IReadOnlyList<T>)this.Source)[index];
             set
             {
                 if (IsReadOnly)
