@@ -156,11 +156,8 @@
     <EmbeddedResource Include="Properties\Opportunity.MvvmUniverse.rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>5.2.4</Version>
-    </PackageReference>
     <PackageReference Include="Opportunity.Helpers.Universal">
-      <Version>1.3.11</Version>
+      <Version>1.3.12</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

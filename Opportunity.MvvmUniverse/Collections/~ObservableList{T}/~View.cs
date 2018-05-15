@@ -33,7 +33,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <see cref="ObservableList{T}"/> of this view.
         /// </summary>
         protected internal ObservableList<T> List
-            => this.list ?? throw new InvalidOperationException("Instance disposed.");
+            => this.list ?? throw new ObjectDisposedException(this.ToString());
 
         /// <summary>
         /// Create a new instance of <see cref="ObservableListView{T}"/>.
@@ -113,7 +113,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public bool Contains(T item) => List.Contains(item);
 
         /// <inheritdoc />
-        public int IndexOf(T item) => this.List.IndexOf(item);
+        public int IndexOf(T item) => List.IndexOf(item);
 
         /// <summary>
         /// Iterate all items in the list.
