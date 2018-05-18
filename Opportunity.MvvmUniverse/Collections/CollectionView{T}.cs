@@ -339,7 +339,7 @@ namespace Opportunity.MvvmUniverse.Collections
         private void checkDisposed()
         {
             if (Disposed)
-                throw new InvalidOperationException("The instance has been disposed.");
+                throw new ObjectDisposedException(this.ToString());
         }
 
         /// <summary>

@@ -35,7 +35,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <see cref="ObservableDictionary{TKey, TValue}"/> of this view.
         /// </summary>
         protected internal ObservableDictionary<TKey, TValue> Dictionary
-            => this.dictionary ?? throw new InvalidOperationException("Instance disposed.");
+            => this.dictionary ?? throw new ObjectDisposedException(this.ToString());
 
         /// <summary>
         /// Create new instance of <see cref="ObservableDictionaryView{TKey, TValue}"/>.
@@ -156,7 +156,7 @@ namespace Opportunity.MvvmUniverse.Collections
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
             => ((ICollection<KeyValuePair<TKey, TValue>>)Dictionary).Contains(item);
 
-        int IList<KeyValuePair<TKey, TValue>>.IndexOf(KeyValuePair<TKey, TValue> item) => ((IList<KeyValuePair<TKey, TValue>>)this.Dictionary).IndexOf(item);
+        int IList<KeyValuePair<TKey, TValue>>.IndexOf(KeyValuePair<TKey, TValue> item) => ((IList<KeyValuePair<TKey, TValue>>)Dictionary).IndexOf(item);
 
         /// <inheritdoc/>
         public bool TryGetValue(TKey key, out TValue value) => Dictionary.TryGetValue(key, out value);

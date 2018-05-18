@@ -14,7 +14,7 @@ namespace Opportunity.MvvmUniverse.Collections
 {
     public abstract partial class FixedIncrementalLoadingList<T>
     {
-        internal class FixedCollectionView : CollectionView<T>, ICollectionView, IDisposable, IItemsRangeInfo
+        internal class FixedCollectionView : CollectionView<T>, IItemsRangeInfo
         {
             public FixedCollectionView(FixedIncrementalLoadingList<T> fixedIncrementalLoadingList)
                 : base(fixedIncrementalLoadingList) { }
