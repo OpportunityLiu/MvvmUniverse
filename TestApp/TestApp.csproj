@@ -144,9 +144,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>5.2.4</Version>
-    </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Services">
       <Version>2.2.0</Version>
     </PackageReference>

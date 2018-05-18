@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.UI.Core;
@@ -93,8 +94,10 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void caculateVisibleBoundsThickness(Rect vb, Size size)
         {
-            var transedView = this.TransformToVisual(null).Inverse.TransformBounds(vb);
+            if (DesignMode.DesignModeEnabled)
+                return;
 
+            var transedView = this.TransformToVisual(null).Inverse.TransformBounds(vb);
             VisibleBounds = new Thickness(transedView.Left.BoundToZero(), transedView.Top.BoundToZero(), (size.Width - transedView.Right).BoundToZero(), (size.Height - transedView.Bottom).BoundToZero());
         }
 

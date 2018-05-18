@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.UI.Core;
@@ -83,6 +84,9 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void caculateVisibleBoundsThickness(Rect vb)
         {
+            if (DesignMode.DesignModeEnabled)
+                return;
+
             if (this.BackgroundElement is null || this.DialogSpace is null)
                 return;
             var size = new Size(this.BackgroundElement.ActualWidth, this.BackgroundElement.ActualHeight);
