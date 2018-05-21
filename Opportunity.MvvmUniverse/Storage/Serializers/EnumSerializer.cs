@@ -7,7 +7,7 @@ using Windows.Storage.Streams;
 namespace Opportunity.MvvmUniverse.Storage.Serializers
 {
     internal sealed class EnumSerializer<T> : ISerializer<T>
-        where T : struct, IComparable, IFormattable, IConvertible
+        where T : struct, Enum, IComparable, IFormattable, IConvertible
     {
         static EnumSerializer()
         {

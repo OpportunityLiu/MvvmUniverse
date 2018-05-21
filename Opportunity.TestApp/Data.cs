@@ -11,7 +11,7 @@ using Opportunity.MvvmUniverse;
 using Windows.UI.Xaml.Data;
 using System.Linq;
 
-namespace TestApp
+namespace Opportunity.TestApp
 {
     public class DataItem : ObservableObject
     {

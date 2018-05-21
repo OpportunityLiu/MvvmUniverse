@@ -15,12 +15,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion(Opportunity.MvvmUniverse.AssemblyInfo.Version)]
 [assembly: ComVisible(false)]
 [assembly: InternalsVisibleTo("Opportunity.MvvmUniverse.Test")]
-[assembly: InternalsVisibleTo("TestApp")]
+[assembly: InternalsVisibleTo("Opportunity.TestApp")]
 
 namespace Opportunity.MvvmUniverse
 {
     internal static class AssemblyInfo
     {
-        public const string Version = "2.6.13.0";
+        public const string Version = "2.6.14.0";
     }
 }

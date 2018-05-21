@@ -16,7 +16,7 @@ using Windows.UI.Xaml.Navigation;
 
 // https://go.microsoft.com/fwlink/?LinkId=234238 上介绍了“内容对话框”项模板
 
-namespace TestApp
+namespace Opportunity.TestApp
 {
     public sealed partial class ContentDialog1 : MvvmContentDialog
     {

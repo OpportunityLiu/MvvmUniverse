@@ -32,11 +32,10 @@ using Windows.UI.Xaml.Navigation;
 using System.Collections.Concurrent;
 using Opportunity.MvvmUniverse.Commands.ReentrancyHandlers;
 using Opportunity.MvvmUniverse.Collections;
-using Microsoft.Toolkit.Services.OneDrive;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
-namespace TestApp
+namespace Opportunity.TestApp
 {
     [MarkupExtensionReturnType(ReturnType = typeof(string))]
     public sealed class TestME : MarkupExtension
@@ -65,7 +64,7 @@ namespace TestApp
         {
             this.InitializeComponent();
             // this.xp.RegisterPropertyChangedCallback(VisibleBoundsProperty, VBC);
-            var c = AsyncActionCommand<int>.Create(async (s, i, t) =>
+            var c = AsyncCommand<int>.Create(async (s, i, t) =>
             {
                 Debug.WriteLine($"Enter {i}");
                 try
@@ -145,9 +144,9 @@ namespace TestApp
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
-            var f = await StorageFolder.GetFolderFromPathAsync(Path.Combine(@"C:\Users\lzy\OneDrive\", Uri.UnescapeDataString(@"Music\Ace%20Combat%20X%C2%B2")));
-            this.btnTest.CommandParameter = (int)this.btnTest.CommandParameter + 1;
-            Debug.WriteLine($"Inc: { this.btnTest.CommandParameter }");
+            //var f = await StorageFolder.GetFolderFromPathAsync(Path.Combine(@"C:\Users\lzy\OneDrive\", Uri.UnescapeDataString(@"Music\Ace%20Combat%20X%C2%B2")));
+            //this.btnTest.CommandParameter = (int)this.btnTest.CommandParameter + 1;
+            //Debug.WriteLine($"Inc: { this.btnTest.CommandParameter }");
             //var appview = CoreApplication.CreateNewView();
             //var id = await appview.Dispatcher.RunAsync(async () =>
             //{

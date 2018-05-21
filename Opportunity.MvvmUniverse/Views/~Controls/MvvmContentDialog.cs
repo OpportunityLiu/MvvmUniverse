@@ -76,10 +76,12 @@ namespace Opportunity.MvvmUniverse.Views
             caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
-        private void MvvmContentDialog_VisibleBoundsChanged(object sender, Rect e)
+        private async void MvvmContentDialog_VisibleBoundsChanged(object sender, Rect e)
         {
             Debug.WriteLine($"MvvmContentDialog_VisibleBoundsChanged {e}");
             caculateVisibleBoundsThickness(e);
+            await Task.Delay(16);
+            caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
         private void caculateVisibleBoundsThickness(Rect vb)

@@ -26,44 +26,26 @@ namespace Opportunity.MvvmUniverse.Views
             if (CoreApplication.GetCurrentView().Properties.TryGetValue(nameof(VisibleBoundsHelper), out var helper))
                 return (VisibleBoundsHelper)helper;
             var tHelper = new VisibleBoundsHelper();
-            tHelper.caculateVisibleBoundsThickness();
             CoreApplication.GetCurrentView().Properties[nameof(VisibleBoundsHelper)] = tHelper;
             return tHelper;
         }
 
-        private VisibleBoundsHelper() { }
+        private VisibleBoundsHelper()
+        {
+            caculateVisibleBoundsThickness();
+            var ipane = InputPane.GetForCurrentView();
+            if (ipane.Visible)
+                enableTimer();
+            ipane.Showing += this.InputPane_InputPaneShowing;
+            ipane.Hiding += this.InputPane_InputPaneHiding;
+            ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.ApplicationView_VisibleBoundsChanged;
+            CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
+        }
 
-        private event EventHandler<Rect> visibleBoundsChanged;
         /// <summary>
         /// Raises when <see cref="VisibleBounds"/> changed.
         /// </summary>
-        public event EventHandler<Rect> VisibleBoundsChanged
-        {
-            add
-            {
-                var on = this.visibleBoundsChanged is null;
-                this.visibleBoundsChanged += value;
-                if (on && this.visibleBoundsChanged != null)
-                    initialize();
-            }
-            remove
-            {
-                var on = this.visibleBoundsChanged is null;
-                this.visibleBoundsChanged -= value;
-                if (!on && this.visibleBoundsChanged is null)
-                    uninitialize();
-            }
-        }
-
-        private void initialize()
-        {
-            InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneShowing;
-            InputPane.GetForCurrentView().Hiding += this.InputPane_InputPaneHiding;
-            ApplicationView.GetForCurrentView().VisibleBoundsChanged += this.ApplicationView_VisibleBoundsChanged;
-            CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged += this.TitleBar_LayoutMetricsChanged;
-            this.timer.Tick += this.Timer_Tick;
-            this.timer.Start();
-        }
+        public event EventHandler<Rect> VisibleBoundsChanged;
 
         private void uninitialize()
         {
@@ -71,6 +53,21 @@ namespace Opportunity.MvvmUniverse.Views
             InputPane.GetForCurrentView().Hiding -= this.InputPane_InputPaneHiding;
             ApplicationView.GetForCurrentView().VisibleBoundsChanged -= this.ApplicationView_VisibleBoundsChanged;
             CoreApplication.GetCurrentView().TitleBar.LayoutMetricsChanged -= this.TitleBar_LayoutMetricsChanged;
+            disableTimer();
+        }
+
+        private void enableTimer()
+        {
+            if (this.timer.IsEnabled)
+                return;
+            this.timer.Tick += this.Timer_Tick;
+            this.timer.Start();
+        }
+
+        private void disableTimer()
+        {
+            if (!this.timer.IsEnabled)
+                return;
             this.timer.Tick -= this.Timer_Tick;
             this.timer.Stop();
         }
@@ -85,11 +82,13 @@ namespace Opportunity.MvvmUniverse.Views
         private void InputPane_InputPaneShowing(InputPane sender, InputPaneVisibilityEventArgs args)
         {
             caculateVisibleBoundsThickness();
+            enableTimer();
         }
 
         private void InputPane_InputPaneHiding(InputPane sender, InputPaneVisibilityEventArgs args)
         {
             caculateVisibleBoundsThickness();
+            disableTimer();
         }
 
         private void TitleBar_LayoutMetricsChanged(CoreApplicationViewTitleBar sender, object args)
@@ -137,7 +136,7 @@ namespace Opportunity.MvvmUniverse.Views
                 if (old == value)
                     return;
                 this.visibleBounds = value;
-                this.visibleBoundsChanged?.Invoke(this, value);
+                this.VisibleBoundsChanged?.Invoke(this, value);
             }
         }
     }
