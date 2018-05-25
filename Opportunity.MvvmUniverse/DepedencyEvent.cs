@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using Windows.ApplicationModel.Core;
@@ -12,26 +10,6 @@ using Windows.UI.Xaml;
 
 namespace Opportunity.MvvmUniverse
 {
-    [DebuggerDisplay(@"\{{TokenValue}\}")]
-    [StructLayout(LayoutKind.Explicit, Pack = sizeof(ulong), Size = sizeof(ulong))]
-    internal readonly struct Token
-    {
-        public Token(ulong value)
-        {
-            this.TokenValue = value;
-        }
-
-        public Token(EventRegistrationToken eventRegistrationToken) : this()
-        {
-            this.EventRegistrationToken = eventRegistrationToken;
-        }
-
-        [FieldOffset(0)]
-        public readonly ulong TokenValue;
-        [FieldOffset(0)]
-        public readonly EventRegistrationToken EventRegistrationToken;
-    }
-
     /// <summary>
     /// A class for managing event associated with dispatcher.
     /// </summary>
@@ -41,7 +19,7 @@ namespace Opportunity.MvvmUniverse
     [DebuggerTypeProxy(typeof(DepedencyEvent<,,>.DebuggerProxy))]
     [DebuggerDisplay(@"InvocationListLength = {InvocationListLength}")]
     public sealed class DepedencyEvent<TDelegate, TSender, TEventArgs>
-        where TDelegate : class
+        where TDelegate : Delegate
     {
         [DebuggerDisplay(@"Token = {Token.Value}, Dispatcher = {DispatcherDisplay,nq}")]
         private readonly struct EventEntry
@@ -62,14 +40,14 @@ namespace Opportunity.MvvmUniverse
             public readonly WeakReference<CoreDispatcher> Dispatcher;
             public readonly EventRegistrationToken Token;
 
-            public EventEntry(TDelegate targetDelegate, CoreDispatcher dispatcher, long token)
+            public unsafe EventEntry(TDelegate targetDelegate, CoreDispatcher dispatcher, long token)
             {
                 this.Delegate = targetDelegate;
                 if (dispatcher != null)
                     this.Dispatcher = new WeakReference<CoreDispatcher>(dispatcher);
                 else
                     this.Dispatcher = default;
-                this.Token = new Token(unchecked((ulong)token)).EventRegistrationToken;
+                this.Token = *(EventRegistrationToken*)&token;
             }
         }
 

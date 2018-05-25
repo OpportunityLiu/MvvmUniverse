@@ -36,7 +36,7 @@ namespace Opportunity.MvvmUniverse
     /// <typeparam name="TSender">Type of sender</typeparam>
     /// <typeparam name="TEventArgs">Type of event args</typeparam>
     public sealed class WeakEvent<TDelegate, TSender, TEventArgs>
-        where TDelegate : class
+        where TDelegate : Delegate
     {
         private struct EventEntry
         {
@@ -61,9 +61,6 @@ namespace Opportunity.MvvmUniverse
 
         static WeakEvent()
         {
-            if (!typeof(TDelegate).GetTypeInfo().IsSubclassOf(typeof(Delegate)))
-                throw new ArgumentException("TDelegate must be a delegate type", nameof(TDelegate));
-
             var invoke = typeof(TDelegate).GetMethod("Invoke");
             if (invoke == null)
                 throw new ArgumentException("TDelegate must have \"Invoke\" method", nameof(TDelegate));
@@ -90,11 +87,9 @@ namespace Opportunity.MvvmUniverse
         /// <param name="eventHandler">handler to add</param>
         public void Add(TDelegate eventHandler)
         {
-            if (eventHandler == null)
+            if (eventHandler is null)
                 return;
-
-            var d = (Delegate)(object)eventHandler;
-            var l = d.GetInvocationList();
+            var l = eventHandler.GetInvocationList();
             if (this.eventEntries.Count + l.Length > this.eventEntries.Capacity)
                 removeDeadEntries();
             foreach (var item in l)
@@ -127,11 +122,9 @@ namespace Opportunity.MvvmUniverse
         /// <param name="eventHandler">handler to remove</param>
         public void Remove(TDelegate eventHandler)
         {
-            if (eventHandler == null)
+            if (eventHandler is null)
                 return;
-
-            var d = (Delegate)(object)eventHandler;
-            foreach (var item in d.GetInvocationList())
+            foreach (var item in eventHandler.GetInvocationList())
             {
                 remove(item);
             }

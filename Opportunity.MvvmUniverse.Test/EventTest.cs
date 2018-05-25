@@ -9,10 +9,10 @@ using System.Runtime.InteropServices.WindowsRuntime;
 namespace Opportunity.MvvmUniverse.Test
 {
     [TestClass]
-    public class WeakEventTest
+    public class EventTest
     {
         [TestMethod]
-        public void Create()
+        public void CreateWeakEvent()
         {
             var wef1 = Assert.ThrowsException<TypeInitializationException>(() => new WeakEvent<Func<int>, int, EventArgs>());
             var wef2 = Assert.ThrowsException<TypeInitializationException>(() => new WeakEvent<Func<object>, int, EventArgs>());
@@ -29,6 +29,18 @@ namespace Opportunity.MvvmUniverse.Test
             var we3 = Assert.ThrowsException<TypeInitializationException>(() => new WeakEvent<ExecutingEventHandler, object, ExecutingEventArgs>());
             var we4 = Assert.ThrowsException<TypeInitializationException>(() => new WeakEvent<ExecutingEventHandler, Command, ExecutingEventArgs>());
             var we5 = new WeakEvent<ExecutingEventHandler, ICommand, ExecutingEventArgs>();
+        }
+
+        [TestMethod]
+        public void TestDepedencyEvent()
+        {
+            var eve = new DepedencyEvent<Action<object, int>, object, int>((a, s, e) => a(s, e));
+            var r1 = eve.Add((s, e) => { Assert.IsNotNull(s); });
+            Assert.AreNotEqual(default, r1);
+            var r2 = eve.Add(null);
+            Assert.AreEqual(default, r2);
+            Assert.AreEqual(1, eve.InvocationListLength);
+            eve.Raise(1, 1);
         }
     }
 }
