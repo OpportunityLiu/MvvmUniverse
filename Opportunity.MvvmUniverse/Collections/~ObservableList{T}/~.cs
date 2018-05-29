@@ -180,8 +180,6 @@ namespace Opportunity.MvvmUniverse.Collections
         public void CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool ICollection.IsSynchronized => false;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => ((ICollection)Items).SyncRoot;
 
         private ObservableListView<T> readOnlyView;

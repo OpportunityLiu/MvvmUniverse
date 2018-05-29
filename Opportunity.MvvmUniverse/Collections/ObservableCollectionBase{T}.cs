@@ -117,10 +117,9 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal bool IsReadOnlyInternal => ((IList)this).IsReadOnly;
-        // Derived class can override this value.
+        internal bool IsReadOnlyInternal => (this is ICollection<T> c) ? c.IsReadOnly : true;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool IList.IsReadOnly => (this is ICollection<T> c) ? c.IsReadOnly : true;
+        bool IList.IsReadOnly => IsReadOnlyInternal;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal bool IsFixedSizeInternal => ((IList)this).IsFixedSize;
@@ -129,9 +128,9 @@ namespace Opportunity.MvvmUniverse.Collections
         bool IList.IsFixedSize => false;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal int CountInternal => ((ICollection)this).Count;
+        internal int CountInternal => (this is ICollection<T> col) ? col.Count : ((IReadOnlyCollection<T>)this).Count;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int ICollection.Count => (this is ICollection<T> col) ? col.Count : ((IReadOnlyCollection<T>)this).Count;
+        int ICollection.Count => CountInternal;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IList.this[int index]
@@ -202,7 +201,8 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (IsReadOnlyInternal) ThrowForReadOnlyCollection();
             if (IsFixedSizeInternal) ThrowForFixedSizeCollection();
-            ((ICollection<T>)this).Remove(CastValue<T>(value));
+            if (TryCastValue<T>(value, out var item))
+                ((ICollection<T>)this).Remove(item);
         }
 
         void IList.RemoveAt(int index)

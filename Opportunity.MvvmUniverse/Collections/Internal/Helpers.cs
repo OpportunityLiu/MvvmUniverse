@@ -13,9 +13,9 @@ namespace Opportunity.MvvmUniverse.Collections.Internal
                 item = default;
                 return (default(T) == null);
             }
-            if (value is T)
+            if (value is T it)
             {
-                item = (T)value;
+                item = it;
                 return true;
             }
             item = default;

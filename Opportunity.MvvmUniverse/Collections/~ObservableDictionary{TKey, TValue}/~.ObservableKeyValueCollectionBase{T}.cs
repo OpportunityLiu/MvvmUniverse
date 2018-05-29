@@ -18,7 +18,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <typeparam name="T">type of elements</typeparam>
         [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-        public abstract class ObservableKeyValueCollectionBase<T> : ObservableCollectionBase<T>, ICollection
+        public abstract class ObservableKeyValueCollectionBase<T> : ObservableCollectionBase<T>, ICollection, IList
         {
             internal ObservableDictionary<TKey, TValue> Parent { get; }
 

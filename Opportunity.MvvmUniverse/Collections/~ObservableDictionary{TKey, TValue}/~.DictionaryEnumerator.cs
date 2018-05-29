@@ -50,8 +50,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 }
             }
 
-            /// <inheritdoc/>
-            public void Dispose()
+            void IDisposable.Dispose()
             {
                 this.keyEnumerator.Dispose();
                 this.valueEnumerator.Dispose();
@@ -64,7 +63,6 @@ namespace Opportunity.MvvmUniverse.Collections
                 var vr = this.valueEnumerator.MoveNext();
                 if (kr == vr)
                     return kr;
-                Dispose();
                 throw new InvalidOperationException("Dictionary has been changed.");
             }
 

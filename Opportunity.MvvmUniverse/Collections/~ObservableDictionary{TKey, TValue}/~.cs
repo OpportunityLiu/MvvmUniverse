@@ -309,8 +309,6 @@ namespace Opportunity.MvvmUniverse.Collections
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool IDictionary.IsFixedSize => false;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool ICollection.IsSynchronized => false;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => ((ICollection)KeySet).SyncRoot;
 
         /// <summary>
@@ -432,7 +430,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="action">Action for each key-value pair.</param>
         public void ForEach(Action<TKey, TValue> action)
         {
-            if (action == null)
+            if (action is null)
                 throw new ArgumentNullException(nameof(action));
             using (var e = GetEnumerator())
             {
@@ -448,7 +446,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="action">Action for each key-value pair and its index.</param>
         public void ForEach(Action<int, TKey, TValue> action)
         {
-            if (action == null)
+            if (action is null)
                 throw new ArgumentNullException(nameof(action));
             var i = 0;
             using (var e = GetEnumerator())
@@ -464,6 +462,8 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <inheritdoc/>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
+            if (array is null)
+                throw new ArgumentNullException(nameof(array));
             if (Count + arrayIndex > array.Length)
                 throw new ArgumentException("Not enough space in array");
             foreach (var item in this)
