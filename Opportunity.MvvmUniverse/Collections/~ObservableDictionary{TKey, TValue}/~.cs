@@ -291,12 +291,12 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <returns>A read-only view of current instance.</returns>
         public ObservableDictionaryView<TKey, TValue> AsReadOnly()
-            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory);
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, CreateReadOnlyView);
 
         /// <summary>
         /// This method will be called when <see cref="AsReadOnly()"/> first called on this instance.
         /// </summary>
-        protected virtual ObservableDictionaryView<TKey, TValue> ReadOnlyViewFactory()
+        protected virtual ObservableDictionaryView<TKey, TValue> CreateReadOnlyView()
             => new UndisposableObservableDictionaryView<TKey, TValue>(this);
 
         /// <inheritdoc/>

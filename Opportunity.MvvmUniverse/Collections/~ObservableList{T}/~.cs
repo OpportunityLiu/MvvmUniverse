@@ -190,12 +190,12 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <returns>A read-only view of current instance.</returns>
         public ObservableListView<T> AsReadOnly()
-            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, ReadOnlyViewFactory);
+            => LazyInitializer.EnsureInitialized(ref this.readOnlyView, CreateReadOnlyView);
 
         /// <summary>
         /// This method will be called when <see cref="AsReadOnly()"/> first called on this instance.
         /// </summary>
-        protected virtual ObservableListView<T> ReadOnlyViewFactory()
+        protected virtual ObservableListView<T> CreateReadOnlyView()
             => new UndisposableObservableListView<T>(this);
 
         /// <inheritdoc/>

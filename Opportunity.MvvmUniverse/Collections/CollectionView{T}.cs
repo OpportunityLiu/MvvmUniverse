@@ -38,7 +38,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="source">Source of data.</param>
         public CollectionView(ObservableCollectionBase<T> source)
         {
-            this.source = source;
+            this.source = source ?? throw new ArgumentNullException(nameof(source));
             this.source.VectorChanged += this.Source_VectorChanged;
             this.source.PropertyChanged += this.Source_PropertyChanged;
             this.currentItem = ((IEnumerable<T>)this.Source).FirstOrDefault();
