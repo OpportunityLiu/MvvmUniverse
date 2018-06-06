@@ -97,6 +97,8 @@ namespace Opportunity.MvvmUniverse.Storage
             Serializer<Color>.Storage.Default = ColorSerializer.Instance;
             Serializer<SolidColorBrush>.Storage.Default = ColorSerializer.Instance;
         }
+
+        internal Serializer() { }
     }
 
     /// <summary>

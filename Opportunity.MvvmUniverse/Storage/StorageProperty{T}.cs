@@ -183,7 +183,6 @@ namespace Opportunity.MvvmUniverse.Storage
             }
         }
 
-
         internal StorageProperty(
             ApplicationDataLocality locality,
             string path,
