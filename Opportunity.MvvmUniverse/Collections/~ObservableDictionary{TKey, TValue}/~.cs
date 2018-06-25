@@ -181,6 +181,15 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         /// <summary>
+        /// Tell caller of <see cref="OnPropertyChanged(PropertyChangedEventArgs)"/> that whether this call can be skipped.
+        /// <para></para>
+        /// Returns <see langword="false"/> if both <see cref="NeedRaisePropertyChanged"/> of this dictionary and its <see cref="Keys"/> and <see cref="Values"/>.
+        /// </summary>
+        protected override bool NeedRaisePropertyChanged => base.NeedRaisePropertyChanged
+            || (this.keys?.NeedRaisePropertyChangedInternal ?? false)
+            || (this.values?.NeedRaisePropertyChangedInternal ?? false);
+
+        /// <summary>
         /// Raise <see cref="ObservableObject.PropertyChanged"/> for this collection, <see cref="Keys"/> and <see cref="Values"/>.
         /// </summary>
         /// <param name="args">event args</param>
@@ -191,6 +200,15 @@ namespace Opportunity.MvvmUniverse.Collections
             this.keys?.RaisePropertyChangedInternal(args);
             this.values?.RaisePropertyChangedInternal(args);
         }
+
+        /// <summary>
+        /// Tell caller of <see cref="OnVectorChanged(IVectorChangedEventArgs)"/> that whether this call can be skipped.
+        /// <para></para>
+        /// Returns <see langword="false"/> if both <see cref="NeedRaiseVectorChanged"/> of this dictionary and its <see cref="Keys"/> and <see cref="Values"/>.
+        /// </summary>
+        protected override bool NeedRaiseVectorChanged => base.NeedRaiseVectorChanged
+            || (this.keys?.NeedRaiseVectorChangedInternal ?? false)
+            || (this.values?.NeedRaiseVectorChangedInternal ?? false);
 
         /// <summary>
         /// Raise <see cref="ObservableCollectionBase{T}.VectorChanged"/> for this collection, <see cref="Keys"/> and <see cref="Values"/>.

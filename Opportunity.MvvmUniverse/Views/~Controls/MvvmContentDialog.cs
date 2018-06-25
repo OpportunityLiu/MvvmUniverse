@@ -24,9 +24,42 @@ namespace Opportunity.MvvmUniverse.Views
         /// </summary>
         public MvvmContentDialog()
         {
+            ViewOfAttribute.Init(GetType());
             this.Opened += this.MvvmContentDialog_Opened;
             this.Closed += this.MvvmContentDialog_Closed;
         }
+
+        /// <summary>
+        /// View model of this dialog.
+        /// </summary>
+        public ViewModelBase ViewModel
+        {
+            get => (ViewModelBase)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
+        }
+
+        /// <summary>
+        /// Indentify <see cref="ViewModel"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(ViewModelBase), typeof(MvvmPage), new PropertyMetadata(null, ViewModelPropertyChanged));
+
+        private static void ViewModelPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (ViewModelBase)e.OldValue;
+            var newValue = (ViewModelBase)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (MvvmContentDialog)dp;
+            sender.OnViewModelChanged(oldValue, newValue);
+        }
+
+        /// <summary>
+        /// Called when <see cref="ViewModel"/> changed.
+        /// </summary>
+        /// <param name="oldValue">Old view model.</param>
+        /// <param name="newValue">New view model.</param>
+        protected virtual void OnViewModelChanged(ViewModelBase oldValue, ViewModelBase newValue) { }
 
         private Border BackgroundElement;
         private Grid DialogSpace;

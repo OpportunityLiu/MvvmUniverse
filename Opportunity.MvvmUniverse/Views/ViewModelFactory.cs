@@ -34,11 +34,19 @@ namespace Opportunity.MvvmUniverse.Views
 
         public static void Register<T>(Func<string, T> activator, int capacity)
             where T : ViewModelBase
+            => Register(activator, capacity, false);
+
+        public static void Register<T>(Func<string, T> activator, int capacity, bool throwIfRegistered)
+            where T : ViewModelBase
         {
             if (activator is null)
                 throw new ArgumentNullException(nameof(activator));
             if (TypedStorage<T>.CacheStorage != null)
-                throw new InvalidOperationException("Have registed.");
+            {
+                if (throwIfRegistered)
+                    throw new InvalidOperationException("Have registed.");
+                return;
+            }
             TypedStorage<T>.CacheStorage = AutoFillCacheStorage.Create(activator, capacity);
         }
 

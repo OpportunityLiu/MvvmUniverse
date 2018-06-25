@@ -27,6 +27,7 @@ namespace Opportunity.MvvmUniverse.Views
         /// </summary>
         public MvvmPage()
         {
+            ViewOfAttribute.Init(GetType());
             this.Unloaded += this.MvvmPage_Unloaded;
             this.Loading += this.MvvmPage_Loading;
         }

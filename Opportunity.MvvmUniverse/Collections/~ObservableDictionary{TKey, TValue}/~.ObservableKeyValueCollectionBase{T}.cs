@@ -25,6 +25,9 @@ namespace Opportunity.MvvmUniverse.Collections
             /// <inheritdoc/>
             public int Count => Parent.Count;
 
+            internal bool NeedRaisePropertyChangedInternal => NeedRaisePropertyChanged;
+            internal bool NeedRaiseVectorChangedInternal => NeedRaiseVectorChanged;
+
             internal ObservableKeyValueCollectionBase(ObservableDictionary<TKey, TValue> parent)
             {
                 Parent = parent;
