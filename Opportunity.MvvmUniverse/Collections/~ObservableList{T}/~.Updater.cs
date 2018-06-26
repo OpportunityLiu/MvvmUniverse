@@ -19,10 +19,10 @@ namespace Opportunity.MvvmUniverse.Collections
             private readonly IReadOnlyList<T> target;
             private readonly IEqualityComparer<T> comparer;
             private readonly ItemUpdater<T> itemUpdater;
-            private readonly int sourceCount, targetCount;
-            private readonly int rowCount, columnCount;
-            private int[] medMat;
-            private int distance;
+            private short sourceCount, targetCount;
+            private short rowCount, columnCount;
+            private short[] medMat;
+            private short distance;
 
             public Updater(ObservableList<T> source, IReadOnlyList<T> target, IEqualityComparer<T> comparer, ItemUpdater<T> itemUpdater)
             {
@@ -30,30 +30,34 @@ namespace Opportunity.MvvmUniverse.Collections
                 this.target = target;
                 this.comparer = comparer;
                 this.itemUpdater = itemUpdater;
-                this.sourceCount = source.Count;
-                this.targetCount = target.Count;
-                this.rowCount = this.sourceCount + 1;
-                this.columnCount = this.targetCount + 1;
             }
 
             public int Update()
             {
-                if (this.targetCount <= 0)
+                if (this.target.Count <= 0)
                 {
+                    var r = this.source.Count;
                     swap();
-                    return this.sourceCount;
+                    return r;
                 }
-                if (this.sourceCount <= 0)
+                if (this.source.Count <= 0)
                 {
+                    var r = this.target.Count;
                     swap();
-                    return this.targetCount;
+                    return r;
                 }
-                if (this.sourceCount * this.targetCount > 1_000_000)
+                if (this.source.Count * this.target.Count > 100_000_000 ||
+                    this.source.Count + 1 >= short.MaxValue ||
+                    this.target.Count + 1 >= short.MaxValue)
                 {
                     // Too large
                     swap();
                     return -1;
                 }
+                this.sourceCount = (short)this.source.Count;
+                this.targetCount = (short)this.target.Count;
+                this.rowCount = (short)(this.sourceCount + 1);
+                this.columnCount = (short)(this.targetCount + 1);
                 computeMED();
                 if (this.sourceCount > this.targetCount ? this.distance == this.sourceCount : this.distance == this.targetCount)
                 {
@@ -70,19 +74,19 @@ namespace Opportunity.MvvmUniverse.Collections
 
             private void computeMED()
             {
-                var mat = new int[this.rowCount * this.columnCount];
-                for (var i = 0; i < this.rowCount; i++)
+                var mat = new short[this.rowCount * this.columnCount];
+                for (short i = 0; i < this.rowCount; i++)
                 {
                     mat[i * this.columnCount] = i;
                 }
-                for (var j = 0; j < this.columnCount; j++)
+                for (short j = 0; j < this.columnCount; j++)
                 {
                     mat[j] = j;
                 }
                 // compute
-                for (var i = 1; i <= this.sourceCount; i++)
+                for (short i = 1; i <= this.sourceCount; i++)
                 {
-                    for (var j = 1; j <= this.targetCount; j++)
+                    for (short j = 1; j <= this.targetCount; j++)
                     {
                         var left = mat[(i - 1) * this.columnCount + j];
                         var up = mat[i * this.columnCount + (j - 1)];
