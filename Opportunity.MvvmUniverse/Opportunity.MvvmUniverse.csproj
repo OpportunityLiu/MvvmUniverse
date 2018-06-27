@@ -140,6 +140,7 @@
     <Compile Include="Storage\StorageProperty{T}.cs" />
     <Compile Include="Services\Notification\Notificator.cs" />
     <Compile Include="Views\CommandDictionary.cs" />
+    <Compile Include="Views\IView.cs" />
     <Compile Include="Views\ViewModelFactory.cs" />
     <Compile Include="Views\~Controls\MathHelper.cs" />
     <Compile Include="Views\~Controls\MvvmContentDialog.cs" />
@@ -148,7 +149,6 @@
     <Compile Include="Services\Navigation\FrameWrapper.cs" />
     <Compile Include="Services\Navigation\INavigationHandler.cs" />
     <Compile Include="Services\Navigation\Navigator.cs" />
-    <Compile Include="Views\~Controls\ViewOfAttribute.cs" />
     <Compile Include="Views\~Controls\VisibleBoundsHelper.cs" />
     <Compile Include="DepedencyEvent.cs" />
     <Compile Include="WeakEvent.cs" />

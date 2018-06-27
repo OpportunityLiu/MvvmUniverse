@@ -11,6 +11,11 @@ namespace Opportunity.MvvmUniverse.Views
         private static class TypedStorage<T>
             where T : ViewModelBase
         {
+            static TypedStorage()
+            {
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(T).TypeHandle);
+            }
+
             public static AutoFillCacheStorage<string, T> CacheStorage { get; set; }
         }
 

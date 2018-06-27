@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Core;
@@ -20,14 +21,13 @@ namespace Opportunity.MvvmUniverse.Views
     /// <summary>
     /// Page with accociated view model and supports <see cref="VisibleBounds"/>.
     /// </summary>
-    public class MvvmPage : Page
+    public class MvvmPage : Page, IView
     {
         /// <summary>
         /// Create new instance of <see cref="MvvmPage"/>.
         /// </summary>
         public MvvmPage()
         {
-            ViewOfAttribute.Init(GetType());
             this.Unloaded += this.MvvmPage_Unloaded;
             this.Loading += this.MvvmPage_Loading;
             this.Loaded += this.MvvmPage_Loaded;
@@ -79,9 +79,17 @@ namespace Opportunity.MvvmUniverse.Views
         {
             var oldValue = (ViewModelBase)e.OldValue;
             var newValue = (ViewModelBase)e.NewValue;
-            if (oldValue == newValue)
-                return;
             var sender = (MvvmPage)dp;
+            if (oldValue == newValue)
+            {
+                if (newValue != null)
+                    newValue.view = sender;
+                return;
+            }
+            if (oldValue != null)
+                Interlocked.CompareExchange(ref oldValue.view, null, sender);
+            if (newValue != null)
+                newValue.view = sender;
             var rt = 0;
             while (!sender.IsLoaded && rt < 2)
             {

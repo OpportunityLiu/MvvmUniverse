@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Core;
@@ -17,14 +18,13 @@ namespace Opportunity.MvvmUniverse.Views
     /// <summary>
     /// <see cref="ContentDialog"/> with visible bounds awareness.
     /// </summary>
-    public class MvvmContentDialog : ContentDialog
+    public class MvvmContentDialog : ContentDialog, IView
     {
         /// <summary>
         /// Create new instance of <see cref="MvvmContentDialog"/>.
         /// </summary>
         public MvvmContentDialog()
         {
-            ViewOfAttribute.Init(GetType());
             this.Opened += this.MvvmContentDialog_Opened;
             this.Closed += this.MvvmContentDialog_Closed;
         }
@@ -53,9 +53,17 @@ namespace Opportunity.MvvmUniverse.Views
         {
             var oldValue = (ViewModelBase)e.OldValue;
             var newValue = (ViewModelBase)e.NewValue;
-            if (oldValue == newValue)
-                return;
             var sender = (MvvmContentDialog)dp;
+            if (oldValue == newValue)
+            {
+                if (newValue != null)
+                    newValue.view = sender;
+                return;
+            }
+            if (oldValue != null)
+                Interlocked.CompareExchange(ref oldValue.view, null, sender);
+            if (newValue != null)
+                newValue.view = sender;
             var rt = 0;
             while (!sender.IsOpened && rt < 2)
             {
