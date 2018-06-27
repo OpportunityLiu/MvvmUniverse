@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Windows.UI.Xaml;
 
 namespace Opportunity.MvvmUniverse.Views
 {
@@ -24,17 +25,26 @@ namespace Opportunity.MvvmUniverse.Views
         /// </summary>
         public Type ViewModelType { get; }
 
-        private readonly static HashSet<RuntimeTypeHandle> initViewTypes = new HashSet<RuntimeTypeHandle>();
+        private readonly static HashSet<string> initViewAssemblies;
+
+        static ViewOfAttribute()
+        {
+            initViewAssemblies = new HashSet<string>();
+            Init(typeof(MvvmPage));
+        }
 
         internal static void Init(Type viewType)
         {
-            var handle = viewType.TypeHandle;
-            if (!initViewTypes.Add(handle))
+            var assembly = viewType.GetTypeInfo().Assembly;
+            if (!initViewAssemblies.Add(assembly.FullName))
                 return;
-            var attrs = viewType.GetTypeInfo().GetCustomAttributes<ViewOfAttribute>(true);
-            foreach (var item in attrs)
+            foreach (var type in assembly.DefinedTypes)
             {
-                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(item.ViewModelType.TypeHandle);
+                var attrs = type.GetCustomAttributes<ViewOfAttribute>(true);
+                foreach (var item in attrs)
+                {
+                    System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(item.ViewModelType.TypeHandle);
+                }
             }
         }
     }
