@@ -121,7 +121,7 @@
     <Compile Include="Services\IService{THandler}.cs" />
     <Compile Include="Services\Notification\INotificationHandler.cs" />
     <Compile Include="Services\ServiceHandlerCollection.cs" />
-    <Compile Include="Storage\RoamingStoragePropertyManager.cs" />
+    <Compile Include="Storage\ApplicationSettingAttribute.cs" />
     <Compile Include="Storage\Serializers\BasicSerializer.cs" />
     <Compile Include="Storage\Serializers\CollectionSerializerBase.cs" />
     <Compile Include="Storage\Serializers\ColorSerializer.cs" />
@@ -136,8 +136,7 @@
     <Compile Include="Storage\Serializers\UriSerializer.cs" />
     <Compile Include="Storage\Serializers\XmlSerializer.cs" />
     <Compile Include="Storage\Serializer{T}.cs" />
-    <Compile Include="Storage\StorageProperty.cs" />
-    <Compile Include="Storage\StorageProperty{T}.cs" />
+    <Compile Include="Storage\StorageObject.cs" />
     <Compile Include="Services\Notification\Notificator.cs" />
     <Compile Include="Views\CommandDictionary.cs" />
     <Compile Include="Views\IView.cs" />

@@ -20,6 +20,20 @@ namespace Opportunity.MvvmUniverse.Test
     [TestClass]
     public class StorageTest
     {
+        public class St1 : StorageObject
+        {
+            public St1(string containerPath) : base(containerPath)
+            {
+            }
+        }
+
+        public class St2 : St1
+        {
+            public St2(string containerPath) : base(containerPath)
+            {
+            }
+        }
+
         [TestInitialize]
         public async Task Init()
         {
@@ -29,30 +43,12 @@ namespace Opportunity.MvvmUniverse.Test
         [TestMethod]
         public void BasicFunctions()
         {
-            var p1 = StorageProperty.Create(ApplicationDataLocality.Local, "Int", 123, null);
-            var p2 = StorageProperty.Create(ApplicationDataLocality.Local, "Int", 456, null);
-            Assert.AreEqual(456, p2.Value);
-            Assert.AreEqual(456, p1.Value);
-            p2.Delete();
-            Assert.IsFalse(p1.Populate());
-            p1.Value = 123;
-            Assert.AreEqual(123, p1.Value);
-            Assert.AreEqual(123, p2.Value);
-
-            p2.Value = 777;
-            Assert.AreEqual(777, p2.Value);
-            Assert.AreEqual(123, p1.Value);
-            Assert.IsTrue(p1.Populate());
-            Assert.AreEqual(777, p1.Value);
-
-            var pa = StorageProperty.Create(ApplicationDataLocality.Local, "AT", default(AT), null, null, Serializer.Create<AT>((t, s) => s.WriteBoolean(false), (s, t) => { s.ReadBoolean(); return t; }));
-            var pp = StorageProperty.Create(ApplicationDataLocality.Local, "PT", default(PT), null, null, Serializer.Create<PT>((t, s) => s.WriteBoolean(false), (s, t) => { s.ReadBoolean(); return t; }));
-            var pi = StorageProperty.Create(ApplicationDataLocality.Local, "IT", default(IT), null, null, Serializer.Create<IT>((t, s) => s.WriteBoolean(false), (s, t) => { s.ReadBoolean(); return t; }));
+            var i1 = new St1("aa");
+            Assert.ThrowsException<InvalidOperationException>(() => new St1("aa"));
+            Assert.ThrowsException<InvalidOperationException>(() => new St2("aa"));
+            Assert.ThrowsException<ArgumentNullException>(() => new St1(""));
+            Assert.ThrowsException<ArgumentException>(() => new St1("///"));
         }
-
-        private abstract class AT { private AT() { } }
-        private class PT { public PT() { } }
-        private class IT { internal IT() { } }
 
         [TestMethod]
         public void WinRTTypes()
@@ -193,16 +189,16 @@ namespace Opportunity.MvvmUniverse.Test
             Tester.Test(new[] { new Dictionary<int, char> { [1] = '1', [2] = '2', [3] = '3' }, new Dictionary<int, char>() }, null, (a, b) => (a == b || a.SequenceEqual(b)) ? 0 : 1);
         }
 
-        [TestMethod]
-        public void XMLSerializer()
-        {
-            var p = StorageProperty.CreateLocal("xml", serializer: new XmlSerializer<Point>());
-            var p2 = StorageProperty.CreateLocal("xml", serializer: new XmlSerializer<Point>());
-            p.Delete();
-            p.Value = new Point(1, 2);
-            p2.Populate();
-            Assert.AreEqual(new Point(1, 2), p2.Value);
-        }
+        //[TestMethod]
+        //public void XMLSerializer()
+        //{
+        //    var p = StorageProperty.CreateLocal("xml", serializer: new XmlSerializer<Point>());
+        //    var p2 = StorageProperty.CreateLocal("xml", serializer: new XmlSerializer<Point>());
+        //    p.Delete();
+        //    p.Value = new Point(1, 2);
+        //    p2.Populate();
+        //    Assert.AreEqual(new Point(1, 2), p2.Value);
+        //}
 
         static class Tester
         {
@@ -253,18 +249,19 @@ namespace Opportunity.MvvmUniverse.Test
             public static void TestCollction<T, TEle>(T v, Comparison<TEle> comparer = null)
                 where T : ICollection<TEle>, ICollection
             {
-                var c = new TypeCollection<T>();
-                c.Setting.Value = v;
+                var c = TypeCollection<T>.Instance;
+                c.ValueL = v;
+                c.Populate();
                 if (comparer == null)
                 {
-                    CollectionAssert.AreEqual(v, c.SettingCop.Value);
+                    CollectionAssert.AreEqual(v, c.ValueL);
                 }
                 else
                 {
-                    var pro = c.SettingCop.Value;
+                    var pro = c.ValueL;
                     if (ReferenceEquals(pro, v))
                         return;
-                    var p = c.SettingCop.Value.ToList();
+                    var p = pro.ToList();
                     var q = v.ToList();
                     Assert.AreEqual(q.Count, p.Count);
                     for (var i = 0; i < p.Count; i++)
@@ -276,66 +273,75 @@ namespace Opportunity.MvvmUniverse.Test
 
             public static void TestDefault<T>(Comparison<T> comparer = null)
                 where T : new()
-            {
-                var v1 = new T();
-                var v2 = new T();
-                var c = new TypeCollection<T>();
-                c.Setting.Value = v1;
-                if (comparer == null)
-                {
-                    Assert.AreEqual(v1, c.SettingCop.Value);
-                    Assert.AreEqual(v2, c.SettingCop.Value);
-                }
-                else
-                {
-                    Assert.IsTrue(comparer(v1, c.SettingCop.Value) == 0);
-                    Assert.IsTrue(comparer(v2, c.SettingCop.Value) == 0);
-                }
-            }
+                => TestSingle(new T(), new T(), comparer);
 
             public static void TestSingle<T>(T v, Comparison<T> comparer = null)
             {
-                var c = new TypeCollection<T>();
-                c.Setting.Value = v;
+                var c = TypeCollection<T>.Instance;
+                c.ValueL = v;
+                c.Populate();
                 if (comparer == null)
                 {
-                    Assert.AreEqual(v, c.SettingCop.Value);
+                    Assert.AreEqual(v, c.ValueL);
                 }
                 else
                 {
-                    Assert.IsTrue(comparer(v, c.SettingCop.Value) == 0);
+                    Assert.IsTrue(comparer(v, c.ValueL) == 0);
                 }
             }
 
             public static void TestSingle<T>(T v1, T v2, Comparison<T> comparer = null)
             {
-                var c = new TypeCollection<T>();
-                c.Setting.Value = v1;
+                var c = TypeCollection<T>.Instance;
+                c.ValueL = v1;
+                c.ValueR = v2;
+                c.Populate();
                 if (comparer == null)
                 {
-                    Assert.AreEqual(v1, c.SettingCop.Value);
-                    Assert.AreEqual(v2, c.SettingCop.Value);
+                    Assert.AreEqual(v1, c.ValueR);
+                    Assert.AreEqual(v2, c.ValueL);
                 }
                 else
                 {
-                    Assert.IsTrue(comparer(v1, c.SettingCop.Value) == 0);
-                    Assert.IsTrue(comparer(v2, c.SettingCop.Value) == 0);
+                    Assert.IsTrue(comparer(v1, c.ValueR) == 0);
+                    Assert.IsTrue(comparer(v2, c.ValueL) == 0);
                 }
             }
         }
 
-        class TypeCollection<T>
+        sealed class TypeCollection<T> : StorageObject
         {
-            private static Random random = new Random();
-            public TypeCollection()
+            public static TypeCollection<T> Instance { get; } = new TypeCollection<T>();
+            private TypeCollection() : base(typeof(T).GetHashCode().ToString()) { }
+
+            [ApplicationSetting(ApplicationDataLocality.Local)]
+            public T ValueL
             {
-                var name = $"{typeof(T)}-{random.Next()}";
-                this.Setting = StorageProperty.CreateLocal<T>(name);
-                this.SettingCop = StorageProperty.CreateLocal<T>(name);
+                get => GetStorage<T>();
+                set => SetStorage(value);
+            }
+            [ApplicationSetting(ApplicationDataLocality.Roaming)]
+            public T ValueR
+            {
+                get => GetStorage<T>();
+                set => SetStorage(value);
             }
 
-            public readonly StorageProperty<T> Setting;
-            public readonly StorageProperty<T> SettingCop;
+            public void Populate()
+            {
+                foreach (var item in this.StorageData.Data)
+                {
+                    this.StorageData.Populate(item.Key, (StorageObjectData.StoragePropertyData<T>)item.Value);
+                }
+            }
+
+            public void Flush()
+            {
+                foreach (var item in this.StorageData.Data)
+                {
+                    this.StorageData.Flush(item.Key, (StorageObjectData.StoragePropertyData<T>)item.Value);
+                }
+            }
         }
     }
 }
