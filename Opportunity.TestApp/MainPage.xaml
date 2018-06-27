@@ -8,6 +8,7 @@
                 xmlns:c="using:Opportunity.MvvmUniverse.Collections"
                 NavigationCacheMode="Enabled"
                 mc:Ignorable="d"
+                Title="{x:Bind ((local:DataItem)View.CurrentItem).Name, Mode=OneWay}"
                 Loaded="MvvmPage_Loaded"
                 Padding="{x:Bind VisibleBounds, Mode=OneWay}">
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">

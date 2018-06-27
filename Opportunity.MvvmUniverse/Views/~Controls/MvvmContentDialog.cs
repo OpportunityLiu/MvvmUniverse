@@ -30,6 +30,11 @@ namespace Opportunity.MvvmUniverse.Views
         }
 
         /// <summary>
+        /// The opening status of the dialog.
+        /// </summary>
+        public bool IsOpened { get; private set; }
+
+        /// <summary>
         /// View model of this dialog.
         /// </summary>
         public ViewModelBase ViewModel
@@ -44,13 +49,19 @@ namespace Opportunity.MvvmUniverse.Views
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register(nameof(ViewModel), typeof(ViewModelBase), typeof(MvvmPage), new PropertyMetadata(null, ViewModelPropertyChanged));
 
-        private static void ViewModelPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        private static async void ViewModelPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
         {
             var oldValue = (ViewModelBase)e.OldValue;
             var newValue = (ViewModelBase)e.NewValue;
             if (oldValue == newValue)
                 return;
             var sender = (MvvmContentDialog)dp;
+            var rt = 0;
+            while (!sender.IsOpened && rt < 2)
+            {
+                await sender.Dispatcher.YieldIdle();
+                rt++;
+            }
             sender.OnViewModelChanged(oldValue, newValue);
         }
 
@@ -63,7 +74,7 @@ namespace Opportunity.MvvmUniverse.Views
 
         private Border BackgroundElement;
         private Grid DialogSpace;
-        private bool opening = false;
+
         /// <inheritdoc/>
         protected override void OnApplyTemplate()
         {
@@ -71,7 +82,7 @@ namespace Opportunity.MvvmUniverse.Views
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged -= this.BackgroundElement_SizeChanged;
             this.BackgroundElement = GetTemplateChild(nameof(this.BackgroundElement)) as Border;
-            if (this.BackgroundElement != null && this.opening)
+            if (this.BackgroundElement != null && IsOpened)
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
             this.DialogSpace = GetTemplateChild(nameof(this.DialogSpace)) as Grid;
             caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
@@ -79,23 +90,23 @@ namespace Opportunity.MvvmUniverse.Views
 
         private void MvvmContentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
         {
-            InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneChanging;
-            VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged += this.MvvmContentDialog_VisibleBoundsChanged;
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
-            this.opening = true;
+            IsOpened = true;
+            InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneChanging;
+            VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged += this.MvvmContentDialog_VisibleBoundsChanged;
             caculateVisibleBoundsThickness(VisibleBoundsHelper.GetForCurrentView().VisibleBounds);
         }
 
         private void MvvmContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
         {
-            InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneChanging;
-            VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged -= this.MvvmContentDialog_VisibleBoundsChanged;
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged -= this.BackgroundElement_SizeChanged;
+            IsOpened = false;
+            InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneChanging;
+            VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged -= this.MvvmContentDialog_VisibleBoundsChanged;
             this.ClearValue(WidthProperty);
             this.ClearValue(HeightProperty);
-            this.opening = false;
         }
 
         private void InputPane_InputPaneChanging(InputPane sender, InputPaneVisibilityEventArgs args)

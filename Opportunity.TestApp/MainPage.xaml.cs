@@ -138,15 +138,13 @@ namespace Opportunity.TestApp
 
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            new ContentDialog1().ShowAsync();
+            await navigator.NavigateAsync(typeof(BlankPage1));
+            //new ContentDialog1().ShowAsync();
         }
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = !CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar;
-            //var f = await StorageFolder.GetFolderFromPathAsync(Path.Combine(@"C:\Users\lzy\OneDrive\", Uri.UnescapeDataString(@"Music\Ace%20Combat%20X%C2%B2")));
-            //this.btnTest.CommandParameter = (int)this.btnTest.CommandParameter + 1;
-            //Debug.WriteLine($"Inc: { this.btnTest.CommandParameter }");
             var appview = CoreApplication.CreateNewView();
             var id = await appview.Dispatcher.RunAsync(async () =>
             {

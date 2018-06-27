@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Opportunity.MvvmUniverse.Services.Navigation;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -47,6 +48,9 @@ namespace Opportunity.TestApp
             {
                 // 创建要充当导航上下文的框架，并导航到第一页
                 rootFrame = new Frame();
+
+                var nav = Navigator.GetOrCreateForCurrentView();
+                nav.Handlers.Add(rootFrame.AsNavigationHandler());
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 

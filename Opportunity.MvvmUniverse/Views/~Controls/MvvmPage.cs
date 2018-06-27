@@ -30,6 +30,34 @@ namespace Opportunity.MvvmUniverse.Views
             ViewOfAttribute.Init(GetType());
             this.Unloaded += this.MvvmPage_Unloaded;
             this.Loading += this.MvvmPage_Loading;
+            this.Loaded += this.MvvmPage_Loaded;
+        }
+
+        /// <summary>
+        /// The title of current page.
+        /// </summary>
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
+        }
+
+        /// <summary>
+        /// Indentify <see cref="Title"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty TitleProperty =
+            DependencyProperty.Register(nameof(Title), typeof(string), typeof(MvvmPage), new PropertyMetadata(null, TitlePropertyChanged));
+
+        private static void TitlePropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = (string)e.OldValue;
+            var newValue = (string)e.NewValue;
+            if (oldValue == newValue)
+                return;
+            var sender = (MvvmPage)dp;
+            if (!sender.IsLoaded)
+                return;
+            ApplicationView.GetForCurrentView().Title = newValue ?? "";
         }
 
         /// <summary>
@@ -47,13 +75,19 @@ namespace Opportunity.MvvmUniverse.Views
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register(nameof(ViewModel), typeof(ViewModelBase), typeof(MvvmPage), new PropertyMetadata(null, ViewModelPropertyChanged));
 
-        private static void ViewModelPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
+        private static async void ViewModelPropertyChanged(DependencyObject dp, DependencyPropertyChangedEventArgs e)
         {
             var oldValue = (ViewModelBase)e.OldValue;
             var newValue = (ViewModelBase)e.NewValue;
             if (oldValue == newValue)
                 return;
             var sender = (MvvmPage)dp;
+            var rt = 0;
+            while (!sender.IsLoaded && rt < 2)
+            {
+                await sender.Dispatcher.YieldIdle();
+                rt++;
+            }
             sender.OnViewModelChanged(oldValue, newValue);
         }
 
@@ -64,15 +98,43 @@ namespace Opportunity.MvvmUniverse.Views
         /// <param name="newValue">New view model.</param>
         protected virtual void OnViewModelChanged(ViewModelBase oldValue, ViewModelBase newValue) { }
 
+        /// <summary>
+        /// The loading status of current page.
+        /// </summary>
+        public bool IsLoaded { get; private set; }
+
         private void MvvmPage_Loading(FrameworkElement sender, object e)
         {
             InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneShowing;
             VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged += this.MvvmPage_VisibleBoundsChanged;
             this.SizeChanged += this.MvvmPage_SizeChanged;
+            if (Title is string t)
+                ApplicationView.GetForCurrentView().Title = t;
+        }
+
+        private void MvvmPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            IsLoaded = true;
         }
 
         private void MvvmPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            IsLoaded = false;
+            var v = ApplicationView.GetForCurrentView();
+            if (v.Title == Title)
+            {
+                var t = "";
+                foreach (var item in Window.Current.Content?.Descendants<MvvmPage>().EmptyIfNull())
+                {
+                    if (!item.IsLoaded)
+                        continue;
+                    var tt = item.Title;
+                    if (tt is null)
+                        continue;
+                    t = tt;
+                }
+                v.Title = t;
+            }
             InputPane.GetForCurrentView().Showing -= this.InputPane_InputPaneShowing;
             VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged -= this.MvvmPage_VisibleBoundsChanged;
             this.SizeChanged -= this.MvvmPage_SizeChanged;
