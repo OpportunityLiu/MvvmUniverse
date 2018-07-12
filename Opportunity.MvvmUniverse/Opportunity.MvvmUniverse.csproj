@@ -48,7 +48,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Collections\CollectionView{T}.cs" />
+    <Compile Include="Collections\~View\CollectionView{T}.cs" />
     <Compile Include="Collections\~Cache\AutoFillCacheStorage.cs" />
     <Compile Include="Collections\~Cache\CacheStorage.cs" />
     <Compile Include="Collections\~Data\FixedIncrementalLoadingList.FixedCollectionView.cs" />
@@ -74,6 +74,7 @@
     <Compile Include="Collections\~ObservableList{T}\~.Updater.cs" />
     <Compile Include="Collections\~Data\FixedIncrementalLoadingList{T}.cs" />
     <Compile Include="Collections\RangedListView{T}.cs" />
+    <Compile Include="Collections\~View\~EventArgs.cs" />
     <Compile Include="Commands\Predefined\DataTransferCommands.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{T, TProgress}.cs" />
     <Compile Include="Commands\~AsyncCommandWithProgress\~Action{TProgress}.cs" />

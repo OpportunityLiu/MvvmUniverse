@@ -41,7 +41,6 @@ namespace Opportunity.MvvmUniverse.Collections
             this.source = source ?? throw new ArgumentNullException(nameof(source));
             this.source.VectorChanged += this.Source_VectorChanged;
             this.source.PropertyChanged += this.Source_PropertyChanged;
-            this.currentItem = ((IEnumerable<T>)this.Source).FirstOrDefault();
         }
 
         /// <summary>
@@ -146,27 +145,25 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns><see langword="true"/> if the operation is not cancelled, and the <paramref name="index"/> is in the view.</returns>
         protected virtual bool MoveCurrentToPosition(int index, bool isCancelable)
         {
-            if (OnCurrentChanging(isCancelable))
+            var oldI = this.currentPosition;
+            if (OnCurrentChanging(isCancelable, oldI, index))
                 return false;
             if (index < 0)
             {
                 CurrentPosition = -1;
-                CurrentItem = default;
-                OnCurrentChanged();
+                OnCurrentChanged(oldI, index);
                 return false;
             }
             else if (index >= Count)
             {
                 CurrentPosition = Count;
-                CurrentItem = default;
-                OnCurrentChanged();
+                OnCurrentChanged(oldI, index);
                 return false;
             }
             else
             {
                 CurrentPosition = index;
-                CurrentItem = this[index];
-                OnCurrentChanged();
+                OnCurrentChanged(oldI, index);
                 return true;
             }
         }
@@ -205,18 +202,33 @@ namespace Opportunity.MvvmUniverse.Collections
         public int CurrentPosition
         {
             get => this.currentPosition;
-            private set => Set(nameof(IsCurrentAfterLast), nameof(IsCurrentBeforeFirst), ref this.currentPosition, value);
+            private set => Set(currentAddtionalPropertyNames, ref this.currentPosition, value);
         }
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private T currentItem;
+        private static readonly string[] currentAddtionalPropertyNames
+            = new[] { nameof(IsCurrentAfterLast), nameof(IsCurrentBeforeFirst), nameof(CurrentItem) };
+
+        /// <summary>
+        /// Get item at <paramref name="position"/>, will return default value if out of range.
+        /// </summary>
+        /// <param name="position">Index of item, can be out of range.</param>
+        /// <returns>Item at <paramref name="position"/>, will return default value if out of range.</returns>
+        protected T GetItemAt(int position)
+        {
+            if ((uint)position >= (uint)Count)
+                return default;
+            return this[position];
+        }
+
         /// <inheritdoc/>
-        public T CurrentItem { get => this.currentItem; private set => Set(ref this.currentItem, value); }
+        public T CurrentItem => GetItemAt(this.currentPosition);
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object ICollectionView.CurrentItem => (IsCurrentAfterLast || IsCurrentBeforeFirst) ? null : (object)this.currentItem;
+        object ICollectionView.CurrentItem => (IsCurrentAfterLast || IsCurrentBeforeFirst) ? null : (object)this.CurrentItem;
 
         private readonly DepedencyEvent<EventHandler<object>, CollectionView<T>, object> currentChanged
             = new DepedencyEvent<EventHandler<object>, CollectionView<T>, object>((h, s, e) => h(s, e));
-        /// <inheritdoc/>
+        /// <summary>
+        /// Will be raised after current changed, event args is of type <see cref="CurrentChangedEventArgs{T}"/>.
+        /// </summary>
         public event EventHandler<object> CurrentChanged
         {
             add
@@ -230,15 +242,20 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <summary>
         /// Raise <see cref="CurrentChanged"/>.
         /// </summary>
-        protected void OnCurrentChanged()
+        /// <param name="oldPosition">Old value of <see cref="CurrentPosition"/>.</param>
+        /// <param name="newPosition">New value of <see cref="CurrentPosition"/>.</param>
+        protected void OnCurrentChanged(int oldPosition, int newPosition)
         {
             checkDisposed();
-            this.currentChanged.Raise(this, null);
+            if (this.currentChanged.InvocationListLength > 0)
+                this.currentChanged.Raise(this, new CurrentChangedEventArgs<T>(oldPosition, GetItemAt(oldPosition), newPosition, GetItemAt(newPosition)));
         }
 
         private readonly DepedencyEvent<CurrentChangingEventHandler, CollectionView<T>, CurrentChangingEventArgs> currentChanging
             = new DepedencyEvent<CurrentChangingEventHandler, CollectionView<T>, CurrentChangingEventArgs>((h, s, e) => h(s, e));
-        /// <inheritdoc/>
+        /// <summary>
+        /// Will be raised before current changed, event args is of type <see cref="CurrentChangingEventArgs{T}"/>.
+        /// </summary>
         public event CurrentChangingEventHandler CurrentChanging
         {
             add
@@ -254,14 +271,16 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="isCancelable">Can this operation be cancelled.</param>
         /// <returns>Indicates this operation was cancelled or not.</returns>
-        protected bool OnCurrentChanging(bool isCancelable)
+        /// <param name="oldPosition">Old value of <see cref="CurrentPosition"/>.</param>
+        /// <param name="newPosition">New value of <see cref="CurrentPosition"/>.</param>
+        protected bool OnCurrentChanging(bool isCancelable, int oldPosition, int newPosition)
         {
             checkDisposed();
             if (isCancelable && this.isCurrentPositionLocked)
                 return true;
             if (this.currentChanging.InvocationListLength == 0)
                 return false;
-            var arg = new CurrentChangingEventArgs(isCancelable);
+            var arg = new CurrentChangingEventArgs<T>(isCancelable, oldPosition, GetItemAt(oldPosition), newPosition, GetItemAt(newPosition));
             this.currentChanging.RaiseHasThreadAccessOnly(this, arg);
             if (!isCancelable)
                 return false;
@@ -371,7 +390,6 @@ namespace Opportunity.MvvmUniverse.Collections
                 // 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
                 // 将大型字段设置为 null。
                 this.source = null;
-                this.currentItem = default;
                 this.Disposed = true;
             }
         }
