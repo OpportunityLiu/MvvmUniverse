@@ -109,6 +109,11 @@ namespace Opportunity.TestApp
             }
         }
 
+        private void MvvmPage_Loading(FrameworkElement sender, object args)
+        {
+
+        }
+
         private void MvvmPage_Loaded(object sender, RoutedEventArgs e)
         {
             View.CurrentChanged += this.View_CurrentChanged;
@@ -117,6 +122,8 @@ namespace Opportunity.TestApp
             var x = LoadItemsResult.Create(12, new[] { 1, 2, 3 });
             var d = new ArraySegment<int>(new[] { 1, 2, 3 }, 1, 2);
         }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e) => base.OnNavigatedTo(e);
 
         private void View_CurrentChanged(object sender, object e)
         {

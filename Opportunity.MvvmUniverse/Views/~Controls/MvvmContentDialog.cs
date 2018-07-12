@@ -42,6 +42,7 @@ namespace Opportunity.MvvmUniverse.Views
             get => (ViewModelBase)GetValue(ViewModelProperty);
             set => SetValue(ViewModelProperty, value);
         }
+        private Action _PendingViewModelAction;
 
         /// <summary>
         /// Indentify <see cref="ViewModel"/> dependency property.
@@ -64,13 +65,14 @@ namespace Opportunity.MvvmUniverse.Views
                 Interlocked.CompareExchange(ref oldValue.view, null, sender);
             if (newValue != null)
                 newValue.view = sender;
-            var rt = 0;
-            while (!sender.IsOpened && rt < 2)
+            sender._PendingViewModelAction = () =>
             {
-                await sender.Dispatcher.YieldIdle();
-                rt++;
-            }
-            sender.OnViewModelChanged(oldValue, newValue);
+                sender.OnViewModelChanged(oldValue, newValue);
+            };
+            await sender.Dispatcher.YieldIdle();
+            await sender.Dispatcher.YieldIdle();
+            var a = Interlocked.Exchange(ref sender._PendingViewModelAction, null);
+            a?.Invoke();
         }
 
         /// <summary>
@@ -100,6 +102,8 @@ namespace Opportunity.MvvmUniverse.Views
         {
             if (this.BackgroundElement != null)
                 this.BackgroundElement.SizeChanged += this.BackgroundElement_SizeChanged;
+            var a = Interlocked.Exchange(ref this._PendingViewModelAction, null);
+            a?.Invoke();
             IsOpened = true;
             InputPane.GetForCurrentView().Showing += this.InputPane_InputPaneChanging;
             VisibleBoundsHelper.GetForCurrentView().VisibleBoundsChanged += this.MvvmContentDialog_VisibleBoundsChanged;

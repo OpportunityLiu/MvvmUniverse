@@ -9,6 +9,7 @@
                 NavigationCacheMode="Enabled"
                 mc:Ignorable="d"
                 Title="{x:Bind ((local:DataItem)View.CurrentItem).Name, Mode=OneWay}"
+                Loading="MvvmPage_Loading"
                 Loaded="MvvmPage_Loaded"
                 Padding="{x:Bind VisibleBounds, Mode=OneWay}">
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
