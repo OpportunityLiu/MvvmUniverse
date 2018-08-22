@@ -34,24 +34,4 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
         /// <returns>Whether the call is handled or not.</returns>
         IAsyncOperation<bool> NavigateAsync(Type sourcePageType, object parameter);
     }
-
-    /// <summary>
-    /// Extension methods for <see cref="INavigationHandler"/>.
-    /// </summary>
-    public static class INavigationHandlerExtension
-    {
-        /// <summary>
-        /// Get <see cref="Navigator"/> associated with the <paramref name="handler"/>.
-        /// </summary>
-        /// <param name="handler"><see cref="INavigationHandler"/> to find associated <see cref="Navigator"/>.</param>
-        /// <returns><see cref="Navigator"/> associated with the <paramref name="handler"/>, or <see langword="null"/>.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="handler"/> is <see langword="null"/>.</exception>
-        public static Navigator GetNavigator(this INavigationHandler handler)
-        {
-            if (handler == null)
-                throw new ArgumentNullException(nameof(handler));
-            ServiceHandlerCollection<Navigator, INavigationHandler>.HandlerDic.TryGetValue(handler, out var navigator);
-            return navigator;
-        }
-    }
 }

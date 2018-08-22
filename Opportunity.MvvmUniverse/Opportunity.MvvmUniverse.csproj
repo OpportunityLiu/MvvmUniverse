@@ -121,6 +121,7 @@
     <Compile Include="Services\IServiceHandler{TService}.cs" />
     <Compile Include="Services\IService{THandler}.cs" />
     <Compile Include="Services\Notification\INotificationHandler.cs" />
+    <Compile Include="Services\ServiceBase.cs" />
     <Compile Include="Services\ServiceHandlerCollection.cs" />
     <Compile Include="Storage\ApplicationSettingAttribute.cs" />
     <Compile Include="Storage\Serializers\BasicSerializer.cs" />

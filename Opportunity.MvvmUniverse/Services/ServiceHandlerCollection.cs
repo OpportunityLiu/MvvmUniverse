@@ -1,5 +1,5 @@
-﻿using Opportunity.MvvmUniverse.Collections;
-using Opportunity.Helpers.ObjectModel;
+﻿using Opportunity.Helpers.ObjectModel;
+using Opportunity.MvvmUniverse.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +14,26 @@ namespace Opportunity.MvvmUniverse.Services
     /// </summary>
     /// <typeparam name="TService">Service type.</typeparam>
     /// <typeparam name="THandler">Handler type.</typeparam>
-    internal sealed class ServiceHandlerCollection<TService, THandler> : ObservableList<THandler>
-        where TService : class, IService<THandler>
+    public sealed class ServiceHandlerCollection<TService, THandler> : ObservableList<THandler>, IDisposable
+        where TService : class, IService<TService, THandler>
         where THandler : IServiceHandler<TService>
     {
-        public static readonly Dictionary<THandler, TService> HandlerDic
+        private static readonly Dictionary<THandler, TService> HandlerDic
             = new Dictionary<THandler, TService>();
+
+        /// <summary>
+        /// Get the service associated with the <paramref name="handler"/>.
+        /// </summary>
+        /// <param name="handler">Handler to find associated service.</param>
+        /// <returns>The service associated with the <paramref name="handler"/>, or <see langword="null"/>, if the <paramref name="handler"/> isn't associated with any services.</returns>
+        public static TService GetService(THandler handler)
+        {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+            if (HandlerDic.TryGetValue(handler, out var service))
+                return service;
+            return default;
+        }
 
         private struct LockHelper : IDisposable
         {
@@ -129,7 +143,10 @@ namespace Opportunity.MvvmUniverse.Services
             Service.UpdateProperties();
         }
 
-        public void Destory()
+        /// <summary>
+        /// Clear handlers and set <see cref="Service"/> to <see langword="null"/>.
+        /// </summary>
+        public void Dispose()
         {
             if (this.Service != null)
             {

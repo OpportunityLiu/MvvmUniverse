@@ -1,28 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using Opportunity.Helpers.ObjectModel;
+using Opportunity.Helpers.Universal.AsyncHelpers;
+using Opportunity.MvvmUniverse.Collections;
+using Opportunity.MvvmUniverse.Commands;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
-using Opportunity.MvvmUniverse.Collections;
-using System;
-using System.Collections.Specialized;
-using Windows.Foundation;
-using Opportunity.Helpers.Universal.AsyncHelpers;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Opportunity.MvvmUniverse.Commands;
-using System.Threading;
-using System.Diagnostics;
-using System.ComponentModel;
-using Opportunity.Helpers.ObjectModel;
 
 namespace Opportunity.MvvmUniverse.Services.Navigation
 {
     /// <summary>
     /// Provides view level navigation service.
     /// </summary>
-    public sealed class Navigator : DependencyObject, IService<INavigationHandler>
+    public sealed class Navigator : DependencyServiceBase<Navigator, INavigationHandler>
     {
         /// <summary>
         /// Create or get <see cref="Navigator"/> of current view.
@@ -52,31 +52,19 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
 
         private Navigator()
         {
-            this.handlers = new ServiceHandlerCollection<Navigator, INavigationHandler>(this);
             this.SystemNavigationManager = SystemNavigationManager.GetForCurrentView();
             this.SystemNavigationManager.BackRequested += this.manager_BackRequested;
         }
 
         private void destory()
         {
-            if (this.handlers != null)
+            if (this.Handlers.Service != null)
             {
                 this.SystemNavigationManager.BackRequested -= this.manager_BackRequested;
                 this.SystemNavigationManager = null;
-                this.handlers.Destory();
-                this.handlers = null;
+                this.Handlers.Dispose();
             }
         }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private ServiceHandlerCollection<Navigator, INavigationHandler> handlers;
-        /// <summary>
-        /// Handlers handles navigation methods.
-        /// </summary>
-        /// <remarks>
-        /// Handlers with greater index will be used first.
-        /// </remarks>
-        public IList<INavigationHandler> Handlers => this.handlers;
 
         /// <summary>
         /// <see cref="Windows.UI.Core.SystemNavigationManager"/> of this instance.
@@ -96,14 +84,14 @@ namespace Opportunity.MvvmUniverse.Services.Navigation
 
         private void CheckAvailable()
         {
-            if (this.handlers is null)
+            if (this.Handlers.Service is null)
                 throw new InvalidOperationException("This navigator has been destoryed.");
         }
 
         /// <summary>
         /// Manually caculates and updates values of <see cref="CanGoBack"/> and <see cref="CanGoForward"/>.
         /// </summary>
-        public void UpdateProperties()
+        protected override void UpdatePropertiesOverride()
         {
             CheckAvailable();
             var canBack = false;

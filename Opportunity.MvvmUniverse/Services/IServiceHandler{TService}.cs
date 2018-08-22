@@ -13,12 +13,12 @@ namespace Opportunity.MvvmUniverse.Services
     public interface IServiceHandler<in TService>
     {
         /// <summary>
-        /// Will be called when adding to <see cref="IService{THandler}.Handlers"/>.
+        /// Will be called when adding to <see cref="IService{TService, THandler}.Handlers"/>.
         /// </summary>
         /// <param name="service">The <typeparamref name="TService"/> of which is adding to.</param>
         void OnAdd(TService service);
         /// <summary>
-        /// Will be called when removing from <see cref="IService{THandler}.Handlers"/>.
+        /// Will be called when removing from <see cref="IService{TService, THandler}.Handlers"/>.
         /// </summary>
         /// <param name="service">The <typeparamref name="TService"/> of which is removing from.</param>
         void OnRemove(TService service);

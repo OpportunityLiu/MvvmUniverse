@@ -14,9 +14,9 @@ using Windows.UI.Xaml;
 namespace Opportunity.MvvmUniverse.Services.Notification
 {
     /// <summary>
-    ///  Provides view level notification service.
+    /// Provides view level notification service.
     /// </summary>
-    public class Notificator : DependencyObject, IService<INotificationHandler>
+    public class Notificator : ServiceBase<Notificator, INotificationHandler>
     {
         /// <summary>
         /// Get <see cref="Notificator"/> of application.
@@ -35,22 +35,6 @@ namespace Opportunity.MvvmUniverse.Services.Notification
             return ThreadLocalSingleton.GetOrCreate(() => new Notificator());
         }
 
-        private Notificator()
-        {
-            var h = new ServiceHandlerCollection<Notificator, INotificationHandler>(this);
-            this.Handlers = h;
-        }
-
-        /// <summary>
-        /// Handlers handles notifications.
-        /// </summary>
-        /// <remarks>
-        /// Handlers with greater index will be used first.
-        /// </remarks>
-        public IList<INotificationHandler> Handlers { get; }
-
-        void IService<INotificationHandler>.UpdateProperties() { }
-
         /// <summary>
         /// Send notification and returns immediately.
         /// </summary>
@@ -66,7 +50,7 @@ namespace Opportunity.MvvmUniverse.Services.Notification
         /// </summary>
         /// <param name="data">Data of notificaiton.</param>
         /// <exception cref="ArgumentNullException"><paramref name="data"/> is <see langword="null"/>.</exception>
-        /// <returns>Whether the notification was handled by any of <see cref="Handlers"/>.</returns>
+        /// <returns>Whether the notification was handled by any of <see cref="DependencyServiceBase{Notificator, INotificationHandler}.Handlers"/>.</returns>
         public IAsyncOperation<bool> NotifyAsync(object data)
         {
             if (data is null)

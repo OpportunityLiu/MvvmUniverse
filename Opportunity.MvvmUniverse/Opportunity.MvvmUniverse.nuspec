@@ -9,7 +9,7 @@
     <licenseUrl>https://github.com/OpportunityLiu/MvvmUniverse/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/OpportunityLiu/MvvmUniverse</projectUrl>
     <description>An Mvvm lib for UWP apps.</description>
-    <releaseNotes>Pages.</releaseNotes>
+    <releaseNotes>Custom services.</releaseNotes>
     <copyright>Opportunity 2018</copyright>
     <tags>UWP mvvm observable</tags>
     <dependencies>
