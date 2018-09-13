@@ -321,7 +321,7 @@ namespace Opportunity.MvvmUniverse
         /// <exception cref="ArgumentNullException"><paramref name="propertyNames"/> is <see langword="null"/></exception>
         public void OnPropertyChanged(params string[] propertyNames)
         {
-            if (propertyNames == null)
+            if (propertyNames is null)
                 throw new ArgumentNullException(nameof(propertyNames));
             if (!NeedRaisePropertyChanged)
                 return;
@@ -343,7 +343,7 @@ namespace Opportunity.MvvmUniverse
         /// <exception cref="ArgumentNullException"><paramref name="propertyNames"/> is <see langword="null"/></exception>
         public void OnPropertyChanged(IEnumerable<string> propertyNames)
         {
-            if (propertyNames == null)
+            if (propertyNames is null)
                 throw new ArgumentNullException(nameof(propertyNames));
             if (!NeedRaisePropertyChanged)
                 return;

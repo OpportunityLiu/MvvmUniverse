@@ -1,8 +1,11 @@
-﻿using Opportunity.MvvmUniverse.Commands;
+﻿using Opportunity.MvvmUniverse.Collections;
+using Opportunity.MvvmUniverse.Commands;
 using Opportunity.MvvmUniverse.Commands.Predefined;
+using Opportunity.MvvmUniverse.Commands.ReentrancyHandlers;
 using Opportunity.MvvmUniverse.Services.Navigation;
 using Opportunity.MvvmUniverse.Views;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,7 +14,6 @@ using System.Numerics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
-using Windows.UI.Core;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -20,6 +22,7 @@ using Windows.Storage.BulkAccess;
 using Windows.Storage.Pickers;
 using Windows.UI.Composition;
 using Windows.UI.Composition.Interactions;
+using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -29,9 +32,6 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Markup;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using System.Collections.Concurrent;
-using Opportunity.MvvmUniverse.Commands.ReentrancyHandlers;
-using Opportunity.MvvmUniverse.Collections;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -145,8 +145,9 @@ namespace Opportunity.TestApp
 
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            await navigator.NavigateAsync(typeof(BlankPage1));
-            //new ContentDialog1().ShowAsync();
+            //await navigator.NavigateAsync(typeof(BlankPage1));
+            var d = new ContentDialog1();
+            await d.ShowAsync();
         }
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)

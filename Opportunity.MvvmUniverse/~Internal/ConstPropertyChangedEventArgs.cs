@@ -16,7 +16,7 @@ namespace Opportunity.MvvmUniverse
         public ConstPropertyChangedEventArgs(string propertyName)
             : base(propertyName) { }
 
-        public static readonly ConstPropertyChangedEventArgs PropertyReset = new ConstPropertyChangedEventArgs(null);
+        public static readonly ConstPropertyChangedEventArgs PropertyReset = new ConstPropertyChangedEventArgs("");
         public static readonly ConstPropertyChangedEventArgs Count = new ConstPropertyChangedEventArgs(nameof(Count));
         public static readonly ConstPropertyChangedEventArgs Current = new ConstPropertyChangedEventArgs(nameof(Current));
         public static readonly ConstPropertyChangedEventArgs Progress = new ConstPropertyChangedEventArgs(nameof(Progress));
