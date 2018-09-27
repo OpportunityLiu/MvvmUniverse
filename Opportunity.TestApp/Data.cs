@@ -21,7 +21,7 @@ namespace Opportunity.TestApp
         public int Index => GetHashCode();
     }
 
-    public class DataList : FixedIncrementalLoadingList<DataItem>
+    public class DataList : FixedLoadingList<DataItem>
     {
         public static DataList Instance { get; } = new DataList();
 

@@ -1,16 +1,16 @@
 ﻿using Opportunity.MvvmUniverse.Collections.Internal;
-using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation.Collections;
-using System.ComponentModel;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -315,7 +315,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// This method will be called when <see cref="AsReadOnly()"/> first called on this instance.
         /// </summary>
         protected virtual ObservableDictionaryView<TKey, TValue> CreateReadOnlyView()
-            => new UndisposableObservableDictionaryView<TKey, TValue>(this);
+            => new ObservableDictionaryView<TKey, TValue>(this);
 
         /// <inheritdoc/>
         public int Count => KeySet.Count;

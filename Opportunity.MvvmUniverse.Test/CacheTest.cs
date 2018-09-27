@@ -31,9 +31,9 @@ namespace Opportunity.MvvmUniverse.Test
                         Assert.AreEqual(item, value);
                 }
             }
-            Assert.AreEqual(128, cache.Count);
+            checkCount(cache, 128);
             cache.Clear();
-            Assert.AreEqual(0, cache.Count);
+            checkCount(cache, 0);
             for (var i = 0; i < 100; i++)
             {
                 r.NextBytes(buf);
@@ -48,7 +48,7 @@ namespace Opportunity.MvvmUniverse.Test
                         Assert.AreEqual(item, value);
                 }
             }
-            Assert.AreEqual(128, cache.Count);
+            checkCount(cache, 128);
         }
 
         [TestMethod]
@@ -66,9 +66,9 @@ namespace Opportunity.MvvmUniverse.Test
                     Assert.AreEqual(item, cache.GetOrCreateAsync(item).GetResults());
                 }
             }
-            Assert.AreEqual(128, cache.Count);
+            checkCount(cache, 128);
             cache.Clear();
-            Assert.AreEqual(0, cache.Count);
+            checkCount(cache, 0);
             for (var i = 0; i < 100; i++)
             {
                 r.NextBytes(buf);
@@ -77,7 +77,7 @@ namespace Opportunity.MvvmUniverse.Test
                     Assert.AreEqual(item, cache.GetOrCreateAsync(item).GetResults());
                 }
             }
-            Assert.AreEqual(128, cache.Count);
+            checkCount(cache, 128);
         }
 
         [TestMethod]
@@ -95,9 +95,9 @@ namespace Opportunity.MvvmUniverse.Test
                     Assert.AreEqual(item, cache.GetOrCreateAsync(item).GetResults());
                 }
             }
-            Assert.AreEqual(128, cache.Count);
+            checkCount(cache, 128);
             cache.Clear();
-            Assert.AreEqual(0, cache.Count);
+            checkCount(cache, 0);
             for (var i = 0; i < 100; i++)
             {
                 r.NextBytes(buf);
@@ -106,7 +106,7 @@ namespace Opportunity.MvvmUniverse.Test
                     Assert.AreEqual(item, cache.GetOrCreateAsync(item).GetResults());
                 }
             }
-            Assert.AreEqual(128, cache.Count);
+            checkCount(cache, 128);
         }
 
         [TestMethod]
@@ -129,9 +129,9 @@ namespace Opportunity.MvvmUniverse.Test
                     Assert.AreEqual(item, value);
                 }
             }
-            Assert.AreEqual(256, cache.Count);
+            checkCount(cache, 256);
             cache.Clear();
-            Assert.AreEqual(0, cache.Count);
+            checkCount(cache, 0);
             for (var i = 0; i < 256; i++)
             {
                 cache[(byte)i] = i;
@@ -145,7 +145,7 @@ namespace Opportunity.MvvmUniverse.Test
                     Assert.AreEqual(item, value);
                 }
             }
-            Assert.AreEqual(256, cache.Count);
+            checkCount(cache, 256);
         }
 
         [TestMethod]
@@ -157,14 +157,21 @@ namespace Opportunity.MvvmUniverse.Test
                 [1] = 1,
                 [2] = 2,
             };
-            Assert.AreEqual(3, cache.Count);
+            checkCount(cache, 3);
             Assert.IsFalse(cache.Remove(12));
-            Assert.AreEqual(3, cache.Count);
+            checkCount(cache, 3);
             Assert.IsTrue(cache.Remove(1));
-            Assert.AreEqual(2, cache.Count);
+            checkCount(cache, 2);
             Assert.IsTrue(cache.ContainsKey(0));
             Assert.IsFalse(cache.ContainsKey(1));
             Assert.IsTrue(cache.ContainsKey(2));
+        }
+
+        private void checkCount<TK, TV>(CacheStorage<TK, TV> storage, int expectedCount)
+        {
+            Assert.AreEqual(expectedCount, storage.Count);
+            Assert.AreEqual(expectedCount, storage.Keys.Count);
+            Assert.AreEqual(expectedCount, storage.ToArray().Length);
         }
     }
 }

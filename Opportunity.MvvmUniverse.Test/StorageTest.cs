@@ -200,10 +200,25 @@ namespace Opportunity.MvvmUniverse.Test
         //    Assert.AreEqual(new Point(1, 2), p2.Value);
         //}
 
-        static class Tester
+        private static class Tester
         {
+            private static void clearData()
+            {
+                clear(ApplicationData.Current.LocalSettings);
+                clear(ApplicationData.Current.RoamingSettings);
+                void clear(ApplicationDataContainer container)
+                {
+                    container.Values.Clear();
+                    while (container.Containers.Count != 0)
+                    {
+                        container.DeleteContainer(container.Containers.Keys.First());
+                    }
+                }
+            }
+
             public static void Test<T>(T[] values, T[] valuesCopy = null, Comparison<T> comparer = null)
             {
+                clearData();
                 if (valuesCopy != null)
                 {
                     for (var i = 0; i < values.Length; i++)
@@ -246,7 +261,8 @@ namespace Opportunity.MvvmUniverse.Test
                 TestCollction(default(LinkedList<T>), comparer);
                 TestCollction(default(Collections.ObservableList<T>), comparer);
             }
-            public static void TestCollction<T, TEle>(T v, Comparison<TEle> comparer = null)
+
+            private static void TestCollction<T, TEle>(T v, Comparison<TEle> comparer = null)
                 where T : ICollection<TEle>, ICollection
             {
                 var c = TypeCollection<T>.Instance;
@@ -271,11 +287,11 @@ namespace Opportunity.MvvmUniverse.Test
                 }
             }
 
-            public static void TestDefault<T>(Comparison<T> comparer = null)
+            private static void TestDefault<T>(Comparison<T> comparer = null)
                 where T : new()
                 => TestSingle(new T(), new T(), comparer);
 
-            public static void TestSingle<T>(T v, Comparison<T> comparer = null)
+            private static void TestSingle<T>(T v, Comparison<T> comparer = null)
             {
                 var c = TypeCollection<T>.Instance;
                 c.ValueL = v;
@@ -290,7 +306,7 @@ namespace Opportunity.MvvmUniverse.Test
                 }
             }
 
-            public static void TestSingle<T>(T v1, T v2, Comparison<T> comparer = null)
+            private static void TestSingle<T>(T v1, T v2, Comparison<T> comparer = null)
             {
                 var c = TypeCollection<T>.Instance;
                 c.ValueL = v1;
@@ -309,7 +325,7 @@ namespace Opportunity.MvvmUniverse.Test
             }
         }
 
-        sealed class TypeCollection<T> : StorageObject
+        private sealed class TypeCollection<T> : StorageObject
         {
             public static TypeCollection<T> Instance { get; } = new TypeCollection<T>();
             private TypeCollection() : base(typeof(T).GetHashCode().ToString()) { }

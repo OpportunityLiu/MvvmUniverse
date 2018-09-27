@@ -31,7 +31,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (startIndex < 0)
                 throw new ArgumentOutOfRangeException(nameof(startIndex));
-            if (items == null)
+            if (items is null)
                 throw new ArgumentNullException(nameof(items));
             return new LoadItemsResult<T>(startIndex, items, replaceLoadedItems);
         }
@@ -50,7 +50,7 @@ namespace Opportunity.MvvmUniverse.Collections
     }
 
     /// <summary>
-    /// Load result of <see cref="FixedIncrementalLoadingList{T}.LoadItemAsync(int)"/>.
+    /// Load result of <see cref="FixedLoadingList{T}.LoadItemAsync(int)"/> and <see cref="IncrementalLoadingList{T}.LoadItemsAsync(int)"/>.
     /// </summary>
     /// <typeparam name="T">Type of items.</typeparam>
     [DebuggerDisplay(@"StartIndex = {StartIndex}, Count = {Count}")]

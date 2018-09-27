@@ -51,7 +51,7 @@
     <Compile Include="Collections\~View\CollectionView{T}.cs" />
     <Compile Include="Collections\~Cache\AutoFillCacheStorage.cs" />
     <Compile Include="Collections\~Cache\CacheStorage.cs" />
-    <Compile Include="Collections\~Data\FixedIncrementalLoadingList.FixedCollectionView.cs" />
+    <Compile Include="Collections\~Data\FixedLoadingList.FixedCollectionView.cs" />
     <Compile Include="Collections\~Data\IncrementalLoadingList{T}.cs" />
     <Compile Include="Collections\Internal\CollectionDebugView.cs" />
     <Compile Include="Collections\Internal\DictionaryDebugView.cs" />
@@ -72,7 +72,7 @@
     <Compile Include="Collections\~ObservableList{T}\~.cs" />
     <Compile Include="Collections\~ObservableList{T}\~.EqualityComparerAdapter.cs" />
     <Compile Include="Collections\~ObservableList{T}\~.Updater.cs" />
-    <Compile Include="Collections\~Data\FixedIncrementalLoadingList{T}.cs" />
+    <Compile Include="Collections\~Data\FixedLoadingList{T}.cs" />
     <Compile Include="Collections\RangedListView{T}.cs" />
     <Compile Include="Collections\~View\~EventArgs.cs" />
     <Compile Include="Commands\Predefined\DataTransferCommands.cs" />
@@ -152,14 +152,13 @@
     <Compile Include="Services\Navigation\Navigator.cs" />
     <Compile Include="Views\~Controls\VisibleBoundsHelper.cs" />
     <Compile Include="DepedencyEvent.cs" />
-    <Compile Include="WeakEvent.cs" />
     <Compile Include="~Internal\ConstPropertyChangedEventArgs.cs" />
     <Compile Include="~Internal\DispatcherHelper.cs" />
     <EmbeddedResource Include="Properties\Opportunity.MvvmUniverse.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Opportunity.Helpers.Universal">
-      <Version>1.3.16</Version>
+      <Version>1.3.19</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

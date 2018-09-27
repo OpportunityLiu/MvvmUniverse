@@ -9,16 +9,39 @@ using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
+    /// <summary>
+    /// A <see cref="CacheStorage{TKey, TCache}"/> that will create value automatically.
+    /// </summary>
+    /// <typeparam name="TKey">Key type of cache.</typeparam>
+    /// <typeparam name="TCache">Value type of cache.</typeparam>
     public abstract class AutoFillCacheStorage<TKey, TCache> : CacheStorage<TKey, TCache>
     {
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
         public AutoFillCacheStorage() { }
 
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
+        /// <param name="capacity">Capacity of stroage.</param>
         public AutoFillCacheStorage(int capacity)
             : base(capacity) { }
 
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
+        /// <param name="capacity">Capacity of stroage.</param>
+        /// <param name="comparer"><see cref="IEqualityComparer{T}"/> for key comparsion.</param>
         public AutoFillCacheStorage(int capacity, IEqualityComparer<TKey> comparer)
             : base(capacity, comparer) { }
 
+        /// <summary>
+        /// Get or create data of given <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">Key of cached data.</param>
+        /// <returns>Cached data of <paramref name="key"/>, 
+        /// if not found in the cache storage, <see cref="CreateAsync(TKey)"/> will be invoked to create one.</returns>
         public IAsyncOperation<TCache> GetOrCreateAsync(TKey key)
         {
             if (TryGetValue(key, out var r))
@@ -42,22 +65,78 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <summary>
+        /// Create cached data of given <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">Key of cached data.</param>
+        /// <returns>Cached data of given <paramref name="key"/>.</returns>
         protected abstract IAsyncOperation<TCache> CreateAsync(TKey key);
     }
 
+    /// <summary>
+    /// Factory class for <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+    /// </summary>
     public static class AutoFillCacheStorage
     {
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
+        /// <typeparam name="TKey">Key type of cache.</typeparam>
+        /// <typeparam name="TCache">Value type of cache.</typeparam>
+        /// <param name="cacheCreator">Implemetation of <see cref="AutoFillCacheStorage{TKey, TCache}.CreateAsync(TKey)"/></param>
+        /// <returns>New instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.</returns>
         public static AutoFillCacheStorage<TKey, TCache> Create<TKey, TCache>(Func<TKey, IAsyncOperation<TCache>> cacheCreator)
             => new AsyncDelegateAutoFillCacheStorage<TKey, TCache>(cacheCreator);
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
+        /// <typeparam name="TKey">Key type of cache.</typeparam>
+        /// <typeparam name="TCache">Value type of cache.</typeparam>
+        /// <param name="cacheCreator">Implemetation of <see cref="AutoFillCacheStorage{TKey, TCache}.CreateAsync(TKey)"/></param>
+        /// <param name="capacity">Capacity of stroage.</param>
+        /// <returns>New instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.</returns>
         public static AutoFillCacheStorage<TKey, TCache> Create<TKey, TCache>(Func<TKey, IAsyncOperation<TCache>> cacheCreator, int capacity)
             => new AsyncDelegateAutoFillCacheStorage<TKey, TCache>(cacheCreator, capacity);
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
+        /// <typeparam name="TKey">Key type of cache.</typeparam>
+        /// <typeparam name="TCache">Value type of cache.</typeparam>
+        /// <param name="cacheCreator">Implemetation of <see cref="AutoFillCacheStorage{TKey, TCache}.CreateAsync(TKey)"/></param>
+        /// <param name="capacity">Capacity of stroage.</param>
+        /// <param name="comparer"><see cref="IEqualityComparer{T}"/> for key comparsion.</param>
+        /// <returns>New instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.</returns>
         public static AutoFillCacheStorage<TKey, TCache> Create<TKey, TCache>(Func<TKey, IAsyncOperation<TCache>> cacheCreator, int capacity, IEqualityComparer<TKey> comparer)
             => new AsyncDelegateAutoFillCacheStorage<TKey, TCache>(cacheCreator, capacity, comparer);
 
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
+        /// <typeparam name="TKey">Key type of cache.</typeparam>
+        /// <typeparam name="TCache">Value type of cache.</typeparam>
+        /// <param name="cacheCreator">Implemetation of <see cref="AutoFillCacheStorage{TKey, TCache}.CreateAsync(TKey)"/></param>
+        /// <returns>New instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.</returns>
         public static AutoFillCacheStorage<TKey, TCache> Create<TKey, TCache>(Func<TKey, TCache> cacheCreator)
             => new DelegateAutoFillCacheStorage<TKey, TCache>(cacheCreator);
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
+        /// <typeparam name="TKey">Key type of cache.</typeparam>
+        /// <typeparam name="TCache">Value type of cache.</typeparam>
+        /// <param name="cacheCreator">Implemetation of <see cref="AutoFillCacheStorage{TKey, TCache}.CreateAsync(TKey)"/></param>
+        /// <param name="capacity">Capacity of stroage.</param>
+        /// <returns>New instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.</returns>
         public static AutoFillCacheStorage<TKey, TCache> Create<TKey, TCache>(Func<TKey, TCache> cacheCreator, int capacity)
             => new DelegateAutoFillCacheStorage<TKey, TCache>(cacheCreator, capacity);
+        /// <summary>
+        /// Create new instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.
+        /// </summary>
+        /// <typeparam name="TKey">Key type of cache.</typeparam>
+        /// <typeparam name="TCache">Value type of cache.</typeparam>
+        /// <param name="cacheCreator">Implemetation of <see cref="AutoFillCacheStorage{TKey, TCache}.CreateAsync(TKey)"/></param>
+        /// <param name="capacity">Capacity of stroage.</param>
+        /// <param name="comparer"><see cref="IEqualityComparer{T}"/> for key comparsion.</param>
+        /// <returns>New instance of <see cref="AutoFillCacheStorage{TKey, TCache}"/>.</returns>
         public static AutoFillCacheStorage<TKey, TCache> Create<TKey, TCache>(Func<TKey, TCache> cacheCreator, int capacity, IEqualityComparer<TKey> comparer)
             => new DelegateAutoFillCacheStorage<TKey, TCache>(cacheCreator, capacity, comparer);
 

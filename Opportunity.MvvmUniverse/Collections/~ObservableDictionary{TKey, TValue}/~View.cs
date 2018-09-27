@@ -1,17 +1,17 @@
 ﻿using Opportunity.MvvmUniverse.Collections.Internal;
-using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Windows.UI.Xaml.Interop;
-using Windows.Foundation.Collections;
 using System.Threading;
-using System.ComponentModel;
+using System.Threading.Tasks;
+using Windows.Foundation.Collections;
+using Windows.UI.Xaml.Interop;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -27,15 +27,11 @@ namespace Opportunity.MvvmUniverse.Collections
         , IList<KeyValuePair<TKey, TValue>>, IReadOnlyList<KeyValuePair<TKey, TValue>>, IList
         , ICollection<KeyValuePair<TKey, TValue>>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>, ICollection
         , IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable
-        , IDisposable
     {
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private ObservableDictionary<TKey, TValue> dictionary;
         /// <summary>
         /// <see cref="ObservableDictionary{TKey, TValue}"/> of this view.
         /// </summary>
-        protected internal ObservableDictionary<TKey, TValue> Dictionary
-            => this.dictionary ?? throw new ObjectDisposedException(this.ToString());
+        public ObservableDictionary<TKey, TValue> Dictionary { get; }
 
         /// <summary>
         /// Create new instance of <see cref="ObservableDictionaryView{TKey, TValue}"/>.
@@ -43,9 +39,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="dictionary"><see cref="ObservableDictionary{TKey, TValue}"/> of this view.</param>
         public ObservableDictionaryView(ObservableDictionary<TKey, TValue> dictionary)
         {
-            this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
-            dictionary.PropertyChanged += this.onDictionaryPropertyChanged;
-            dictionary.VectorChanged += this.onDictionaryVectorChanged;
+            this.Dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+            dictionary.VectorChanged += WeakDelegate.Create<BindableVectorChangedEventHandler>(this.onDictionaryVectorChanged);
+            dictionary.PropertyChanged += WeakDelegate.Create<PropertyChangedEventHandler>(this.onDictionaryPropertyChanged);
         }
 
         private void onDictionaryPropertyChanged(object _, PropertyChangedEventArgs e)
@@ -76,18 +72,6 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (NeedRaiseVectorChanged)
                 OnVectorChanged(e);
-        }
-
-        /// <summary>
-        /// Set <see cref="Dictionary"/> to <see langword="null"/> and unsubscribe events.
-        /// </summary>
-        public virtual void Dispose()
-        {
-            var dic = Interlocked.Exchange(ref this.dictionary, null);
-            if (dic is null)
-                return;
-            dic.VectorChanged -= this.onDictionaryVectorChanged;
-            dic.PropertyChanged -= this.onDictionaryPropertyChanged;
         }
 
         /// <inheritdoc/>
@@ -194,13 +178,5 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="action">Action for each key-value pair and its index.</param>
         public void ForEach(Action<int, TKey, TValue> action) => Dictionary.ForEach(action);
-    }
-
-    internal sealed class UndisposableObservableDictionaryView<TKey, TValue> : ObservableDictionaryView<TKey, TValue>
-    {
-        public UndisposableObservableDictionaryView(ObservableDictionary<TKey, TValue> dictionary)
-            : base(dictionary) { }
-
-        public override void Dispose() { }
     }
 }

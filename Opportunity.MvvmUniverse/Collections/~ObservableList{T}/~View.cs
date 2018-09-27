@@ -1,17 +1,17 @@
 ﻿using Opportunity.MvvmUniverse.Collections.Internal;
-using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Windows.UI.Xaml.Interop;
-using Windows.Foundation.Collections;
 using System.Threading;
-using System.ComponentModel;
+using System.Threading.Tasks;
+using Windows.Foundation.Collections;
+using Windows.UI.Xaml.Interop;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -25,15 +25,11 @@ namespace Opportunity.MvvmUniverse.Collections
         , IList<T>, IReadOnlyList<T>, IList
         , ICollection<T>, IReadOnlyCollection<T>, ICollection
         , IEnumerable<T>, IEnumerable
-        , IDisposable
     {
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private ObservableList<T> list;
         /// <summary>
         /// <see cref="ObservableList{T}"/> of this view.
         /// </summary>
-        protected internal ObservableList<T> List
-            => this.list ?? throw new ObjectDisposedException(this.ToString());
+        public ObservableList<T> List { get; }
 
         /// <summary>
         /// Create a new instance of <see cref="ObservableListView{T}"/>.
@@ -41,9 +37,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="list"><see cref="ObservableList{T}"/> of this view.</param>
         public ObservableListView(ObservableList<T> list)
         {
-            this.list = list ?? throw new ArgumentNullException(nameof(list));
-            list.VectorChanged += this.onListVectorChanged;
-            list.PropertyChanged += this.onListPropertyChanged;
+            this.List = list ?? throw new ArgumentNullException(nameof(list));
+            list.VectorChanged += WeakDelegate.Create<BindableVectorChangedEventHandler>(this.onListVectorChanged);
+            list.PropertyChanged += WeakDelegate.Create<PropertyChangedEventHandler>(this.onListPropertyChanged);
         }
 
         private void onListPropertyChanged(object _, PropertyChangedEventArgs e)
@@ -76,18 +72,6 @@ namespace Opportunity.MvvmUniverse.Collections
                 OnVectorChanged(e);
         }
 
-        /// <summary>
-        /// Set <see cref="List"/> to <see langword="null"/> and unsubscribe events.
-        /// </summary>
-        public virtual void Dispose()
-        {
-            var l = Interlocked.Exchange(ref this.list, null);
-            if (l is null)
-                return;
-            l.VectorChanged -= this.onListVectorChanged;
-            l.PropertyChanged -= this.onListPropertyChanged;
-        }
-
         /// <inheritdoc />
         public T this[int index] => List[index];
         T IList<T>.this[int index] { get => this[index]; set => ThrowForReadOnlyCollection(List); }
@@ -106,8 +90,7 @@ namespace Opportunity.MvvmUniverse.Collections
         public void CopyTo(T[] array, int arrayIndex) => List.CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
-        public List<T>.Enumerator GetEnumerator() => List.GetEnumerator();
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => List.GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => List.GetEnumerator();
 
         /// <inheritdoc />
         public bool Contains(T item) => List.Contains(item);
@@ -131,13 +114,5 @@ namespace Opportunity.MvvmUniverse.Collections
         void ICollection<T>.Add(T item) => ThrowForReadOnlyCollection(List);
         void ICollection<T>.Clear() => ThrowForReadOnlyCollection(List);
         void IList<T>.Insert(int index, T item) => ThrowForReadOnlyCollection(List);
-    }
-
-    internal sealed class UndisposableObservableListView<T> : ObservableListView<T>
-    {
-        public UndisposableObservableListView(ObservableList<T> list)
-            : base(list) { }
-
-        public override void Dispose() { }
     }
 }

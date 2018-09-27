@@ -1,51 +1,54 @@
-﻿using System;
+﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+using System;
 using System.Collections;
-using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml.Data;
 using static System.Runtime.InteropServices.WindowsRuntime.AsyncInfo;
-using Opportunity.Helpers.Universal.AsyncHelpers;
-using System.Threading;
-using System.Diagnostics;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
     /// <summary>
-    /// An <see cref="IncrementalLoadingList{T}"/> with a previous known final length.
+    /// An <see cref="ObservableList{T}"/> with a previous known final length that supports incremental loading.
     /// </summary>
     /// <typeparam name="T">Type of record.</typeparam>
-    public abstract partial class FixedIncrementalLoadingList<T> : ObservableList<T>, IList
+    public abstract partial class FixedLoadingList<T> : ObservableList<T>, IList
     {
         /// <summary>
-        /// Create instance of <see cref="FixedIncrementalLoadingList{T}"/>.
+        /// Create instance of <see cref="FixedLoadingList{T}"/>.
         /// </summary>
         /// <param name="recordCount">Final length of the list.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="recordCount"/> is negitive.</exception>
-        protected FixedIncrementalLoadingList(int recordCount)
+        protected FixedLoadingList(int recordCount)
             : this(Enumerable.Empty<T>(), recordCount) { }
 
         /// <summary>
-        /// Create instance of <see cref="FixedIncrementalLoadingList{T}"/>.
+        /// Create instance of <see cref="FixedLoadingList{T}"/>.
         /// </summary>
         /// <param name="recordCount">Final length of the list.</param>
-        /// <param name="items">Items will be copied to the <see cref="FixedIncrementalLoadingList{T}"/>.</param>
+        /// <param name="items">Items will be copied to the <see cref="FixedLoadingList{T}"/>.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="recordCount"/> is less than length of <paramref name="items"/>.</exception>
-        protected FixedIncrementalLoadingList(IEnumerable<T> items, int recordCount) : base(items)
+        protected FixedLoadingList(IEnumerable<T> items, int recordCount) : base(items)
         {
             if (recordCount < Count)
                 throw new ArgumentOutOfRangeException(nameof(recordCount));
             this.LoadedItems = new bool[recordCount];
-            for (var i = 0; i < this.Count; i++)
+            for (var i = 0; i < Count; i++)
             {
                 this.LoadedItems[i] = true;
             }
-            this.Items.AddRange(Enumerable.Range(Count, recordCount - Count).Select(i => CreatePlaceholder(i)));
+            for (var i = Count; i < recordCount; i++)
+            {
+                this.Items.Add(CreatePlaceholder(i));
+            }
         }
 
         /// <summary>
@@ -64,7 +67,7 @@ namespace Opportunity.MvvmUniverse.Collections
         protected abstract T CreatePlaceholder(int index);
 
         /// <summary>
-        /// Set item of the <see cref="FixedIncrementalLoadingList{T}"/> to placeholder value and mark that item as unloaded.
+        /// Set item of the <see cref="FixedLoadingList{T}"/> to placeholder value and mark that item as unloaded.
         /// </summary>
         /// <param name="index">Index of item to set new value.</param>
         /// <exception cref="ArgumentOutOfRangeException">
@@ -77,7 +80,7 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         /// <summary>
-        /// Set item of the <see cref="FixedIncrementalLoadingList{T}"/> and mark that item as loaded.
+        /// Set item of the <see cref="FixedLoadingList{T}"/> and mark that item as loaded.
         /// </summary>
         /// <param name="index">Index of item to set new value.</param>
         /// <param name="item">New value of item.</param>
@@ -91,25 +94,19 @@ namespace Opportunity.MvvmUniverse.Collections
         }
 
         /// <exception cref="InvalidOperationException">The list is fixed size.</exception>
-        protected override void InsertItem(int index, T item)
-        {
-            throw new InvalidOperationException("The list is fixed size.");
-        }
+        protected sealed override void InsertItem(int index, T item)
+            => Internal.Helpers.ThrowForFixedSizeCollection();
 
         /// <exception cref="InvalidOperationException">The list is fixed size.</exception>
-        protected override void RemoveItem(int index)
-        {
-            throw new InvalidOperationException("The list is fixed size.");
-        }
+        protected sealed override void RemoveItem(int index)
+            => Internal.Helpers.ThrowForFixedSizeCollection();
 
         /// <exception cref="InvalidOperationException">The list is fixed size.</exception>
-        protected override void ClearItems()
-        {
-            throw new InvalidOperationException("The list is fixed size.");
-        }
+        protected sealed override void ClearItems()
+            => Internal.Helpers.ThrowForFixedSizeCollection();
 
         /// <summary>
-        /// Set item of the <see cref="FixedIncrementalLoadingList{T}"/> to placeholder value and mark that item as unloaded.
+        /// Set item of the <see cref="FixedLoadingList{T}"/> to placeholder value and mark that item as unloaded.
         /// </summary>
         /// <param name="index">Index of item to set new value.</param>
         /// <exception cref="ArgumentOutOfRangeException">
@@ -172,11 +169,8 @@ namespace Opportunity.MvvmUniverse.Collections
 
         private async Task loadItemsCoreAsync(int startIndex, int endIndex, CancellationToken token)
         {
-            var loadOp = this.LoadItemAsync(startIndex);
-            token.Register(loadOp.Cancel);
-            var loadR = await loadOp;
-            token.ThrowIfCancellationRequested();
-            if (loadR.Items == null)
+            var loadR = await this.LoadItemAsync(startIndex).AsTask(token);
+            if (loadR.Items is null)
                 throw new InvalidOperationException("Wrong result of LoadItemAsync(int), " + nameof(loadR.Items) + " is null.");
             startIndex = loadR.StartIndex;
             if (loadR.ReplaceLoadedItems)
@@ -201,10 +195,10 @@ namespace Opportunity.MvvmUniverse.Collections
             formatLoadRange(ref startIndex, ref endIndex);
             if (startIndex >= endIndex)
                 return;
-            // Need load another page.
-            var loadConOp = loadItemsCoreAsync(startIndex, endIndex, token);
-            await loadConOp;
+
             token.ThrowIfCancellationRequested();
+            // Need load another page.
+            await loadItemsCoreAsync(startIndex, endIndex, token);
             return;
         }
 
@@ -242,18 +236,12 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 return Run(async token =>
                 {
-                    var s = startIndex;
-                    var c = endIndex - startIndex;
-                    while (!token.IsCancellationRequested)
+                    while (!token.IsCancellationRequested && this.isLoading != 0)
                     {
                         await Task.Delay(500, token);
-                        token.ThrowIfCancellationRequested();
-                        if (this.isLoading == 0)
-                            break;
                     }
-                    var load = LoadItemsAsync(s, c);
-                    token.Register(load.Cancel);
-                    await load;
+                    token.ThrowIfCancellationRequested();
+                    await this.LoadItemsAsync(startIndex, endIndex - startIndex).AsTask(token);
                 });
             }
         }

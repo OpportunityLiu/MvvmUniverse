@@ -25,7 +25,7 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <summary>
         /// Item storage of the <see cref="ObservableList{T}"/>.
         /// </summary>
-        protected List<T> Items { get; }
+        protected IList<T> Items { get; }
 
         /// <summary>
         /// Create instance of <see cref="ObservableList{T}"/>.
@@ -37,9 +37,26 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="items">Items will be copied to the <see cref="ObservableList{T}"/>.</param>
         public ObservableList(IEnumerable<T> items)
+            : this(new List<T>(items.EmptyIfNull()), false) { }
+
+        /// <summary>
+        /// Create instance of <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="items">Items will be copied or wrapped to the <see cref="ObservableList{T}"/>.</param>
+        /// <param name="makeCopy">Indicates the <paramref name="items"/> should be copied or directly set to <see cref="Items"/>.</param>
+        protected ObservableList(IList<T> items, bool makeCopy)
         {
-            Items = items is null ? new List<T>() : new List<T>(items);
+            if (makeCopy)
+                Items = items is null ? new List<T>() : new List<T>(items);
+            else
+                Items = items ?? throw new ArgumentNullException(nameof(items));
         }
+
+        /// <summary>
+        /// Create instance of <see cref="ObservableList{T}"/>.
+        /// </summary>
+        /// <param name="list">The list will be wrapped to the <see cref="ObservableList{T}"/>, as the <see cref="Items"/>.</param>
+        public static ObservableList<T> CreaterWrapper(IList<T> list) => new ObservableList<T>(list, false);
 
         /// <summary>
         /// Insert item to the <see cref="ObservableList{T}"/>.
@@ -156,14 +173,22 @@ namespace Opportunity.MvvmUniverse.Collections
         /// Iterate all items in the list.
         /// </summary>
         /// <param name="action">Action for each item.</param>
-        public void ForEach(Action<T> action) => Items.ForEach(action);
+        public void ForEach(Action<T> action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+            foreach (var item in Items)
+            {
+                action(item);
+            }
+        }
         /// <summary>
         /// Iterate all items and their index in the list.
         /// </summary>
         /// <param name="action">Action for each item and its index.</param>
         public void ForEach(Action<int, T> action)
         {
-            if (action == null)
+            if (action is null)
                 throw new ArgumentNullException(nameof(action));
             var i = 0;
             foreach (var item in Items)
@@ -194,13 +219,12 @@ namespace Opportunity.MvvmUniverse.Collections
         /// This method will be called when <see cref="AsReadOnly()"/> first called on this instance.
         /// </summary>
         protected virtual ObservableListView<T> CreateReadOnlyView()
-            => new UndisposableObservableListView<T>(this);
+            => new ObservableListView<T>(this);
 
         /// <inheritdoc/>
         public int IndexOf(T item) => Items.IndexOf(item);
 
         /// <inheritdoc/>
-        public List<T>.Enumerator GetEnumerator() => Items.GetEnumerator();
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => Items.GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => Items.GetEnumerator();
     }
 }

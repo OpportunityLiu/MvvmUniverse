@@ -1,22 +1,22 @@
-﻿using System;
+﻿using Opportunity.Helpers.Universal.AsyncHelpers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Windows.Foundation;
-using Windows.UI.Xaml.Data;
-using Windows.Foundation.Collections;
-using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
-using Opportunity.Helpers.Universal.AsyncHelpers;
 using System.Linq;
 using Windows.ApplicationModel.Core;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
 using Windows.UI.Core;
+using Windows.UI.Xaml.Data;
+using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
-    public abstract partial class FixedIncrementalLoadingList<T>
+    public abstract partial class FixedLoadingList<T>
     {
-        internal class FixedCollectionView : CollectionView<T>, IItemsRangeInfo
+        internal sealed class FixedCollectionView : CollectionView<T>, IItemsRangeInfo
         {
-            public FixedCollectionView(FixedIncrementalLoadingList<T> fixedIncrementalLoadingList)
+            public FixedCollectionView(FixedLoadingList<T> fixedIncrementalLoadingList)
                 : base(fixedIncrementalLoadingList) { }
 
             protected override bool MoveCurrentToPosition(int index, bool isCancelable)
@@ -46,12 +46,14 @@ namespace Opportunity.MvvmUniverse.Collections
                 return r;
             }
 
-            public new FixedIncrementalLoadingList<T> Source => (FixedIncrementalLoadingList<T>)base.Source;
+            public new FixedLoadingList<T> Source => (FixedLoadingList<T>)base.Source;
 
             public async void RangesChanged(ItemIndexRange visibleRange, IReadOnlyList<ItemIndexRange> trackedItems)
             {
                 await this.Source.LoadItemsAsync(visibleRange.FirstIndex, (int)visibleRange.Length);
             }
+
+            void IDisposable.Dispose() { }
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// A list implements <see cref="ISupportIncrementalLoading"/>.
     /// </summary>
     /// <typeparam name="T">Type of items.</typeparam>
-    public abstract class IncrementalLoadingList<T> : ObservableList<T>, ISupportIncrementalLoading, IList
+    public abstract class IncrementalLoadingList<T> : ObservableList<T>, ISupportIncrementalLoading
     {
         /// <summary>
         /// Create instance of <see cref="IncrementalLoadingList{T}"/>.
@@ -54,7 +54,10 @@ namespace Opportunity.MvvmUniverse.Collections
         public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
         {
             if (!this.HasMoreItems)
-                return AsyncOperation<LoadMoreItemsResult>.CreateCompleted(new LoadMoreItemsResult());
+                return AsyncOperation<LoadMoreItemsResult>.CreateCompleted();
+            var c = (int)count;
+            if (c < 0) c = int.MaxValue;
+
             if (Interlocked.CompareExchange(ref this.isLoading, 1, 0) == 0)
             {
                 OnPropertyChanged(nameof(IsLoading));
@@ -63,10 +66,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     try
                     {
                         var currentCount = Count;
-                        var lp = LoadItemsAsync((int)count);
-                        token.Register(lp.Cancel);
-                        var re = await lp;
-                        token.ThrowIfCancellationRequested();
+                        var re = await LoadItemsAsync(c).AsTask(token);
                         if (Count != currentCount)
                             throw new InvalidOperationException("The collection has changed during loading.");
                         var lc = 0u;
@@ -74,13 +74,13 @@ namespace Opportunity.MvvmUniverse.Collections
                             return new LoadMoreItemsResult { Count = 0 };
                         if (re.StartIndex > this.Count)
                         {
-                            var c = -1;
+                            var cc = -1;
                             try
                             {
-                                c = re.Items.Count();
+                                cc = re.Items.Count();
                             }
                             catch { }
-                            throw new InvalidOperationException($"Wrong range returned from implementation of LoadItemsAsync(int).\nExpacted range: {this.Count} -\nActual range: {re.StartIndex} - {(c > 0 ? (re.StartIndex + c - 1).ToString() : "")}");
+                            throw new InvalidOperationException($"Wrong range returned from implementation of LoadItemsAsync(int).\nExpacted range: {this.Count} -\nActual range: {re.StartIndex} - {(cc > 0 ? (re.StartIndex + cc - 1).ToString() : "")}");
                         }
                         else if (re.StartIndex == this.Count)
                         {
@@ -121,17 +121,12 @@ namespace Opportunity.MvvmUniverse.Collections
             {
                 return Run(async token =>
                 {
-                    var c = count;
-                    while (!token.IsCancellationRequested)
+                    while (!token.IsCancellationRequested && this.isLoading != 0)
                     {
                         await Task.Delay(500, token);
-                        token.ThrowIfCancellationRequested();
-                        if (this.isLoading == 0)
-                            break;
                     }
-                    var load = LoadMoreItemsAsync(c);
-                    token.Register(load.Cancel);
-                    return await load;
+                    token.ThrowIfCancellationRequested();
+                    return await LoadMoreItemsAsync((uint)c).AsTask(token);
                 });
             }
         }
