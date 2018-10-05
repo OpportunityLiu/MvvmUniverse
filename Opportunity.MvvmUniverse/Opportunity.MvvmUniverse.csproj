@@ -48,6 +48,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Collections\~Data\PagingList.cs" />
     <Compile Include="Collections\~View\CollectionView{T}.cs" />
     <Compile Include="Collections\~Cache\AutoFillCacheStorage.cs" />
     <Compile Include="Collections\~Cache\CacheStorage.cs" />
