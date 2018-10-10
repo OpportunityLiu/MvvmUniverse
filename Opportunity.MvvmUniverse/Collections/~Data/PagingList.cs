@@ -21,13 +21,14 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <summary>
         /// Page count of the <see cref="PagingList{T}"/>.
         /// </summary>
-        /// <exception cref="InvalidOperationException"><see cref="IsLoading"/> is <see langword="true"/>.</exception>
+        /// <exception cref="ArgumentException">New <paramref name="value"/> dosen't cover loaded range.</exception>
         public int PageCount
         {
             get => this._PageCount;
             set
             {
-                throwIfIsLoading();
+                if (value < this._FirstPage + this._LoadedPageCount)
+                    throw new ArgumentException($"Wrong value, must >= FirstPage + LoadedPageCount ({this._FirstPage + this._LoadedPageCount})");
                 Set(nameof(ISupportIncrementalLoading.HasMoreItems), ref this._PageCount, value);
             }
         }
@@ -106,16 +107,13 @@ namespace Opportunity.MvvmUniverse.Collections
                 {
                     try
                     {
-                        var fp = this._FirstPage;
-                        var lpc = this._LoadedPageCount;
-                        var pc = this._PageCount;
-                        if (fp <= 0)
+                        if (this._FirstPage <= 0)
                             return;
 
-                        var currentCount = Count;
-                        var re = await LoadItemsAsync(fp - 1).AsTask(token);
-                        if (Count != currentCount || fp != this._FirstPage || lpc != this._LoadedPageCount || pc != this._PageCount)
-                            throw new InvalidOperationException("The collection has changed during loading.");
+                        var re = await LoadItemsAsync(this._FirstPage - 1).AsTask(token);
+
+                        if (this._FirstPage <= 0)
+                            return;
 
                         var i = 0;
                         foreach (var item in re)
@@ -159,22 +157,17 @@ namespace Opportunity.MvvmUniverse.Collections
                 {
                     try
                     {
-                        var fp = this._FirstPage;
-                        var lpc = this._LoadedPageCount;
-                        var pc = this._PageCount;
-                        if (fp + lpc >= pc)
+                        if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
                             return;
 
-                        var currentCount = Count;
-                        var re = await LoadItemsAsync(fp + lpc).AsTask(token);
-                        if (Count != currentCount || fp != this._FirstPage || lpc != this._LoadedPageCount || pc != this._PageCount)
-                            throw new InvalidOperationException("The collection has changed during loading.");
+                        var re = await this.LoadItemsAsync(this._FirstPage + this._LoadedPageCount).AsTask(token);
+
+                        if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
+                            return;
 
                         foreach (var item in re)
-                        {
                             this.Add(item);
-                        }
-                        LoadedPageCount++;
+                        this.LoadedPageCount++;
                     }
                     finally
                     {

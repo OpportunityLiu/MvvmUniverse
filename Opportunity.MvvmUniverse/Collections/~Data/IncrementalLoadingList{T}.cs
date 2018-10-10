@@ -20,6 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// A list implements <see cref="ISupportIncrementalLoading"/>.
     /// </summary>
     /// <typeparam name="T">Type of items.</typeparam>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "} HasMoreItems = {" + nameof(HasMoreItems) + "}")]
     public abstract class IncrementalLoadingList<T> : ObservableList<T>, ISupportIncrementalLoading
     {
         /// <summary>
