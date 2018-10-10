@@ -21,6 +21,7 @@ namespace Opportunity.MvvmUniverse
         public static readonly ConstPropertyChangedEventArgs Current = new ConstPropertyChangedEventArgs(nameof(Current));
         public static readonly ConstPropertyChangedEventArgs Progress = new ConstPropertyChangedEventArgs(nameof(Progress));
         public static readonly ConstPropertyChangedEventArgs IsExecuting = new ConstPropertyChangedEventArgs(nameof(IsExecuting));
+        public static readonly ConstPropertyChangedEventArgs IsLoading = new ConstPropertyChangedEventArgs(nameof(IsLoading));
         public static readonly ConstPropertyChangedEventArgs AttachedCommand = new ConstPropertyChangedEventArgs(nameof(AttachedCommand));
         public static readonly ConstPropertyChangedEventArgs QueuedValue = new ConstPropertyChangedEventArgs(nameof(QueuedValue));
         public static readonly ConstPropertyChangedEventArgs HasValue = new ConstPropertyChangedEventArgs(nameof(HasValue));

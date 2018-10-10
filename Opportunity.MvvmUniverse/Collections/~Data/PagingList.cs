@@ -8,12 +8,39 @@ using Windows.Foundation;
 using Windows.UI.Xaml.Data;
 using static System.Runtime.InteropServices.WindowsRuntime.AsyncInfo;
 
+
 namespace Opportunity.MvvmUniverse.Collections
 {
+    /// <summary>
+    /// A list with paged data.
+    /// </summary>
+    /// <typeparam name="T">Type of items.</typeparam>
+    [DebuggerDisplay("{DebuggerDisp}")]
     public abstract class PagingList<T> : ObservableList<T>, ISupportIncrementalLoading
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string DebuggerDisp
+        {
+            get
+            {
+                var str = $"Count = {Count} Pages = ";
+                if (this._LoadedPageCount <= 0)
+                    str += this._PageCount;
+                else
+                    str += $"{this._FirstPage}-{this._FirstPage + this._LoadedPageCount - 1}/{this._PageCount}";
+                return str;
+            }
+        }
+
+        /// <summary>
+        /// Create instance of <see cref="PagingList{T}"/>.
+        /// </summary>
         protected PagingList() { }
 
+        /// <summary>
+        /// Create instance of <see cref="PagingList{T}"/>.
+        /// </summary>
+        /// <param name="items">Items will be copied to the <see cref="PagingList{T}"/>.</param>
         protected PagingList(IEnumerable<T> items) : base(items) { }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -52,7 +79,6 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         /// <param name="pageIndex">Index of page that will jump to.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="pageIndex"/> is not in range of <see cref="PageCount"/>.</exception>
-        /// <exception cref="InvalidOperationException"><see cref="IsLoading"/> is <see langword="true"/>.</exception>
         public void JumpTo(int pageIndex)
         {
             if (this._FirstPage == pageIndex)
@@ -63,19 +89,11 @@ namespace Opportunity.MvvmUniverse.Collections
             this.FirstPage = pageIndex;
         }
 
-        private void throwIfIsLoading()
-        {
-            if (this.isLoading != 0)
-                throw new InvalidOperationException("Loading in progress.");
-        }
-
         /// <summary>
         /// Remove all items in the <see cref="PagingList{T}"/>, set <see cref="FirstPage"/> and <see cref="LoadedPageCount"/> to 0.
         /// </summary>
-        /// <exception cref="InvalidOperationException"><see cref="IsLoading"/> is <see langword="true"/>.</exception>
         protected override void ClearItems()
         {
-            throwIfIsLoading();
             base.ClearItems();
             this.FirstPage = 0;
             this.LoadedPageCount = 0;
@@ -95,6 +113,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// </summary>
         public bool IsLoading => this.isLoading != 0;
 
+        /// <summary>
+        /// Load previous page of currently loaded range.
+        /// </summary>
         public IAsyncAction LoadPreviousPage()
         {
             if (this._FirstPage <= 0)
@@ -110,9 +131,12 @@ namespace Opportunity.MvvmUniverse.Collections
                         if (this._FirstPage <= 0)
                             return;
 
-                        var re = await LoadItemsAsync(this._FirstPage - 1).AsTask(token);
+                        var toLoad = this._FirstPage - 1;
+                        var re = await LoadItemsAsync(toLoad).AsTask(token);
 
                         if (this._FirstPage <= 0)
+                            return;
+                        if (toLoad != this._FirstPage - 1)
                             return;
 
                         var i = 0;
@@ -127,7 +151,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     finally
                     {
                         Volatile.Write(ref this.isLoading, 0);
-                        OnPropertyChanged(nameof(IsLoading), nameof(ISupportIncrementalLoading.HasMoreItems));
+                        OnPropertyChanged(ConstPropertyChangedEventArgs.IsLoading);
                     }
                 });
             }
@@ -145,6 +169,9 @@ namespace Opportunity.MvvmUniverse.Collections
             }
         }
 
+        /// <summary>
+        /// Load next page of currently loaded range.
+        /// </summary>
         public IAsyncAction LoadNextPage()
         {
             if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
@@ -160,9 +187,12 @@ namespace Opportunity.MvvmUniverse.Collections
                         if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
                             return;
 
-                        var re = await this.LoadItemsAsync(this._FirstPage + this._LoadedPageCount).AsTask(token);
+                        var toLoad = this._FirstPage + this._LoadedPageCount;
+                        var re = await this.LoadItemsAsync(toLoad).AsTask(token);
 
                         if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
+                            return;
+                        if (toLoad != this._FirstPage + this._LoadedPageCount)
                             return;
 
                         foreach (var item in re)
@@ -172,7 +202,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     finally
                     {
                         Volatile.Write(ref this.isLoading, 0);
-                        OnPropertyChanged(nameof(IsLoading), nameof(ISupportIncrementalLoading.HasMoreItems));
+                        OnPropertyChanged(ConstPropertyChangedEventArgs.IsLoading);
                     }
                 });
             }

@@ -228,7 +228,7 @@ namespace Opportunity.MvvmUniverse.Collections
                     finally
                     {
                         Volatile.Write(ref this.isLoading, 0);
-                        OnPropertyChanged(nameof(IsLoading));
+                        OnPropertyChanged(ConstPropertyChangedEventArgs.IsLoading);
                     }
                 });
             }
