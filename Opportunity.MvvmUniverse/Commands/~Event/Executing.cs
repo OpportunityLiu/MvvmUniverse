@@ -31,10 +31,26 @@ namespace Opportunity.MvvmUniverse.Commands
         /// </summary>
         public ExecutingEventArgs() { }
 
+        private bool canceled = false;
         /// <summary>
         /// Should current execution be canceled or not.
         /// </summary>
-        public bool Canceled { get; set; }
+        /// <exception cref="InvalidOperationException">The event has been handled.</exception>
+        /// <remarks>Only handlers that has access to the thread that the command is executing can set this property.</remarks>
+        public bool Canceled
+        {
+            get => this.canceled;
+            set
+            {
+                if (this.locked)
+                    throw new InvalidOperationException("The event has been handled.");
+                this.canceled = value;
+            }
+        }
+
+        private bool locked = false;
+
+        internal void Lock() => this.locked = true;
     }
 
     /// <summary>

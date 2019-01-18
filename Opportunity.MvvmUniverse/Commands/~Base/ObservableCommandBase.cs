@@ -71,7 +71,7 @@ namespace Opportunity.MvvmUniverse.Commands
         {
             if (NotificationSuspending)
                 return;
-            this.canExecuteChanged.Raise(this, EventArgs.Empty);
+            var ignore = this.canExecuteChanged.RaiseAsync(this, EventArgs.Empty);
         }
     }
 }

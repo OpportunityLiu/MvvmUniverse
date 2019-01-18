@@ -56,7 +56,7 @@ namespace Opportunity.MvvmUniverse.Services
 
         private static LockHelper GetLock() => new LockHelper(ThreadLocalSingleton.Count<TService>() > 1);
 
-        public TService Service { get; private set; }
+        internal TService Service { get; private set; }
 
         internal ServiceHandlerCollection(TService service)
         {
@@ -69,6 +69,7 @@ namespace Opportunity.MvvmUniverse.Services
                 throw new InvalidOperationException("The service of this collection has been destoryed.");
         }
 
+        /// <inhertdoc/>
         protected override void ClearItems()
         {
             CheckAvailable();
@@ -91,6 +92,7 @@ namespace Opportunity.MvvmUniverse.Services
             }
         }
 
+        /// <inhertdoc/>
         protected override void InsertItem(int index, THandler item)
         {
             CheckAvailable();
@@ -105,6 +107,7 @@ namespace Opportunity.MvvmUniverse.Services
             Service.UpdateProperties();
         }
 
+        /// <inhertdoc/>
         protected override void SetItem(int index, THandler item)
         {
             CheckAvailable();
@@ -130,6 +133,7 @@ namespace Opportunity.MvvmUniverse.Services
             Service.UpdateProperties();
         }
 
+        /// <inhertdoc/>
         protected override void RemoveItem(int index)
         {
             CheckAvailable();
@@ -144,7 +148,7 @@ namespace Opportunity.MvvmUniverse.Services
         }
 
         /// <summary>
-        /// Clear handlers and set <see cref="Service"/> to <see langword="null"/>.
+        /// Clear handlers.
         /// </summary>
         public void Dispose()
         {

@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using Action = Windows.Foundation.Collections.CollectionChange;
-using Handler = Windows.UI.Xaml.Interop.BindableVectorChangedEventHandler;
-using Args = Opportunity.MvvmUniverse.Collections.VectorChangedEventArgs;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Interop;
 using static Opportunity.MvvmUniverse.Collections.Internal.Helpers;
-using System.Diagnostics;
-using Windows.UI.Xaml;
-using Windows.UI.Core;
-using Windows.UI.Xaml.Data;
+using Action = Windows.Foundation.Collections.CollectionChange;
+using Args = Opportunity.MvvmUniverse.Collections.VectorChangedEventArgs;
+using Handler = Windows.UI.Xaml.Interop.BindableVectorChangedEventHandler;
 
 namespace Opportunity.MvvmUniverse.Collections
 {
@@ -72,7 +72,7 @@ namespace Opportunity.MvvmUniverse.Collections
                 throw new ArgumentNullException(nameof(args));
             if (!NeedRaiseVectorChanged)
                 return;
-            this.vectorChanged.Raise(this, args);
+            var ignore = this.vectorChanged.RaiseAsync(this, args);
         }
 
         /// <summary>

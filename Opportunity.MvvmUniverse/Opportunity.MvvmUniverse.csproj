@@ -11,7 +11,7 @@
     <AssemblyName>Opportunity.MvvmUniverse</AssemblyName>
     <DefaultLanguage>zh-CN</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.17134.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.17763.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.15063.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -48,6 +48,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Collections\~Data\LoadingListBase{T}.cs" />
     <Compile Include="Collections\~Data\PagingList.cs" />
     <Compile Include="Collections\~View\CollectionView{T}.cs" />
     <Compile Include="Collections\~Cache\AutoFillCacheStorage.cs" />

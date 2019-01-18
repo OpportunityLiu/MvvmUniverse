@@ -45,7 +45,7 @@ namespace Opportunity.MvvmUniverse.Collections
         {
             if (NotificationSuspending)
                 return;
-            this.vectorChanged.Raise(this, VectorChangedEventArgs.Reset);
+            var ignore = this.vectorChanged.RaiseAsync(this, VectorChangedEventArgs.Reset);
             base.OnObjectReset();
         }
 
@@ -109,7 +109,9 @@ namespace Opportunity.MvvmUniverse.Collections
         protected virtual void OnSourceVectorChanged(IVectorChangedEventArgs e)
         {
             if (!NotificationSuspending)
-                this.vectorChanged.Raise(this, e);
+            {
+                var ignore = this.vectorChanged.RaiseAsync(this, e);
+            }
             switch (e.CollectionChange)
             {
             case CollectionChange.ItemInserted:
@@ -241,8 +243,9 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <param name="newPosition">New value of <see cref="CurrentPosition"/>.</param>
         protected void OnCurrentChanged(int oldPosition, int newPosition)
         {
-            if (this.currentChanged.InvocationListLength > 0)
-                this.currentChanged.Raise(this, new CurrentChangedEventArgs<T>(oldPosition, GetItemAt(oldPosition), newPosition, GetItemAt(newPosition)));
+            if (this.currentChanged.InvocationListLength == 0)
+                return;
+            var ignore = this.currentChanged.RaiseAsync(this, new CurrentChangedEventArgs<T>(oldPosition, GetItemAt(oldPosition), newPosition, GetItemAt(newPosition)));
         }
 
         private readonly DepedencyEvent<CurrentChangingEventHandler, CollectionView<T>, CurrentChangingEventArgs> currentChanging
@@ -270,7 +273,7 @@ namespace Opportunity.MvvmUniverse.Collections
             if (this.currentChanging.InvocationListLength == 0)
                 return false;
             var arg = new CurrentChangingEventArgs<T>(isCancelable, oldPosition, GetItemAt(oldPosition), newPosition, GetItemAt(newPosition));
-            this.currentChanging.RaiseHasThreadAccessOnly(this, arg);
+            var ignore = this.currentChanging.RaiseAsync(this, arg);
             if (!isCancelable)
                 return false;
             return arg.Cancel;

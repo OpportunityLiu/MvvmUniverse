@@ -20,7 +20,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// An <see cref="ObservableList{T}"/> with a previous known final length that supports incremental loading.
     /// </summary>
     /// <typeparam name="T">Type of record.</typeparam>
-    public abstract partial class FixedLoadingList<T> : ObservableList<T>, IList
+    public abstract partial class FixedLoadingList<T> : LoadingListBase<T>, IList
     {
         /// <summary>
         /// Create instance of <see cref="FixedLoadingList{T}"/>.
@@ -141,13 +141,6 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns>Load result, must contains item at position <paramref name="index"/>.</returns>
         protected abstract IAsyncOperation<LoadItemsResult<T>> LoadItemAsync(int index);
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private int isLoading;
-        /// <summary>
-        /// Indicates <see cref="LoadItemsAsync(int,int)"/> is running.
-        /// </summary>
-        public bool IsLoading => this.isLoading != 0;
-
         private void formatLoadRange(ref int start, ref int end)
         {
             Debug.Assert(end >= start);
@@ -169,6 +162,10 @@ namespace Opportunity.MvvmUniverse.Collections
 
         private async Task loadItemsCoreAsync(int startIndex, int endIndex, CancellationToken token)
         {
+            formatLoadRange(ref startIndex, ref endIndex);
+            if (startIndex >= endIndex)
+                return;
+
             var loadR = await this.LoadItemAsync(startIndex).AsTask(token);
             if (loadR.Items is null)
                 throw new InvalidOperationException("Wrong result of LoadItemAsync(int), " + nameof(loadR.Items) + " is null.");
@@ -192,6 +189,7 @@ namespace Opportunity.MvvmUniverse.Collections
             }
             if (endIndex <= startIndex)
                 return;
+
             formatLoadRange(ref startIndex, ref endIndex);
             if (startIndex >= endIndex)
                 return;
@@ -210,40 +208,12 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <exception cref="ArgumentOutOfRangeException">The range out of the list.</exception>
         public IAsyncAction LoadItemsAsync(int startIndex, int count)
         {
-            if (startIndex < 0 || startIndex > Count) throw new ArgumentOutOfRangeException(nameof(startIndex));
-            if (count < 0 || startIndex + count > Count) throw new ArgumentOutOfRangeException(nameof(count));
-            var endIndex = startIndex + count;
-            formatLoadRange(ref startIndex, ref endIndex);
-            if (startIndex >= endIndex)
-                return AsyncAction.CreateCompleted();
-            if (Interlocked.CompareExchange(ref this.isLoading, 1, 0) == 0)
-            {
-                OnPropertyChanged(nameof(IsLoading));
-                return Run(async token =>
-                {
-                    try
-                    {
-                        await this.loadItemsCoreAsync(startIndex, endIndex, token);
-                    }
-                    finally
-                    {
-                        Volatile.Write(ref this.isLoading, 0);
-                        OnPropertyChanged(ConstPropertyChangedEventArgs.IsLoading);
-                    }
-                });
-            }
-            else
-            {
-                return Run(async token =>
-                {
-                    while (!token.IsCancellationRequested && this.isLoading != 0)
-                    {
-                        await Task.Delay(500, token);
-                    }
-                    token.ThrowIfCancellationRequested();
-                    await this.LoadItemsAsync(startIndex, endIndex - startIndex).AsTask(token);
-                });
-            }
+            if (startIndex < 0 || startIndex > Count)
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
+            if (count < 0 || startIndex + count > Count)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            return BeginLoading(() => Run(async token => await this.loadItemsCoreAsync(startIndex, startIndex + count, token)));
         }
 
         /// <summary>

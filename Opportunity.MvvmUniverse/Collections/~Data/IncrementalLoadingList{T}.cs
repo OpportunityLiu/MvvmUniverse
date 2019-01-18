@@ -21,7 +21,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// </summary>
     /// <typeparam name="T">Type of items.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "} HasMoreItems = {" + nameof(HasMoreItems) + "}")]
-    public abstract class IncrementalLoadingList<T> : ObservableList<T>, ISupportIncrementalLoading
+    public abstract class IncrementalLoadingList<T> : LoadingListBase<T>, ISupportIncrementalLoading
     {
         /// <summary>
         /// Create instance of <see cref="IncrementalLoadingList{T}"/>.
@@ -44,92 +44,67 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns>Loaded items.</returns>
         protected abstract IAsyncOperation<LoadItemsResult<T>> LoadItemsAsync(int count);
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private int isLoading;
-        /// <summary>
-        /// Indicates <see cref="LoadMoreItemsAsync(uint)"/> is running.
-        /// </summary>
-        public bool IsLoading => this.isLoading != 0;
-
         /// <inheritdoc/>
         public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
         {
             if (!this.HasMoreItems)
                 return AsyncOperation<LoadMoreItemsResult>.CreateCompleted();
-            var c = (int)count;
-            if (c < 0) c = int.MaxValue;
 
-            if (Interlocked.CompareExchange(ref this.isLoading, 1, 0) == 0)
+            async Task<LoadMoreItemsResult> loadCore(int n, CancellationToken t)
             {
-                OnPropertyChanged(nameof(IsLoading));
-                return Run(async token =>
+                if (!this.HasMoreItems)
+                    return default;
+
+                var currentCount = Count;
+                var re = await LoadItemsAsync(n).AsTask(t);
+                if (Count != currentCount)
+                    throw new InvalidOperationException("The collection has changed during loading.");
+                var lc = 0u;
+                if (re.Items is null)
+                    return new LoadMoreItemsResult { Count = 0 };
+                if (re.StartIndex > this.Count)
                 {
+                    var cc = -1;
                     try
                     {
-                        var currentCount = Count;
-                        var re = await LoadItemsAsync(c).AsTask(token);
-                        if (Count != currentCount)
-                            throw new InvalidOperationException("The collection has changed during loading.");
-                        var lc = 0u;
-                        if (re.Items is null)
-                            return new LoadMoreItemsResult { Count = 0 };
-                        if (re.StartIndex > this.Count)
+                        cc = re.Items.Count();
+                    }
+                    catch { }
+                    throw new InvalidOperationException($"Wrong range returned from implementation of LoadItemsAsync(int).\nExpacted range: {this.Count} -\nActual range: {re.StartIndex} - {(cc > 0 ? (re.StartIndex + cc - 1).ToString() : "")}");
+                }
+                else if (re.StartIndex == this.Count)
+                {
+                    foreach (var item in re.Items)
+                    {
+                        this.Add(item);
+                        lc++;
+                    }
+                }
+                else
+                {
+                    var current = re.StartIndex;
+                    foreach (var item in re.Items)
+                    {
+                        if (current < Count)
                         {
-                            var cc = -1;
-                            try
-                            {
-                                cc = re.Items.Count();
-                            }
-                            catch { }
-                            throw new InvalidOperationException($"Wrong range returned from implementation of LoadItemsAsync(int).\nExpacted range: {this.Count} -\nActual range: {re.StartIndex} - {(cc > 0 ? (re.StartIndex + cc - 1).ToString() : "")}");
-                        }
-                        else if (re.StartIndex == this.Count)
-                        {
-                            foreach (var item in re.Items)
-                            {
-                                this.Add(item);
-                                lc++;
-                            }
+                            if (re.ReplaceLoadedItems)
+                                this.SetItem(current, item);
                         }
                         else
                         {
-                            var current = re.StartIndex;
-                            foreach (var item in re.Items)
-                            {
-                                if (current < Count)
-                                {
-                                    if (re.ReplaceLoadedItems)
-                                        this.SetItem(current, item);
-                                }
-                                else
-                                {
-                                    this.Add(item);
-                                    lc++;
-                                }
-                                current++;
-                            }
+                            this.Add(item);
+                            lc++;
                         }
-                        return new LoadMoreItemsResult { Count = lc };
+                        current++;
                     }
-                    finally
-                    {
-                        Volatile.Write(ref this.isLoading, 0);
-                        OnPropertyChanged(nameof(IsLoading), nameof(HasMoreItems));
-                    }
-                });
+                }
+                return new LoadMoreItemsResult { Count = lc };
             }
-            else
-            {
-                return Run(async token =>
-                {
-                    while (!token.IsCancellationRequested && this.isLoading != 0)
-                    {
-                        await Task.Delay(500, token);
-                    }
-                    token.ThrowIfCancellationRequested();
-                    return await LoadMoreItemsAsync((uint)c).AsTask(token);
-                });
-            }
+
+            var c = (int)count;
+            if (c < 0) c = int.MaxValue;
+
+            return BeginLoading(() => Run(async token => await loadCore(c, token)));
         }
     }
 }

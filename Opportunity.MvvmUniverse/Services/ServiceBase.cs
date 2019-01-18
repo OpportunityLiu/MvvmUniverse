@@ -20,7 +20,6 @@ namespace Opportunity.MvvmUniverse.Services
             this.Handlers = new ServiceHandlerCollection<TService, THandler>((TService)this);
         }
 
-        /// <inheritdoc />
         /// <summary>
         /// Handlers of this service.
         /// </summary>
@@ -54,7 +53,6 @@ namespace Opportunity.MvvmUniverse.Services
             this.Handlers = new ServiceHandlerCollection<TService, THandler>((TService)this);
         }
 
-        /// <inheritdoc />
         /// <summary>
         /// Handlers of this service.
         /// </summary>

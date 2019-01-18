@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
+using Windows.Foundation;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 
@@ -92,7 +94,7 @@ namespace Opportunity.MvvmUniverse
         /// Add handler to event.
         /// </summary>
         /// <param name="eventHandler">Handler to add.</param>
-        /// <returns><see cref="EventRegistrationToken"/> or the registered handler.</returns>
+        /// <returns><see cref=" System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken"/> or the registered handler.</returns>
         public EventRegistrationToken Add(TDelegate eventHandler)
         {
             if (eventHandler is null)
@@ -195,87 +197,125 @@ namespace Opportunity.MvvmUniverse
         /// </summary>
         public void Clear() => this.invocationList = Array.Empty<EventEntry>();
 
-        private void raise(TSender sender, TEventArgs e, bool hasThreadAccessOnly)
+        private Task raise(TSender sender, TEventArgs e)
         {
             var entries = this.invocationList;
             if (entries.Length == 0)
-                return;
+                return Task.CompletedTask;
+
+            var completionSource = new TaskCompletionSource<int>();
+            var completedCount = 0;
 
             var defaultDispatcher = DispatcherHelper.Default;
 
-            if (defaultDispatcher is null || defaultDispatcher.HasThreadAccess)
+            void raiseOne(EventEntry entry)
             {
-                foreach (var entry in entries)
+                try
                 {
-                    Debug.Assert(entry.Delegate != null);
-                    Debug.Assert(entry.Token != default);
-                    if (entry.Dispatcher is null)
-                        this.raiser(entry.Delegate, sender, e);
-                    else if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
-                        remove(entry.Token);
-                    else if (dispatcher == defaultDispatcher || dispatcher is null)
-                        this.raiser(entry.Delegate, sender, e);
-                    else if (!hasThreadAccessOnly)
-                        dispatcher.Begin(() => this.raiser(entry.Delegate, sender, e));
+                    this.raiser(entry.Delegate, sender, e);
                 }
-            }
-            else
-            {
-                var c = entries.Length;
-                foreach (var entry in entries)
+                catch (Exception ex)
                 {
-                    Debug.Assert(entry.Delegate != null);
-                    Debug.Assert(entry.Token != default);
-                    if (entry.Dispatcher is null)
-                        continue;
-                    if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
-                    {
-                        remove(entry.Token);
-                        c--;
-                    }
-                    else if (dispatcher == defaultDispatcher || dispatcher is null)
-                        continue;
-                    else if (dispatcher.HasThreadAccess)
-                    {
-                        this.raiser(entry.Delegate, sender, e);
-                        c--;
-                    }
-                    else if (!hasThreadAccessOnly)
-                    {
-                        dispatcher.Begin(() => this.raiser(entry.Delegate, sender, e));
-                        c--;
-                    }
+                    completionSource.TrySetException(ex);
+                    return;
                 }
-                if (c != 0 && !hasThreadAccessOnly)
-                    defaultDispatcher.Begin(() =>
-                    {
-                        foreach (var entry in entries)
-                        {
-                            if (entry.Dispatcher is null)
-                                this.raiser(entry.Delegate, sender, e);
-                            else if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
-                                continue;
-                            else if (dispatcher == defaultDispatcher || dispatcher is null)
-                                this.raiser(entry.Delegate, sender, e);
-                        }
-                    });
+                Interlocked.Increment(ref completedCount);
+                if (completedCount == entries.Length)
+                    completionSource.TrySetResult(0);
             }
-        }
 
-        /// <summary>
-        /// Raise event for handlers associated with current dispatcher.
-        /// </summary>
-        /// <param name="sender">sender of event</param>
-        /// <param name="e">args of event</param>
-        public void RaiseHasThreadAccessOnly(TSender sender, TEventArgs e)
-            => raise(sender, e, true);
+            void removeOne(EventEntry entry)
+            {
+                remove(entry.Token);
+                Interlocked.Increment(ref completedCount);
+                if (completedCount == entries.Length)
+                    completionSource.TrySetResult(0);
+            }
+
+            try
+            {
+                if (defaultDispatcher is null || defaultDispatcher.HasThreadAccess)
+                {
+                    foreach (var entry in entries)
+                    {
+                        Debug.Assert(entry.Delegate != null);
+                        Debug.Assert(entry.Token != default);
+                        if (entry.Dispatcher is null)
+                        {
+                            raiseOne(entry);
+                        }
+                        else if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
+                        {
+                            removeOne(entry);
+                        }
+                        else if (dispatcher == defaultDispatcher || dispatcher is null)
+                        {
+                            raiseOne(entry);
+                        }
+                        else
+                        {
+                            dispatcher.Begin(() => raiseOne(entry));
+                        }
+                    }
+                }
+                else
+                {
+                    var c = entries.Length;
+                    foreach (var entry in entries)
+                    {
+                        Debug.Assert(entry.Delegate != null);
+                        Debug.Assert(entry.Token != default);
+                        if (entry.Dispatcher is null)
+                            continue;
+                        else if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
+                        {
+                            removeOne(entry);
+                            c--;
+                        }
+                        else if (dispatcher == defaultDispatcher || dispatcher is null)
+                            continue;
+                        else if (dispatcher.HasThreadAccess)
+                        {
+                            raiseOne(entry);
+                            c--;
+                        }
+                        else
+                        {
+                            dispatcher.Begin(() => raiseOne(entry));
+                            c--;
+                        }
+                    }
+                    if (c != 0)
+                        defaultDispatcher.Begin(() =>
+                        {
+                            foreach (var entry in entries)
+                            {
+                                if (entry.Dispatcher is null)
+                                    raiseOne(entry);
+                                else if (!entry.Dispatcher.TryGetTarget(out var dispatcher))
+                                    continue;
+                                else if (dispatcher == defaultDispatcher || dispatcher is null)
+                                    raiseOne(entry);
+                                else
+                                    continue;
+                            }
+                        });
+                }
+            }
+            catch (Exception ex)
+            {
+                completionSource.SetException(ex);
+            }
+
+            return completionSource.Task;
+        }
 
         /// <summary>
         /// Raise event.
         /// </summary>
         /// <param name="sender">sender of event</param>
         /// <param name="e">args of event</param>
-        public void Raise(TSender sender, TEventArgs e)
-            => raise(sender, e, false);
+        public IAsyncAction RaiseAsync(TSender sender, TEventArgs e)
+            => raise(sender, e).AsAsyncAction();
     }
 }

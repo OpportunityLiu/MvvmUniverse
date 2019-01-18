@@ -378,7 +378,7 @@ namespace Opportunity.MvvmUniverse
                 throw new ArgumentNullException(nameof(args));
             if (!NeedRaisePropertyChanged)
                 return;
-            this.propertyChanged.Raise(this, args);
+            var ignore = this.propertyChanged.RaiseAsync(this, args);
         }
 
         private readonly DepedencyEvent<PropertyChangedEventHandler, ObservableObject, PropertyChangedEventArgs> propertyChanged

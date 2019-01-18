@@ -55,7 +55,7 @@ namespace Opportunity.MvvmUniverse.Views
             if (oldValue == newValue)
                 return;
             var sender = (MvvmPage)dp;
-            if (!sender.IsLoaded)
+            if (!sender.IsShown)
                 return;
             ApplicationView.GetForCurrentView().Title = newValue ?? "";
         }
@@ -111,7 +111,7 @@ namespace Opportunity.MvvmUniverse.Views
         /// <summary>
         /// The loading status of current page.
         /// </summary>
-        public bool IsLoaded { get; private set; }
+        public bool IsShown { get; private set; }
 
         private void MvvmPage_Loading(FrameworkElement sender, object e)
         {
@@ -126,19 +126,19 @@ namespace Opportunity.MvvmUniverse.Views
                 ApplicationView.GetForCurrentView().Title = t;
             var a = Interlocked.Exchange(ref this._PendingViewModelAction, null);
             a?.Invoke();
-            IsLoaded = true;
+            IsShown = true;
         }
 
         private void MvvmPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            IsLoaded = false;
+            IsShown = false;
             var v = ApplicationView.GetForCurrentView();
             if (v.Title == Title)
             {
                 var t = "";
                 foreach (var item in Window.Current.Content?.Descendants<MvvmPage>().EmptyIfNull())
                 {
-                    if (!item.IsLoaded)
+                    if (!item.IsShown)
                         continue;
                     var tt = item.Title;
                     if (tt is null)

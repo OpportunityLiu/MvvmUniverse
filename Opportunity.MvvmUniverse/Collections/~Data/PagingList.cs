@@ -16,7 +16,7 @@ namespace Opportunity.MvvmUniverse.Collections
     /// </summary>
     /// <typeparam name="T">Type of items.</typeparam>
     [DebuggerDisplay("{DebuggerDisp}")]
-    public abstract class PagingList<T> : ObservableList<T>, ISupportIncrementalLoading
+    public abstract class PagingList<T> : LoadingListBase<T>, ISupportIncrementalLoading
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisp
@@ -106,13 +106,6 @@ namespace Opportunity.MvvmUniverse.Collections
         /// <returns>Loaded items.</returns>
         protected abstract IAsyncOperation<IEnumerable<T>> LoadItemsAsync(int pageIndex);
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private int isLoading;
-        /// <summary>
-        /// Indicates <see cref="LoadPreviousPage()"/> or <see cref="LoadNextPage()"/> is running.
-        /// </summary>
-        public bool IsLoading => this.isLoading != 0;
-
         /// <summary>
         /// Load previous page of currently loaded range.
         /// </summary>
@@ -121,52 +114,30 @@ namespace Opportunity.MvvmUniverse.Collections
             if (this._FirstPage <= 0)
                 return AsyncAction.CreateCompleted();
 
-            if (Interlocked.CompareExchange(ref this.isLoading, 1, 0) == 0)
+            async Task load(CancellationToken token)
             {
-                OnPropertyChanged(nameof(IsLoading));
-                return Run(async token =>
+                if (this._FirstPage <= 0)
+                    return;
+
+                var toLoad = this._FirstPage - 1;
+                var re = await LoadItemsAsync(toLoad).AsTask(token);
+
+                if (this._FirstPage <= 0)
+                    return;
+                if (toLoad != this._FirstPage - 1)
+                    return;
+
+                var i = 0;
+                foreach (var item in re)
                 {
-                    try
-                    {
-                        if (this._FirstPage <= 0)
-                            return;
-
-                        var toLoad = this._FirstPage - 1;
-                        var re = await LoadItemsAsync(toLoad).AsTask(token);
-
-                        if (this._FirstPage <= 0)
-                            return;
-                        if (toLoad != this._FirstPage - 1)
-                            return;
-
-                        var i = 0;
-                        foreach (var item in re)
-                        {
-                            this.Insert(i, item);
-                            i++;
-                        }
-                        LoadedPageCount++;
-                        FirstPage--;
-                    }
-                    finally
-                    {
-                        Volatile.Write(ref this.isLoading, 0);
-                        OnPropertyChanged(ConstPropertyChangedEventArgs.IsLoading);
-                    }
-                });
+                    this.Insert(i, item);
+                    i++;
+                }
+                LoadedPageCount++;
+                FirstPage--;
             }
-            else
-            {
-                return Run(async token =>
-                {
-                    while (!token.IsCancellationRequested && this.isLoading != 0)
-                    {
-                        await Task.Delay(500, token);
-                    }
-                    token.ThrowIfCancellationRequested();
-                    await LoadPreviousPage().AsTask(token);
-                });
-            }
+
+            return BeginLoading(() => Run(async token => await load(token)));
         }
 
         /// <summary>
@@ -177,47 +148,25 @@ namespace Opportunity.MvvmUniverse.Collections
             if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
                 return AsyncAction.CreateCompleted();
 
-            if (Interlocked.CompareExchange(ref this.isLoading, 1, 0) == 0)
+            async Task load(CancellationToken token)
             {
-                OnPropertyChanged(nameof(IsLoading));
-                return Run(async token =>
-                {
-                    try
-                    {
-                        if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
-                            return;
+                if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
+                    return;
 
-                        var toLoad = this._FirstPage + this._LoadedPageCount;
-                        var re = await this.LoadItemsAsync(toLoad).AsTask(token);
+                var toLoad = this._FirstPage + this._LoadedPageCount;
+                var re = await this.LoadItemsAsync(toLoad).AsTask(token);
 
-                        if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
-                            return;
-                        if (toLoad != this._FirstPage + this._LoadedPageCount)
-                            return;
+                if (this._FirstPage + this._LoadedPageCount >= this._PageCount)
+                    return;
+                if (toLoad != this._FirstPage + this._LoadedPageCount)
+                    return;
 
-                        foreach (var item in re)
-                            this.Add(item);
-                        this.LoadedPageCount++;
-                    }
-                    finally
-                    {
-                        Volatile.Write(ref this.isLoading, 0);
-                        OnPropertyChanged(ConstPropertyChangedEventArgs.IsLoading);
-                    }
-                });
+                foreach (var item in re)
+                    this.Add(item);
+                this.LoadedPageCount++;
             }
-            else
-            {
-                return Run(async token =>
-                {
-                    while (!token.IsCancellationRequested && this.isLoading != 0)
-                    {
-                        await Task.Delay(500, token);
-                    }
-                    token.ThrowIfCancellationRequested();
-                    await LoadNextPage().AsTask(token);
-                });
-            }
+
+            return BeginLoading(() => Run(async token => await load(token)));
         }
 
         bool ISupportIncrementalLoading.HasMoreItems => this._FirstPage + this._LoadedPageCount < this._PageCount;

@@ -30,7 +30,7 @@ namespace Opportunity.MvvmUniverse.Storage.Serializers
             this.xmlSerializer = xmlSerializer ?? throw new ArgumentNullException(nameof(xmlSerializer));
         }
 
-        private System.Xml.Serialization.XmlSerializer xmlSerializer;
+        private readonly System.Xml.Serialization.XmlSerializer xmlSerializer;
 
         /// <inheritdoc/>
         public void Serialize(in T value, DataWriter storage)

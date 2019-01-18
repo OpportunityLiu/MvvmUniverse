@@ -140,7 +140,8 @@ namespace Opportunity.MvvmUniverse.Commands
             if (this.executing.InvocationListLength == 0)
                 return true;
             var eventarg = new ExecutingEventArgs<T>(parameter);
-            this.executing.RaiseHasThreadAccessOnly(this, eventarg);
+            var ignore = this.executing.RaiseAsync(this, eventarg);
+            eventarg.Lock();
             return !eventarg.Canceled;
         }
 
@@ -162,7 +163,7 @@ namespace Opportunity.MvvmUniverse.Commands
                     return;
                 }
                 var args = new ExecutedEventArgs<T>(parameter, error);
-                this.executed.Raise(this, args);
+                var ignore = this.executed.RaiseAsync(this, args);
                 CommandHelper.ThrowIfUnhandled(args);
             }
             finally

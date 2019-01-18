@@ -72,7 +72,7 @@ namespace Opportunity.MvvmUniverse.Commands
             else
             {
                 Progress = e.Progress;
-                this.progressChanged.Raise(this, e);
+                var ignore = this.progressChanged.RaiseAsync(this, e);
             }
         }
 
