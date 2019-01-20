@@ -50,12 +50,6 @@ namespace Opportunity.MvvmUniverse.Commands
             throw new InvalidOperationException("Current is not null.");
         }
 
-        public static void AssertCurrentEquals(IAsyncAction current, IAsyncAction execution)
-        {
-            if (execution != current)
-                throw new InvalidOperationException("execution != Current");
-        }
-
         public static void AssertCurrentIsNull(IAsyncAction current)
         {
             if (current is null)

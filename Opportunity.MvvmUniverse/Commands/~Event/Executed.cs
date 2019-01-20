@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Foundation;
 
 namespace Opportunity.MvvmUniverse.Commands
 {
@@ -29,20 +30,23 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Create new instance of <see cref="ExecutedEventArgs{T}"/>.
         /// </summary>
-        public ExecutedEventArgs() : this(null) { }
+        /// <param name="executedAction">Executed action of finished excution, i.e., previous <see cref="CommandBase.Current"/>.</param>
+        public ExecutedEventArgs(IAsyncAction executedAction) : this(executedAction, null) { }
 
         /// <summary>
         /// Create new instance of <see cref="ExecutedEventArgs{T}"/>.
         /// </summary>
+        /// <param name="executedAction">Executed action of finished excution, i.e., previous <see cref="CommandBase.Current"/>.</param>
         /// <param name="exception">Error during the execution.</param>
-        public ExecutedEventArgs(Exception exception)
+        public ExecutedEventArgs(IAsyncAction executedAction, Exception exception)
         {
+            this.ExecutedAction = executedAction ?? throw new ArgumentNullException(nameof(executedAction));
             this.Exception = exception;
             this.Handled = exception is null;
         }
 
         /// <summary>
-        /// Error during the execution.
+        /// Error during the finished execution.
         /// </summary>
         public Exception Exception { get; }
 
@@ -50,6 +54,11 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <see cref="Exception"/> is handled by event handlers or not.
         /// </summary>
         public bool Handled { get; set; }
+
+        /// <summary>
+        /// Executed action of finished excution, i.e., previous <see cref="CommandBase.Current"/>.
+        /// </summary>
+        public IAsyncAction ExecutedAction { get; }
     }
 
     /// <summary>
@@ -61,8 +70,9 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Create new instance of <see cref="ExecutedEventArgs{T}"/>.
         /// </summary>
+        /// <param name="executedAction">Executed action of finished excution, i.e., previous <see cref="CommandBase.Current"/>.</param>
         /// <param name="parameter">Parameter of current execution.</param>
-        public ExecutedEventArgs(T parameter) : base()
+        public ExecutedEventArgs(IAsyncAction executedAction, T parameter) : base(executedAction)
         {
             this.Parameter = parameter;
         }
@@ -70,16 +80,17 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <summary>
         /// Create new instance of <see cref="ExecutedEventArgs{T}"/>.
         /// </summary>
+        /// <param name="executedAction">Executed action of finished excution, i.e., previous <see cref="CommandBase.Current"/>.</param>
         /// <param name="parameter">Parameter of current execution.</param>
         /// <param name="exception">Error during the execution.</param>
-        public ExecutedEventArgs(T parameter, Exception exception)
-            : base(exception)
+        public ExecutedEventArgs(IAsyncAction executedAction, T parameter, Exception exception)
+            : base(executedAction, exception)
         {
             this.Parameter = parameter;
         }
 
         /// <summary>
-        /// Parameter of current execution.
+        /// Parameter of finished execution.
         /// </summary>
         public T Parameter { get; }
     }

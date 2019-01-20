@@ -152,25 +152,18 @@ namespace Opportunity.MvvmUniverse.Commands
         /// <param name="execution">Result of <see cref="StartExecutionAsync(T)"/></param>
         protected virtual void OnFinished(IAsyncAction execution, T parameter)
         {
-            CommandHelper.AssertCurrentEquals(this.current, execution);
+            CommandHelper.ResetCurrent(ref this.current, execution);
+            OnCurrentChanged();
 
-            try
+            var error = CommandHelper.GetError(execution);
+            if (this.executed.InvocationListLength == 0 || NotificationSuspending)
             {
-                var error = CommandHelper.GetError(execution);
-                if (this.executed.InvocationListLength == 0 || NotificationSuspending)
-                {
-                    DispatcherHelper.ThrowUnhandledError(error);
-                    return;
-                }
-                var args = new ExecutedEventArgs<T>(parameter, error);
-                var ignore = this.executed.RaiseAsync(this, args);
-                CommandHelper.ThrowIfUnhandled(args);
+                DispatcherHelper.ThrowUnhandledError(error);
+                return;
             }
-            finally
-            {
-                CommandHelper.ResetCurrent(ref this.current, execution);
-                OnCurrentChanged();
-            }
+            var args = new ExecutedEventArgs<T>(execution, parameter, error);
+            var ignore = this.executed.RaiseAsync(this, args);
+            CommandHelper.ThrowIfUnhandled(args);
         }
 
         private readonly DepedencyEvent<ExecutingEventHandler<T>, ICommand<T>, ExecutingEventArgs<T>> executing
